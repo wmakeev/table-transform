@@ -1,0 +1,7 @@
+№,Name,Value,List,List,Some,List,Num,Foo,Bar
+1,String,Some text,One,2,,3️⃣,10,1,
+2,Строка,Просто текст,,,,,20,,a
+3,Emoji,"😀 Text 💯 &quot;Текст&quot,",,,,,30,2,
+4,Integer,1000,,,,,15,,c
+5,Float,"1225,55",,,,,25,3,
+6,Date,2023/12/12 14:23,,,,,35,,d
