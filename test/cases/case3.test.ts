@@ -15,6 +15,7 @@ import {
   transforms,
   mappers
 } from '../../src/index.js'
+import { expressionContext } from '../../src/expressionContext.js'
 
 test('complex transform #3', async () => {
   const csvTransformer = createTableTransformer({
@@ -53,10 +54,13 @@ test('complex transform #3', async () => {
         arrIndex: 2
       }),
 
-      transforms.column.filter({
-        columnName: 'Num',
-        expression: 'value() != "20"'
-      }),
+      transforms.column.filter(
+        {
+          columnName: 'Num',
+          expression: 'value() != "20"'
+        },
+        expressionContext
+      ),
 
       transforms.column.map({
         columnName: 'Value',

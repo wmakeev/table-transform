@@ -11,6 +11,7 @@ import {
   createTableTransformer
 } from '../../src/index.js'
 import * as transform from '../../src/transforms/index.js'
+import { expressionContext } from '../../src/expressionContext.js'
 
 test('num', async () => {
   const srcData = [
@@ -25,12 +26,15 @@ test('num', async () => {
 
   const csvTransformer = createTableTransformer({
     transforms: [
-      transform.column.transform({
-        columnName: 'result',
-        expression: `
-          Num:TryParseFloat('value')
-        `
-      })
+      transform.column.transform(
+        {
+          columnName: 'result',
+          expression: `
+            Num:TryParseFloat('value')
+          `
+        },
+        expressionContext
+      )
     ]
   })
 
@@ -64,15 +68,18 @@ test('curried functions', async () => {
 
   const csvTransformer = createTableTransformer({
     transforms: [
-      transform.column.transform({
-        columnName: 'value',
-        expression: `
-          if 'case' == "1" then
-            (3, 0, "1", 6, 0, "foo", 8, 2) | Arr:Filter(_, NotEqual(_, 0)) | Num:Min
-          else
-            value()
-        `
-      })
+      transform.column.transform(
+        {
+          columnName: 'value',
+          expression: `
+            if 'case' == "1" then
+              (3, 0, "1", 6, 0, "foo", 8, 2) | Arr:Filter(_, NotEqual(_, 0)) | Num:Min
+            else
+              value()
+          `
+        },
+        expressionContext
+      )
     ]
   })
 
@@ -111,12 +118,15 @@ test('barcode', async () => {
 
   const csvTransformer = createTableTransformer({
     transforms: [
-      transform.column.transform({
-        columnName: 'result',
-        expression: `
-          Barcode:IsGTIN('value')
-        `
-      })
+      transform.column.transform(
+        {
+          columnName: 'result',
+          expression: `
+            Barcode:IsGTIN('value')
+          `
+        },
+        expressionContext
+      )
     ]
   })
 
@@ -157,12 +167,15 @@ test('tools', async () => {
 
   const csvTransformer = createTableTransformer({
     transforms: [
-      transform.column.transform({
-        columnName: 'result',
-        expression: `
-          Str:ExtractNums('value')
-        `
-      })
+      transform.column.transform(
+        {
+          columnName: 'result',
+          expression: `
+            Str:ExtractNums('value')
+          `
+        },
+        expressionContext
+      )
     ]
   })
 

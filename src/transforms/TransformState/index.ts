@@ -1,7 +1,10 @@
 import { DataRow, TableHeaderMeta } from '../../index.js'
-import { ExpressionTransformParams } from '../index.js'
+import { TransformExpressionParams } from '../index.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
-import { getTransformExpression } from './getTransformExpression.js'
+import {
+  TransformExpressionContext,
+  getTransformExpression
+} from './getTransformExpression.js'
 
 export class TransformState {
   public rowNum = 0
@@ -22,8 +25,9 @@ export class TransformState {
   private transformExpression
 
   constructor(
-    transformParams: ExpressionTransformParams,
-    header: TableHeaderMeta
+    transformParams: TransformExpressionParams,
+    header: TableHeaderMeta,
+    context?: TransformExpressionContext
   ) {
     const { columnName } = transformParams
 
@@ -50,7 +54,11 @@ export class TransformState {
 
     this.rowProxy = new Proxy(this, getRowProxyHandler(header, this))
 
-    this.transformExpression = getTransformExpression(transformParams, this)
+    this.transformExpression = getTransformExpression(
+      transformParams,
+      this,
+      context
+    )
   }
 
   nextRow(row: DataRow) {

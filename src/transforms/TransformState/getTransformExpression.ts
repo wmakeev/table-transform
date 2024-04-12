@@ -1,18 +1,25 @@
 import { compileExpression } from '@wmakeev/filtrex'
-import { functions } from '../../functions/index.js'
-import { CURRY_PLACEHOLDER } from '../../functions/curryWrapper.js'
 import { TransformState } from './index.js'
-import { ExpressionTransformParams } from '../index.js'
+import { TransformExpressionParams } from '../index.js'
 
-const defaultConstants = {
-  _: CURRY_PLACEHOLDER,
-  TRUE: true,
-  FALSE: false
+export interface TransformExpressionContext {
+  functions?:
+    | {
+        [k: string]: (...args: any[]) => any
+      }
+    | undefined
+
+  constants?:
+    | {
+        [T: string]: any
+      }
+    | undefined
 }
 
 export const getTransformExpression = (
-  params: ExpressionTransformParams,
-  transformState: TransformState
+  params: TransformExpressionParams,
+  transformState: TransformState,
+  context?: TransformExpressionContext
 ) => {
   const transformExpression = compileExpression(params.expression, {
     extraFunctions: {
@@ -51,13 +58,10 @@ export const getTransformExpression = (
         return val == null || val === ''
       },
 
-      ...functions
+      ...(context?.functions ?? {})
     },
 
-    constants: {
-      ...defaultConstants,
-      ...params.constants
-    }
+    constants: context?.constants ?? {}
   })
 
   return transformExpression

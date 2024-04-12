@@ -1,14 +1,9 @@
 export * as column from './column/index.js'
 
-export interface ExpressionTransformParams {
+export interface TransformExpressionParams {
   /** Column name */
   columnName: string
 
-  /** Filtrex expression */
+  /** Expression */
   expression: string
-
-  /** Filtrex constants */
-  constants?: {
-    [T: string]: any
-  }
 }
