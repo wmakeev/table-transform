@@ -12,10 +12,10 @@ import {
   ChunkTransform,
   FlattenTransform,
   createTableTransformer,
-  transforms,
-  mappers
+  expressionContext,
+  mappers,
+  transforms
 } from '../../src/index.js'
-import { expressionContext } from '../../src/expressionContext.js'
 
 test('complex transform #3', async () => {
   const csvTransformer = createTableTransformer({

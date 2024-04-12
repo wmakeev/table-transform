@@ -8,10 +8,10 @@ import test from 'node:test'
 import {
   ChunkTransform,
   FlattenTransform,
-  createTableTransformer
+  createTableTransformer,
+  expressionContext
 } from '../../src/index.js'
 import * as transform from '../../src/transforms/index.js'
-import { expressionContext } from '../../src/expressionContext.js'
 
 test('num', async () => {
   const srcData = [

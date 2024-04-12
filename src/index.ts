@@ -1,4 +1,5 @@
 export * from './createTableTransformer.js'
+export * from './expressionContext.js'
 export * from './mappers/index.js'
 export * from './tools/index.js'
 export * as transforms from './transforms/index.js'
