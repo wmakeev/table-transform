@@ -1,11 +1,11 @@
 import { UNICODE_SPACES_REGEX } from '../index.js'
 import * as arr from './arr/index.js'
 import * as barcode from './barcode/index.js'
+import * as common from './common/index.js'
 import { curryWrapper } from './curryWrapper.js'
-import { neq } from './neq.js'
 import * as num from './num/index.js'
 import * as str from './str/index.js'
-import { vlookup } from './vlookup.js'
+import { vlookup } from './table/vlookup.js'
 
 const functionsByName: Record<string, (...args: any[]) => any> = {
   'TypeOf': (val: unknown) => {
@@ -18,7 +18,7 @@ const functionsByName: Record<string, (...args: any[]) => any> = {
 
   'Table:VLookup': vlookup,
 
-  'NotEqual': neq,
+  'NotEqual': common.NotEqual,
 
   'Arr:Filter': arr.filter,
 
