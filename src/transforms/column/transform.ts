@@ -1,7 +1,9 @@
 import { DataRowChunkTransformer } from '../../index.js'
-import { TransformExpressionContext } from '../TransformState/getTransformExpression.js'
-import { TransformState } from '../TransformState/index.js'
-import { TransformExpressionParams } from '../index.js'
+import {
+  TransformExpressionContext,
+  TransformExpressionParams,
+  TransformState
+} from '../index.js'
 
 export const transform = (
   params: TransformExpressionParams,

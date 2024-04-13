@@ -1,6 +1,5 @@
 import { compileExpression } from '@wmakeev/filtrex'
-import { TransformState } from './index.js'
-import { TransformExpressionParams } from '../index.js'
+import { TransformExpressionParams, TransformState } from '../index.js'
 
 export interface TransformExpressionContext {
   functions?:

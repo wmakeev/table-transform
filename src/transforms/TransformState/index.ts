@@ -6,6 +6,8 @@ import {
   getTransformExpression
 } from './getTransformExpression.js'
 
+export type { TransformExpressionContext } from './getTransformExpression.js'
+
 export class TransformState {
   public rowNum = 0
   public arrColIndex = 0
