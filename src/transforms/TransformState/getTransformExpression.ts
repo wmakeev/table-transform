@@ -2,13 +2,7 @@ import { compileExpression } from '@wmakeev/filtrex'
 import { TransformExpressionParams, TransformState } from '../index.js'
 
 export interface TransformExpressionContext {
-  functions?:
-    | {
-        [k: string]: (...args: any[]) => any
-      }
-    | undefined
-
-  constants?:
+  symbols?:
     | {
         [T: string]: any
       }
@@ -21,7 +15,9 @@ export const getTransformExpression = (
   context?: TransformExpressionContext
 ) => {
   const transformExpression = compileExpression(params.expression, {
-    extraFunctions: {
+    symbols: {
+      ...(context?.symbols ?? {}),
+
       value: (columnName: unknown) => {
         if (columnName != null && typeof columnName !== 'string') {
           throw new Error('values() argument expected to be string')
@@ -55,12 +51,8 @@ export const getTransformExpression = (
 
       empty: (val: unknown) => {
         return val == null || val === ''
-      },
-
-      ...(context?.functions ?? {})
-    },
-
-    constants: context?.constants ?? {}
+      }
+    }
   })
 
   return transformExpression
