@@ -5,14 +5,14 @@ import {
   DataRowChunk,
   DataRowChunkInfo,
   TableHeaderMeta,
-  TableTransfromOptions
+  TableTransfromConfig
 } from './index.js'
 import {
   generateColumnNumHeader,
   generateExcelStyleHeader
 } from './tools/headers.js'
 
-export const createTableTransformer = (config: TableTransfromOptions) => {
+export const createTableTransformer = (config: TableTransfromConfig) => {
   const { transforms, prependHeaders } = config
 
   const isHeaderPrepended = prependHeaders != null

@@ -38,7 +38,7 @@ export type DataRowChunkTransformer = (
   rowsChunkInfo: DataRowChunkInfo
 ) => Promise<DataRowChunkInfo>
 
-export type TableTransfromOptions = {
+export type TableTransfromConfig = {
   /** Transformers */
   transforms: DataRowChunkTransformer[]
 

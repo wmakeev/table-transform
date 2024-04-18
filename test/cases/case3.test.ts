@@ -12,7 +12,6 @@ import {
   ChunkTransform,
   FlattenTransform,
   createTableTransformer,
-  expressionContext,
   mappers,
   transforms
 } from '../../src/index.js'
@@ -54,13 +53,10 @@ test('complex transform #3', async () => {
         arrIndex: 2
       }),
 
-      transforms.column.filter(
-        {
-          columnName: 'Num',
-          expression: 'value() != "20"'
-        },
-        expressionContext
-      ),
+      transforms.column.filter({
+        columnName: 'Num',
+        expression: 'value() != "20"'
+      }),
 
       transforms.column.map({
         columnName: 'Value',
