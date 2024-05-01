@@ -1,8 +1,8 @@
 import assert from 'node:assert'
 
 export function generateColumnNumHeader(colsCount: number) {
-  assert.ok(colsCount <= 1000, 'Expected to be less then 1000 collumns')
-  assert.ok(colsCount > 0, 'Expected to be not 0 collumns')
+  assert.ok(colsCount <= 1000, 'Expected to be less then 1000 columns')
+  assert.ok(colsCount > 0, 'Expected to be not 0 columns')
 
   const header: string[] = Array(colsCount)
 
@@ -33,8 +33,8 @@ function* excelHeaderGen(): Generator<string, any, undefined> {
 }
 
 export function generateExcelStyleHeader(colsCount: number) {
-  assert.ok(colsCount <= 1000, 'Expected to be less then 1000 collumns')
-  assert.ok(colsCount > 0, 'Expected to be not 0 collumns')
+  assert.ok(colsCount <= 1000, 'Expected to be less then 1000 columns')
+  assert.ok(colsCount > 0, 'Expected to be not 0 columns')
 
   const header: string[] = []
 

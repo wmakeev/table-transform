@@ -39,7 +39,7 @@ export class TransformState {
     })
 
     if (this.fieldColsIndexes.length === 0) {
-      throw new Error(`Collumn "${columnName}" not found`)
+      throw new Error(`Column "${columnName}" not found`)
     }
 
     this.fieldIndexesByName = header.reduce((res, h) => {
