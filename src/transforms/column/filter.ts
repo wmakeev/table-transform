@@ -23,22 +23,36 @@ export const filter = (
 
       let isPass = true
 
-      for (const arrColIndex of transformState.fieldColsIndexes.keys()) {
-        transformState.arrColIndex = arrColIndex
-
+      // No column specified
+      if (transformState.fieldColsIndexes.length === 0) {
         const result = transformState.evaluateExpression()
 
-        if (result instanceof Error) {
-          throw result
-        }
+        if (result instanceof Error) throw result
 
         if (typeof result !== 'boolean') {
           throw new Error('Filter expression should return boolean result')
         }
 
         isPass = result
+      }
 
-        if (isPass === false) break
+      // Column specified
+      else {
+        for (const arrColIndex of transformState.fieldColsIndexes.keys()) {
+          transformState.arrColIndex = arrColIndex
+
+          const result = transformState.evaluateExpression()
+
+          if (result instanceof Error) throw result
+
+          if (typeof result !== 'boolean') {
+            throw new Error('Filter expression should return boolean result')
+          }
+
+          isPass = result
+
+          if (isPass === false) break
+        }
       }
 
       if (isPass) filteredRows.push(row)

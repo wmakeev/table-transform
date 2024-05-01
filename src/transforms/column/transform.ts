@@ -1,14 +1,20 @@
+import assert from 'node:assert'
 import { DataRowChunkTransformer } from '../../index.js'
 import {
   TransformExpressionContext,
-  TransformExpressionParams,
+  ColumnTransformExpressionParams,
   TransformState
 } from '../index.js'
 
 export const transform = (
-  params: TransformExpressionParams,
+  params: ColumnTransformExpressionParams,
   context?: TransformExpressionContext
 ): DataRowChunkTransformer => {
+  assert.ok(
+    typeof params.columnName === 'string',
+    'transform columnName parameter expected to be string'
+  )
+
   let transformState: TransformState | null = null
 
   return async ({ header, rows, rowLength }) => {

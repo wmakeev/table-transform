@@ -16,12 +16,12 @@ export class TransformState {
   /**
    * Indexes of source columns with transfomed column header name
    */
-  public fieldColsIndexes
+  public fieldColsIndexes = [] as number[]
 
   /**
    * Indexes of source columns by current header cloumns names
    */
-  public fieldIndexesByName
+  public fieldIndexesByName = new Map<string, number[]>()
 
   private rowProxy
   private transformExpression
@@ -33,13 +33,15 @@ export class TransformState {
   ) {
     const { columnName } = transformParams
 
-    this.fieldColsIndexes = header.flatMap(h => {
-      if (h.name === columnName) return h.srcIndex
-      else return []
-    })
+    if (columnName != null) {
+      this.fieldColsIndexes = header.flatMap(h => {
+        if (h.name === columnName) return h.srcIndex
+        else return []
+      })
 
-    if (this.fieldColsIndexes.length === 0) {
-      throw new Error(`Column "${columnName}" not found`)
+      if (this.fieldColsIndexes.length === 0) {
+        throw new Error(`Column "${columnName}" not found`)
+      }
     }
 
     this.fieldIndexesByName = header.reduce((res, h) => {
@@ -52,7 +54,7 @@ export class TransformState {
       }
 
       return res
-    }, new Map<string, number[]>())
+    }, this.fieldIndexesByName)
 
     this.rowProxy = new Proxy(this, getRowProxyHandler(header, this))
 

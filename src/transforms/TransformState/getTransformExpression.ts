@@ -23,9 +23,14 @@ export const getTransformExpression = (
           throw new Error('values() argument expected to be string')
         }
 
-        const index = transformState.fieldIndexesByName.get(
-          columnName ?? params.columnName
-        )?.[transformState.arrColIndex]
+        const actualColumnName = columnName ?? params.columnName
+
+        if (actualColumnName == null) return null
+
+        const index =
+          transformState.fieldIndexesByName.get(actualColumnName)?.[
+            transformState.arrColIndex
+          ]
 
         return index === undefined ? '' : transformState.curRow[index] ?? ''
       },
@@ -35,13 +40,15 @@ export const getTransformExpression = (
           throw new Error('values() argument expected to be string')
         }
 
-        const index = transformState.fieldIndexesByName.get(
-          columnName ?? params.columnName
-        )
+        const actualColumnName = columnName ?? params.columnName
 
-        if (index === undefined) return ''
+        if (actualColumnName == null) return []
 
-        return index.map(i => transformState.curRow[i] ?? '')
+        const indexes = transformState.fieldIndexesByName.get(actualColumnName)
+
+        if (indexes === undefined) return ''
+
+        return indexes.map(i => transformState.curRow[i] ?? '')
       },
 
       row: () => transformState.rowNum,
