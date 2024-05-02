@@ -53,6 +53,8 @@ export const getTransformExpression = (
 
       row: () => transformState.rowNum,
 
+      column: () => transformState.columnName,
+
       // TODO Name is not obvious
       arrayIndex: () => transformState.arrColIndex,
 

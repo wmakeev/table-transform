@@ -21,6 +21,11 @@ test('column transform (array) #2', async () => {
       transforms.column.transform({
         columnName: 'List',
         expression: `row() & ":" & arrayIndex() & if empty(value()) then "" else " - " & value()`
+      }),
+
+      transforms.column.transform({
+        columnName: 'Some',
+        expression: `if row() == 3 then column() else value()`
       })
     ]
   })
@@ -49,7 +54,7 @@ test('column transform (array) #2', async () => {
       ['№', 'Name'   , 'Value'           , 'List'      , 'List'   , 'Some'   , 'List'    , 'Num'],
       ['1', 'String' , 'Some text'       , '1:0 - One' , '1:1 - 2', ''       , '1:2 - 3️⃣', '10' ],
       ['2', 'Строка' , 'Просто текст'    , '2:0'       , '2:1'    , ''       , '2:2'     , '20' ],
-      ['3', 'Emoji'  , '😀 Text 💯 Текст', '3:0'       , '3:1'    , ''       , '3:2'     , '30' ],
+      ['3', 'Emoji'  , '😀 Text 💯 Текст', '3:0'       , '3:1'    , 'Some'   , '3:2'     , '30' ],
       ['4', 'Integer', '1000'            , '4:0'       , '4:1'    , ''       , '4:2'     , '15' ]
     ]
   )
@@ -121,7 +126,7 @@ test('column transform (values)', async () => {
     transformedRows,
     /* prettier-ignore */
     [
-      ['Value1', 'Value2', 'Values1', 'Values2' ],
+      ['Value1', 'Value2', 'Values1'  , 'Values2'        ],
       ['10'    , 'One'   , ['10']     , ['One','2', '3️⃣']],
       ['20'    , ''      , ['20']     , ['', '', '']     ],
       ['30'    , ''      , ['30']     , ['', '', '']     ],

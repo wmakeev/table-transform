@@ -14,6 +14,11 @@ export class TransformState {
   public curRow!: DataRow
 
   /**
+   * Column name specified for this transform
+   */
+  public columnName: string | null
+
+  /**
    * Indexes of source columns with transfomed column header name
    */
   public fieldColsIndexes = [] as number[]
@@ -32,6 +37,8 @@ export class TransformState {
     context?: TransformExpressionContext
   ) {
     const { columnName } = transformParams
+
+    this.columnName = columnName ?? null
 
     if (columnName != null) {
       this.fieldColsIndexes = header.flatMap(h => {
