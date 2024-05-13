@@ -1,2 +1,2 @@
-import './stream/index.test.js'
+import './stream/index.js'
 import './headers.test.js'
