@@ -1,2 +1,2 @@
-import './DynamicHeaderTransform.test.js'
+import './PivotHeaderTransform.test.js'
 import './index.test.js'

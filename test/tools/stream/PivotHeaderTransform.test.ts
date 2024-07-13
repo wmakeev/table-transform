@@ -7,11 +7,11 @@ import {
 import test from 'node:test'
 import {
   ChunkTransform,
-  DynamicHeaderTransform,
+  PivotHeaderTransform,
   FlattenTransform
 } from '../../../src/index.js'
 
-test('DynamicHeaderTransform', async () => {
+test('PivotHeaderTransform', async () => {
   /* prettier-ignore */
   const items = [
     ['id', 'name', 'value'],
@@ -27,9 +27,9 @@ test('DynamicHeaderTransform', async () => {
   const stream = compose(
     Readable.from(items),
     new ChunkTransform({ batchSize: 3 }),
-    new DynamicHeaderTransform({
-      columnNameFrom: 'name',
-      columnValueFrom: 'value'
+    new PivotHeaderTransform({
+      keyColumn: 'name',
+      valueColumn: 'value'
     }),
     new FlattenTransform()
   )

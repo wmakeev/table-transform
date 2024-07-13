@@ -17,4 +17,6 @@ package-lock.json
 # temp
 /__temp
 
+/_inspire
+
 /build
