@@ -1,6 +1,6 @@
-import { TableHeaderMeta } from './types.js'
+import { ColumnHeader } from './types.js'
 
-export const compareTableHeader = (a: TableHeaderMeta, b: TableHeaderMeta) => {
+export const compareTableHeader = (a: ColumnHeader[], b: ColumnHeader[]) => {
   if (a === b) return true
   if (a.length !== b.length) return false
 
@@ -8,7 +8,8 @@ export const compareTableHeader = (a: TableHeaderMeta, b: TableHeaderMeta) => {
     const aHead = a[i]
     const bHead = b[i]
 
-    const isPass = aHead?.srcIndex === bHead?.srcIndex
+    const isPass =
+      aHead?.index === bHead?.index && aHead?.isDeleted === bHead?.isDeleted
 
     if (!isPass) return false
   }

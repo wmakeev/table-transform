@@ -1,4 +1,4 @@
-import { DataRowChunkTransformer, TableHeaderMeta } from '../../index.js'
+import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 export interface FillColumnParams {
   columnName: string
@@ -9,38 +9,34 @@ export interface FillColumnParams {
 /**
  * Fill column with value
  */
-export const fill = (params: FillColumnParams): DataRowChunkTransformer => {
+export const fill = (params: FillColumnParams): TableChunksTransformer => {
   const { columnName, value, arrIndex } = params
 
-  let fillColumns: TableHeaderMeta | null = null
+  return async ({ header, getSourceGenerator }) => {
+    const fillColumns: ColumnHeader[] = header.filter(
+      h => h.name === columnName
+    )
 
-  const factory: DataRowChunkTransformer = async ({
-    header,
-    rows,
-    rowLength
-  }) => {
-    if (fillColumns === null) {
-      fillColumns = header.filter(h => h.name === columnName)
+    if (fillColumns.length === 0) {
+      throw new Error(`Column "${columnName}" not found and can't be filled`)
+    }
 
-      if (fillColumns.length === 0) {
-        throw new Error(`Column "${columnName}" not found and can't be filled`)
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        chunk.forEach(row => {
+          fillColumns.forEach((h, index) => {
+            if (typeof arrIndex === 'number' && index !== arrIndex) return
+            row[h.index] = value
+          })
+        })
+
+        yield chunk
       }
     }
 
-    rows.forEach(row => {
-      fillColumns!.forEach((h, index) => {
-        if (typeof arrIndex === 'number' && index !== arrIndex) return
-
-        row[h.srcIndex] = value
-      })
-    })
-
     return {
       header,
-      rows,
-      rowLength
+      getSourceGenerator: getTransformedSourceGenerator
     }
   }
-
-  return factory
 }

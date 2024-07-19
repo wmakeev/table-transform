@@ -1,8 +1,8 @@
 import assert from 'assert'
 import {
-  DataRowChunkTransformer,
-  DataRowChunkInfo,
-  TableHeaderMeta
+  ColumnHeader,
+  TableChunksSource,
+  TableChunksTransformer
 } from '../../index.js'
 
 export interface AddColumnParams {
@@ -13,33 +13,47 @@ export interface AddColumnParams {
 /**
  * Adds new column
  */
-export const add = (params: AddColumnParams): DataRowChunkTransformer => {
+export const add = (params: AddColumnParams): TableChunksTransformer => {
   const defaultValue = params.defaultValue ?? null
 
-  let transformedHeader: TableHeaderMeta | null = null
-  let newRowLength: number | null = null
+  return async ({ header, getSourceGenerator }) => {
+    const firstDeletedHeaderIndex = header.findIndex(h => h.isDeleted)
 
-  return async ({ header, rows, rowLength }) => {
-    if (transformedHeader === null) {
-      newRowLength = rowLength + 1
+    // Add a cell at the end of a row or reuse a deleted cell
+    const transformedHeader: ColumnHeader[] =
+      firstDeletedHeaderIndex === -1
+        ? [
+            ...header,
+            {
+              index: header.length,
+              name: params.columnName,
+              isDeleted: false
+            }
+          ]
+        : header.map(h =>
+            h.index === firstDeletedHeaderIndex
+              ? {
+                  index: firstDeletedHeaderIndex,
+                  name: params.columnName,
+                  isDeleted: false
+                }
+              : h
+          )
 
-      transformedHeader = [
-        ...header,
-        {
-          srcIndex: rowLength,
-          name: params.columnName
-        }
-      ]
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        chunk.forEach(row => {
+          const newLen = row.push(defaultValue)
+          assert.equal(newLen, transformedHeader.length)
+        })
+
+        yield chunk
+      }
     }
 
-    rows.forEach(row => {
-      assert.equal(row.push(defaultValue), newRowLength)
-    })
-
-    const resultChunk: DataRowChunkInfo = {
+    const resultChunk: TableChunksSource = {
       header: transformedHeader,
-      rows,
-      rowLength: newRowLength!
+      getSourceGenerator: getTransformedSourceGenerator
     }
 
     return resultChunk

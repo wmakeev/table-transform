@@ -1,5 +1,5 @@
 import { parse } from 'csv-parse'
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import {

@@ -1,46 +1,36 @@
-/** Column header */
-export type ColumnHeader = string
-
-/** Table header */
-export type TableHeader = ColumnHeader[]
-
 /** Metadata of column header */
-export type ColumnHeaderMeta = {
+export type ColumnHeader = {
   /** Column name */
   name: string
 
   /**
-   * Index in source data row.
-   *
-   * If index is `-1` then column is not mapped to source.
+   * Index in data row.
    */
-  srcIndex: number
+  index: number
+
+  isDeleted: boolean
 }
 
-/** Metadata of table headers */
-export type TableHeaderMeta = ColumnHeaderMeta[]
-
 /** Data row */
-export type DataRow = Array<unknown | null>
+export type TableRow = Array<unknown | null>
 
-export type DataRowChunk = DataRow[]
-
-export type DataRowChunkInfo = {
-  header: TableHeaderMeta
-  rows: DataRowChunk
-  rowLength: number
+export type TableChunksSource = {
+  header: ColumnHeader[]
+  getSourceGenerator: () => AsyncGenerator<TableRow[]>
 }
 
 /**
  * Table row transformer. Gets batch of rows and returns transformed batch.
  */
-export type DataRowChunkTransformer = (
-  rowsChunkInfo: DataRowChunkInfo
-) => Promise<DataRowChunkInfo>
+export type TableChunksTransformer = (
+  rowsChunkInfo: TableChunksSource
+) => Promise<TableChunksSource>
+
+export type PrependHeadersStyle = 'COLUMN_NUM' | 'EXCEL_STYLE'
 
 export type TableTransfromConfig = {
   /** Transformers */
-  transforms: DataRowChunkTransformer[]
+  transforms: TableChunksTransformer[]
 
   /**
    * **Prepended header style.**
@@ -53,5 +43,5 @@ export type TableTransfromConfig = {
    *
    * Use this option if table has't headers.
    */
-  prependHeaders?: 'COLUMN_NUM' | 'EXCEL_STYLE'
+  prependHeaders?: PrependHeadersStyle
 }

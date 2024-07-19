@@ -1,8 +1,4 @@
-import {
-  DataRowChunkTransformer,
-  DataRowChunkInfo,
-  TableHeaderMeta
-} from '../../index.js'
+import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 export interface RemoveColumnParams {
   columnName: string
@@ -13,52 +9,52 @@ export interface RemoveColumnParams {
 /**
  * Remove column
  */
-export const remove = (params: RemoveColumnParams): DataRowChunkTransformer => {
-  let transformedHeader: TableHeaderMeta | null = null
+export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
+  return async ({ header, getSourceGenerator }) => {
+    const deletedColsSrcIndexes: number[] = []
 
-  const deletedColsSrcIndexes: number[] = []
+    let headerIndex = 0
 
-  return async ({ header, rows, rowLength }) => {
-    if (transformedHeader === null) {
-      let headerIndex = 0
+    const transformedHeader: ColumnHeader[] = header.flatMap(h => {
+      if (!h.isDeleted && h.name === params.columnName) {
+        if (params.colIndex != null ? params.colIndex === headerIndex : true) {
+          deletedColsSrcIndexes.push(h.index)
 
-      transformedHeader = header.flatMap(h => {
-        if (h.name === params.columnName) {
-          if (
-            params.colIndex != null ? params.colIndex === headerIndex : true
-          ) {
-            deletedColsSrcIndexes.push(h.srcIndex)
-
-            return []
+          return {
+            ...h,
+            isDeleted: true
           }
-
-          headerIndex++
         }
 
-        return h
-      })
+        headerIndex++
+      }
 
-      if (deletedColsSrcIndexes.length === 0) {
-        throw new Error(
-          `Column "${params.columnName}" not found and can't be removed`
-        )
+      return h
+    })
+
+    if (deletedColsSrcIndexes.length === 0) {
+      throw new Error(
+        `Column "${params.columnName}" not found and can't be removed`
+      )
+    }
+
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        if (params.eraseData === true) {
+          chunk.forEach(row => {
+            deletedColsSrcIndexes.forEach(index => {
+              row[index] = null
+            })
+          })
+        }
+
+        yield chunk
       }
     }
 
-    if (params.eraseData === true) {
-      rows.forEach(row => {
-        deletedColsSrcIndexes.forEach(index => {
-          row[index] = null
-        })
-      })
-    }
-
-    const resultChunk: DataRowChunkInfo = {
+    return {
       header: transformedHeader,
-      rows,
-      rowLength
+      getSourceGenerator: getTransformedSourceGenerator
     }
-
-    return resultChunk
   }
 }

@@ -1,4 +1,5 @@
-import { DataRowChunkTransformer, TableHeaderMeta } from '../../index.js'
+import assert from 'assert'
+import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 export interface SelectColumnsParams {
   /** Columns that should be selected */
@@ -9,86 +10,93 @@ export interface SelectColumnsParams {
   eraseData?: boolean
 }
 
-export const select = (
-  params: SelectColumnsParams
-): DataRowChunkTransformer => {
-  const { columns: selectedColumns, keepSrcColumnsOrder } = params
+export const select = (params: SelectColumnsParams): TableChunksTransformer => {
+  const { columns: selectedColumns, keepSrcColumnsOrder = false } = params
 
   if (selectedColumns.length === 0) {
     throw new Error('Columns to select not specified')
   }
 
-  const selectedColumnsSet = new Set(selectedColumns)
+  const selectedColumnsNamesSet = new Set(selectedColumns)
 
-  if (selectedColumns.length !== selectedColumnsSet.size) {
+  if (selectedColumns.length !== selectedColumnsNamesSet.size) {
     throw new Error(`Select columns values has duplicates`)
   }
 
-  let selectedColumnsMeta: TableHeaderMeta | null = null
-  let selectedColumnsSrcIndexesSet: Set<number> | null = null
+  return async ({ header, getSourceGenerator }) => {
+    //#region Ensure selected headers exist
+    const notDeletedHeaders = header.filter(h => !h.isDeleted)
 
-  const transformer: DataRowChunkTransformer = async ({
-    header,
-    rows,
-    rowLength
-  }) => {
-    //#region Select selected columns
-    if (selectedColumnsMeta === null) {
-      selectedColumnsMeta = [] as TableHeaderMeta
+    const notFoundColumnsNamesSet = new Set(notDeletedHeaders.map(h => h.name))
 
-      // Keep original columns order
-      if (keepSrcColumnsOrder === true) {
-        for (const head of header) {
-          if (selectedColumnsSet.has(head.name)) {
-            selectedColumnsMeta.push(head)
-          }
-        }
-      }
+    notDeletedHeaders.forEach(h => {
+      notFoundColumnsNamesSet.delete(h.name)
+    })
 
-      // Reorder columns
-      else {
-        const notFound: string[] = []
-
-        // Get selected headers
-        for (const colName of selectedColumns) {
-          const selectedColHeaders = header.filter(h => h.name === colName)
-
-          if (selectedColHeaders.length) {
-            selectedColumnsMeta.push(...selectedColHeaders)
-          } else {
-            notFound.push(colName)
-          }
-        }
-
-        if (notFound.length) {
-          throw new Error(
-            `Columns not found and can't be selected: ${notFound.map(c => `"${c}"`).join(', ')}`
-          )
-        }
-      }
-
-      selectedColumnsSrcIndexesSet = new Set(
-        selectedColumnsMeta.map(h => h.srcIndex)
+    if (notFoundColumnsNamesSet.size !== 0) {
+      throw new Error(
+        "Columns not found and can't be selected: " +
+          [...notFoundColumnsNamesSet.values()].map(c => `"${c}"`).join(', ')
       )
     }
     //#endregion
 
-    if (params.eraseData === true) {
-      rows.forEach(row => {
-        row.forEach((_, index) => {
-          if (!selectedColumnsSrcIndexesSet!.has(index)) {
-            row[index] = null
-          }
-        })
-      })
+    // Mark not selected columns as deleted
+    let transformedHeader: ColumnHeader[] = header.map(h => {
+      return !h.isDeleted && selectedColumnsNamesSet.has(h.name)
+        ? h
+        : { ...h, isDeleted: true }
+    })
+
+    // Reorder columns
+    if (!keepSrcColumnsOrder) {
+      const orderedHeaders: ColumnHeader[] = []
+
+      // Get selected headers
+      for (const colName of selectedColumns) {
+        const colNameHeaders = transformedHeader.filter(
+          h => !h.isDeleted && h.name === colName
+        )
+
+        if (colNameHeaders.length) {
+          orderedHeaders.push(...colNameHeaders)
+        }
+      }
+
+      transformedHeader = [
+        ...orderedHeaders,
+
+        // Other headers is deleted
+        ...transformedHeader.filter(h => h.isDeleted)
+      ]
+    }
+
+    assert.equal(header.length, transformedHeader.length)
+
+    /** Indexes of all selected columns */
+    const selectedColumnsSrcIndexesSet = new Set(
+      transformedHeader.filter(h => !h.isDeleted).map(h => h.index)
+    )
+
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        if (params.eraseData === true) {
+          chunk.forEach(row => {
+            row.forEach((_, index) => {
+              if (!selectedColumnsSrcIndexesSet.has(index)) {
+                row[index] = null
+              }
+            })
+          })
+        }
+
+        yield chunk
+      }
     }
 
     return {
-      header: selectedColumnsMeta,
-      rows,
-      rowLength
+      header: transformedHeader,
+      getSourceGenerator: getTransformedSourceGenerator
     }
   }
-
-  return transformer
 }

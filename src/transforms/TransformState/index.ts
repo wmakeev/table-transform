@@ -1,4 +1,4 @@
-import { DataRow, TableHeaderMeta } from '../../index.js'
+import { ColumnHeader, TableRow } from '../../index.js'
 import { TransformExpressionParams } from '../index.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
 import {
@@ -11,7 +11,7 @@ export type { TransformExpressionContext } from './getTransformExpression.js'
 export class TransformState {
   public rowNum = 0
   public arrColIndex = 0
-  public curRow!: DataRow
+  public curRow!: TableRow
 
   /**
    * Column name specified for this transform
@@ -33,7 +33,7 @@ export class TransformState {
 
   constructor(
     transformParams: TransformExpressionParams,
-    header: TableHeaderMeta,
+    header: ColumnHeader[],
     context?: TransformExpressionContext
   ) {
     const { columnName } = transformParams
@@ -42,7 +42,7 @@ export class TransformState {
 
     if (columnName != null) {
       this.fieldColsIndexes = header.flatMap(h => {
-        if (h.name === columnName) return h.srcIndex
+        if (!h.isDeleted && h.name === columnName) return h.index
         else return []
       })
 
@@ -51,17 +51,19 @@ export class TransformState {
       }
     }
 
-    this.fieldIndexesByName = header.reduce((res, h) => {
-      const indexes = res.get(h.name)
+    this.fieldIndexesByName = header
+      .filter(h => !h.isDeleted)
+      .reduce((res, h) => {
+        const indexes = res.get(h.name)
 
-      if (indexes) {
-        indexes.push(h.srcIndex)
-      } else {
-        res.set(h.name, [h.srcIndex])
-      }
+        if (indexes) {
+          indexes.push(h.index)
+        } else {
+          res.set(h.name, [h.index])
+        }
 
-      return res
-    }, this.fieldIndexesByName)
+        return res
+      }, this.fieldIndexesByName)
 
     this.rowProxy = new Proxy(this, getRowProxyHandler(header, this))
 
@@ -72,7 +74,7 @@ export class TransformState {
     )
   }
 
-  nextRow(row: DataRow) {
+  nextRow(row: TableRow) {
     this.curRow = row
     this.rowNum++
   }

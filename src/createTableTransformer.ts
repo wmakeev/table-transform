@@ -1,10 +1,9 @@
 import { compareTableHeader } from './compareTableHeader.js'
 import {
-  ColumnHeaderMeta,
-  DataRow,
-  DataRowChunk,
-  DataRowChunkInfo,
-  TableHeaderMeta,
+  ColumnHeader,
+  PrependHeadersStyle,
+  TableChunksSource,
+  TableRow,
   TableTransfromConfig
 } from './index.js'
 import {
@@ -12,116 +11,140 @@ import {
   generateExcelStyleHeader
 } from './tools/headers.js'
 
-export const createTableTransformer = (config: TableTransfromConfig) => {
-  const { transforms, prependHeaders } = config
+const getInitialTableSource = async (params: {
+  prependHeaders?: PrependHeadersStyle | undefined
+  chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
+}): Promise<TableChunksSource> => {
+  const { prependHeaders, chunkedRowsIterable } = params
 
   const isHeaderPrepended = prependHeaders != null
 
-  return async function* (
-    source: Iterable<DataRowChunk> | AsyncIterable<DataRowChunk>
-  ) {
-    let isHeaderYielded = false
-    let isHeaderChanged: boolean | null = null
+  let sourceIterator: Iterator<TableRow[]> | AsyncIterator<TableRow[]>
 
+  if (Symbol.iterator in chunkedRowsIterable) {
+    sourceIterator = chunkedRowsIterable[Symbol.iterator]()
+  } else if (Symbol.asyncIterator in chunkedRowsIterable) {
+    sourceIterator = chunkedRowsIterable[Symbol.asyncIterator]()
+  } else {
+    throw new Error('rowsChunks is not iterable')
+  }
+
+  const firstIteratorResult = await sourceIterator.next()
+
+  if (firstIteratorResult.done === true) {
+    // TODO Подумать как обработать
+    throw new Error('Iterator not yields')
+  }
+
+  let firstChunk = firstIteratorResult.value
+
+  if (firstChunk[0] == null) {
+    throw new Error('Empty or incorrect rows chunk')
+  }
+
+  const firstRow = firstChunk[0]
+
+  if (firstRow.length === 0) {
+    throw new Error('No columns in row')
+  }
+
+  let srcHeaderRow: TableRow
+
+  // No header. Header should be generated and prepended.
+  if (isHeaderPrepended) {
+    srcHeaderRow =
+      prependHeaders === 'EXCEL_STYLE'
+        ? generateExcelStyleHeader(firstRow.length)
+        : generateColumnNumHeader(firstRow.length)
+  }
+
+  // Header should exist. Extract header from first row.
+  else {
+    srcHeaderRow = firstChunk[0]
+    firstChunk = firstChunk.slice(1)
+  }
+
+  const srcTableHeaderMeta: ColumnHeader[] = srcHeaderRow.flatMap(
+    (h, index) => {
+      if (h === '' || h == null) return []
+
+      const colMeta: ColumnHeader = {
+        index: index,
+        name: String(h),
+        isDeleted: false
+      }
+
+      return colMeta
+    }
+  )
+
+  const rowsChunksNext = async function* () {
+    yield firstChunk
+
+    while (true) {
+      const iterResult = await sourceIterator.next()
+
+      if (iterResult.done) return iterResult.value
+
+      yield iterResult.value
+    }
+  }
+
+  return { header: srcTableHeaderMeta, getSourceGenerator: rowsChunksNext }
+}
+
+export const createTableTransformer = (config: TableTransfromConfig) => {
+  const { transforms, prependHeaders } = config
+
+  return async function* (
+    source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
+  ) {
     // TODO Возможно добавить настройку `emitHeaderMode = 'ALWAYS' | 'OMIT' | 'OMIT_WITHOUT_DATA'`
     const shouldEmitHeader = true
 
-    let srcTableHeaderMeta: TableHeaderMeta | undefined
+    let tableSource = await getInitialTableSource({
+      prependHeaders,
+      chunkedRowsIterable: source
+    })
 
-    for await (let rowsChunk of source) {
-      //#region First source chunk of rows
-      if (srcTableHeaderMeta === undefined) {
-        if (rowsChunk[0] == null) {
-          throw new Error('Empty or incorrect rows chunk')
-        }
+    const initialTableHeader = tableSource.header
 
-        const firstRow = rowsChunk[0]
+    // Chain transformations
+    for (const transform of transforms) {
+      tableSource = await transform(tableSource)
+    }
 
-        if (firstRow.length === 0) {
-          throw new Error('No columns in row')
-        }
+    const isHeaderChanged = !compareTableHeader(
+      initialTableHeader,
+      tableSource.header
+    )
 
-        let srcHeaderRow: DataRow
+    if (shouldEmitHeader) {
+      yield [tableSource.header.filter(h => !h.isDeleted).map(h => h.name)]
+    }
 
-        // No header. Header should be generated and prepended.
-        if (isHeaderPrepended) {
-          srcHeaderRow =
-            prependHeaders === 'EXCEL_STYLE'
-              ? generateExcelStyleHeader(firstRow.length)
-              : generateColumnNumHeader(firstRow.length)
-        }
+    for await (const rowsChunk of tableSource.getSourceGenerator()) {
+      // Header is changed should normalize result
+      if (isHeaderChanged) {
+        const normalizedRowsChunk: TableRow[] = []
 
-        // Header should exist. Extract header from first row.
-        else {
-          srcHeaderRow = rowsChunk[0]
-          rowsChunk = rowsChunk.slice(1)
-        }
+        for (const row of rowsChunk) {
+          const resultRow: TableRow = []
 
-        srcTableHeaderMeta = srcHeaderRow.flatMap((h, index) => {
-          if (h === '' || h == null) return []
-
-          const colMeta: ColumnHeaderMeta = {
-            srcIndex: index,
-            name: String(h)
+          for (const h of tableSource.header) {
+            if (!h.isDeleted) resultRow.push(row[h.index])
           }
 
-          return colMeta
-        })
-      }
-      //#endregion
-
-      let dataRowChunkInfo: DataRowChunkInfo = {
-        header: srcTableHeaderMeta,
-        rows: rowsChunk,
-        rowLength: srcTableHeaderMeta.length
-      }
-
-      // Make chunk transformation
-      for (const transform of transforms) {
-        dataRowChunkInfo = await transform(dataRowChunkInfo)
-      }
-
-      /** Is current transformed chunk empty */
-      const isEmptyChunk = dataRowChunkInfo.rows.length === 0
-
-      if (shouldEmitHeader && !isHeaderYielded) {
-        const resultHeader = dataRowChunkInfo.header.map(h => h.name)
-
-        yield [resultHeader]
-
-        isHeaderYielded = true
-      }
-
-      if (isEmptyChunk) continue
-
-      if (isHeaderChanged === null) {
-        isHeaderChanged = !compareTableHeader(
-          srcTableHeaderMeta,
-          dataRowChunkInfo.header
-        )
-      }
-
-      // Headers not changed. Rows normalization can be skipped.
-      if (!isHeaderChanged) {
-        yield dataRowChunkInfo.rows
-        continue
-      }
-
-      //#region Normalize transformed rows
-      const resultRows: DataRowChunk = []
-
-      for (const row of dataRowChunkInfo.rows) {
-        const resultRow: DataRow = []
-
-        for (const h of dataRowChunkInfo.header) {
-          resultRow.push(row[h.srcIndex])
+          normalizedRowsChunk.push(resultRow)
         }
 
-        resultRows.push(resultRow)
+        yield normalizedRowsChunk
       }
 
-      yield resultRows
-      //#endregion
+      // Header not changed, pass rows as is
+      else {
+        yield rowsChunk
+      }
     }
   }
 }

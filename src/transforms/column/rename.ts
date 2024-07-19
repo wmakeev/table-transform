@@ -1,4 +1,4 @@
-import { ColumnHeaderMeta, DataRowChunkTransformer } from '../../index.js'
+import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 export interface RenameColumnParams {
   oldColumnName: string
@@ -8,37 +8,32 @@ export interface RenameColumnParams {
 /**
  * Rename header
  */
-export const rename = (params: RenameColumnParams): DataRowChunkTransformer => {
-  let transformedHeaders: ColumnHeaderMeta[] | null = null
+export const rename = (params: RenameColumnParams): TableChunksTransformer => {
+  return async ({ header, getSourceGenerator }) => {
+    let isHeaderFound = false
 
-  return async ({ header, rows, rowLength }) => {
-    if (transformedHeaders === null) {
-      let isHeaderFound = false
+    const transformedHeaders: ColumnHeader[] = header.map(h => {
+      if (!h.isDeleted && h.name === params.oldColumnName) {
+        isHeaderFound = true
 
-      transformedHeaders = header.map(h => {
-        if (h.name === params.oldColumnName) {
-          isHeaderFound = true
-
-          return {
-            ...h,
-            name: params.newColumnName
-          }
-        } else {
-          return h
+        return {
+          ...h,
+          name: params.newColumnName
         }
-      })
-
-      if (!isHeaderFound) {
-        throw new Error(
-          `Header "${params.oldColumnName}" not found and can't be renamed`
-        )
       }
+
+      return h
+    })
+
+    if (!isHeaderFound) {
+      throw new Error(
+        `Header "${params.oldColumnName}" not found and can't be renamed`
+      )
     }
 
     return {
       header: transformedHeaders,
-      rows,
-      rowLength
+      getSourceGenerator
     }
   }
 }

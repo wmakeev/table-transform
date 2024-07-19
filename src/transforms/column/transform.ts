@@ -1,46 +1,51 @@
 import assert from 'node:assert'
-import { DataRowChunkTransformer } from '../../index.js'
+import { TableChunksTransformer } from '../../index.js'
 import {
-  TransformExpressionContext,
   ColumnTransformExpressionParams,
+  TransformExpressionContext,
   TransformState
 } from '../index.js'
 
 export const transform = (
   params: ColumnTransformExpressionParams,
   context?: TransformExpressionContext
-): DataRowChunkTransformer => {
+): TableChunksTransformer => {
   assert.ok(
     typeof params.columnName === 'string',
     'transform columnName parameter expected to be string'
   )
 
-  let transformState: TransformState | null = null
+  return async ({ header, getSourceGenerator }) => {
+    const transformState: TransformState = new TransformState(
+      params,
+      header,
+      context
+    )
 
-  return async ({ header, rows, rowLength }) => {
-    if (transformState === null) {
-      transformState = new TransformState(params, header, context)
-    }
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        chunk.forEach(row => {
+          transformState.nextRow(row)
 
-    for (const row of rows) {
-      transformState.nextRow(row)
+          for (const [
+            arrIndex,
+            colIndex
+          ] of transformState.fieldColsIndexes.entries()) {
+            transformState.arrColIndex = arrIndex
 
-      for (const [
-        arrIndex,
-        colIndex
-      ] of transformState.fieldColsIndexes.entries()) {
-        transformState.arrColIndex = arrIndex
+            const result = transformState.evaluateExpression()
 
-        const result = transformState.evaluateExpression()
+            row[colIndex] = result
+          }
+        })
 
-        row[colIndex] = result
+        yield chunk
       }
     }
 
     return {
       header,
-      rows,
-      rowLength
+      getSourceGenerator: getTransformedSourceGenerator
     }
   }
 }

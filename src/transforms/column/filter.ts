@@ -1,4 +1,4 @@
-import { DataRowChunk, DataRowChunkTransformer } from '../../index.js'
+import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
   TransformExpressionContext,
   TransformExpressionParams,
@@ -8,60 +8,63 @@ import {
 export const filter = (
   params: TransformExpressionParams,
   context?: TransformExpressionContext
-): DataRowChunkTransformer => {
-  let transformState: TransformState | null = null
+): TableChunksTransformer => {
+  return async ({ header, getSourceGenerator }) => {
+    const transformState = new TransformState(params, header, context)
 
-  return async ({ header, rows, rowLength }) => {
-    const filteredRows: DataRowChunk = []
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        const filteredRows: TableRow[] = []
 
-    if (transformState === null) {
-      transformState = new TransformState(params, header, context)
-    }
+        for (const row of chunk) {
+          transformState.nextRow(row)
 
-    for (const row of rows) {
-      transformState.nextRow(row)
+          let isPass = true
 
-      let isPass = true
+          // No column specified
+          if (transformState.fieldColsIndexes.length === 0) {
+            const result = transformState.evaluateExpression()
 
-      // No column specified
-      if (transformState.fieldColsIndexes.length === 0) {
-        const result = transformState.evaluateExpression()
+            if (result instanceof Error) throw result
 
-        if (result instanceof Error) throw result
+            if (typeof result !== 'boolean') {
+              throw new Error('Filter expression should return boolean result')
+            }
 
-        if (typeof result !== 'boolean') {
-          throw new Error('Filter expression should return boolean result')
-        }
-
-        isPass = result
-      }
-
-      // Column specified
-      else {
-        for (const arrColIndex of transformState.fieldColsIndexes.keys()) {
-          transformState.arrColIndex = arrColIndex
-
-          const result = transformState.evaluateExpression()
-
-          if (result instanceof Error) throw result
-
-          if (typeof result !== 'boolean') {
-            throw new Error('Filter expression should return boolean result')
+            isPass = result
           }
 
-          isPass = result
+          // Column specified
+          else {
+            for (const arrColIndex of transformState.fieldColsIndexes.keys()) {
+              transformState.arrColIndex = arrColIndex
 
-          if (isPass === false) break
+              const result = transformState.evaluateExpression()
+
+              if (result instanceof Error) throw result
+
+              if (typeof result !== 'boolean') {
+                throw new Error(
+                  'Filter expression should return boolean result'
+                )
+              }
+
+              isPass = result
+
+              if (isPass === false) break
+            }
+          }
+
+          if (isPass) filteredRows.push(row)
         }
-      }
 
-      if (isPass) filteredRows.push(row)
+        yield filteredRows
+      }
     }
 
     return {
       header,
-      rows: filteredRows,
-      rowLength
+      getSourceGenerator: getTransformedSourceGenerator
     }
   }
 }

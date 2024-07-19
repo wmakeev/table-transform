@@ -1,12 +1,12 @@
-import { TableHeaderMeta } from '../../index.js'
+import { ColumnHeader } from '../../index.js'
 import { TransformState } from './index.js'
 
 export const getRowProxyHandler = (
-  header: TableHeaderMeta,
+  header: ColumnHeader[],
   transformState: TransformState
 ) => {
   /** Headers list */
-  const fields = header.map(h => h.name)
+  const fields = header.filter(h => !h.isDeleted).map(h => h.name)
 
   /** Uniq columns names */
   const fieldsSet = new Set(fields)
@@ -30,7 +30,7 @@ export const getRowProxyHandler = (
       if (indexes == null) return undefined
 
       if (indexes.length === 1) {
-        return target.curRow[indexes[0]!] ?? '' // undefined is empty string
+        return target.curRow[indexes[0]!]
       } else {
         const values = []
 

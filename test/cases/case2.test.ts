@@ -1,5 +1,5 @@
 import { parse } from 'csv-parse'
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import {
@@ -16,7 +16,7 @@ import {
 } from '../../src/index.js'
 
 test('column transform (array) #2', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
         columnName: 'List',
@@ -40,7 +40,7 @@ test('column transform (array) #2', async () => {
 
     new ChunkTransform({ batchSize: 100 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -61,7 +61,7 @@ test('column transform (array) #2', async () => {
 })
 
 test('column transform (values)', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
         columnName: 'Value1'
@@ -115,7 +115,7 @@ test('column transform (values)', async () => {
 
     new ChunkTransform({ batchSize: 100 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
