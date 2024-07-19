@@ -46,3 +46,147 @@ export function generateExcelStyleHeader(colsCount: number) {
 
   return header
 }
+
+/**
+ * @param excelHeaderName Name of Excel column like `AB`
+ */
+export function getExcelHeaderColumnNum(excelHeaderName: string) {
+  const symbolsNumsReversed = excelHeaderName
+    .toUpperCase()
+    .split('')
+    .map(sym => sym.charCodeAt(0) - CHAR_FROM + 1)
+    .reverse()
+
+  if (symbolsNumsReversed.length === 0) {
+    throw new Error('Empty Excel header name')
+  }
+
+  if (symbolsNumsReversed.some(n => n < 1 || n > 26)) {
+    throw new Error(`Incorrect Excel header name - ${excelHeaderName}`)
+  }
+
+  if (symbolsNumsReversed.length > 3) {
+    throw new Error(`To long Excel header name - ${excelHeaderName}`)
+  }
+
+  const colNum = symbolsNumsReversed
+    .map((num, index) => {
+      return num * Math.pow(CHAR_COUNT, index)
+    })
+    .reduce((res, it) => res + it)
+
+  return colNum
+}
+
+export interface Coordinates {
+  x: number
+  y: number
+}
+
+const EXCEL_ADDRESS_REGEX = /^([a-zA-Z]+)(\d+)$/i
+
+export function getExcelAddressCoordinates(address: string): Coordinates {
+  if (typeof address !== 'string' || address.length === 0) {
+    throw new Error('Excel address should not to be empty string')
+  }
+
+  const match = EXCEL_ADDRESS_REGEX.exec(address)
+
+  if (match === null) {
+    throw new Error(`Incorrect Excel address - ${address}`)
+  }
+
+  if (match?.length !== 3) {
+    throw new Error(`Incorrect Excel address - ${address}`)
+  }
+
+  const column = getExcelHeaderColumnNum(match[1]!)
+  const row = Number.parseInt(match[2]!)
+
+  return {
+    x: column - 1,
+    y: row - 1
+  }
+}
+
+export interface ExcelRangeBound {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
+
+export function getExcelRangeBound(range: string): ExcelRangeBound {
+  let [cellFrom, cellTo] = range.split(':') as [string] | [string, string]
+
+  const cellFromCoord = getExcelAddressCoordinates(cellFrom)
+
+  let cellToCoord: Coordinates
+
+  if (cellTo == null) {
+    cellToCoord = cellFromCoord
+  } else {
+    cellToCoord = getExcelAddressCoordinates(cellTo)
+  }
+
+  const result: ExcelRangeBound = {
+    x1: cellFromCoord.x,
+    y1: cellFromCoord.y,
+    x2: cellToCoord.x,
+    y2: cellToCoord.y
+  }
+
+  if (result.x1 > result.x2 || result.y1 > result.y2) {
+    throw new Error(`Inverted Excel ranges not supported - ${range}`)
+  }
+
+  return result
+}
+
+export interface Offset {
+  x: number
+  y: number
+}
+
+const EXCEL_RC_OFFSET_REGEX = /^R(?:\[(-?\d+)\])?C(?:\[(-?\d+)\])?$/i
+
+export function getExcelOffset(offset: string): Offset {
+  if (typeof offset !== 'string') {
+    throw new Error('Expected offset to be string value')
+  }
+
+  if (offset === '') {
+    return { x: 0, y: 0 }
+  }
+
+  const match = EXCEL_RC_OFFSET_REGEX.exec(offset)
+
+  if (match === null) {
+    throw new Error(`Incorrect offset value - ${offset}`)
+  }
+
+  if (match.length !== 3) {
+    throw new Error(`Incorrect offset value - ${offset}`)
+  }
+
+  // "RC"
+  if (match[1] == null && match[2] == null) {
+    return { x: 0, y: 0 }
+  }
+
+  // "R[1]C"
+  else if (match[2] == null) {
+    return {
+      x: 0,
+      y: Number.parseInt(match[1]!)
+    }
+  }
+
+  // "R[1]C[2]" | "RC[2]"
+  else {
+    return {
+      x: match[2] ? Number.parseInt(match[2]!) : 0,
+      y: match[1] == null ? 0 : Number.parseInt(match[1])
+    }
+  }
+}
