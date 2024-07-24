@@ -1,16 +1,17 @@
+import { TransformAssertError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import { getExcelOffset, getExcelRangeBound } from '../../tools/headers.js'
 
 export type SheetCellParams = {
+  /** Cell value to compare */
+  testValue: unknown
+
   /**
    * The operation through which the comparison with `testValue` is handled.
    *
    * default: `EQUAL`
    */
-  operation?: SheetCellOperations
-
-  /** Cell value to compare */
-  testValue: unknown
+  testOperation?: SheetCellOperations
 
   /**
    * The range in which to search for a cell.
@@ -66,22 +67,22 @@ export type SheetCellOperations =
 
 const operations: Record<
   SheetCellOperations,
-  (actual: unknown, expected: unknown) => boolean
+  (str1: unknown, str2: unknown) => boolean
 > = {
-  STARTS_WITH: (actual, expected) => {
-    return actual != null && expected != null
-      ? String(expected).trim().startsWith(String(actual).trim())
+  STARTS_WITH: (str1, str2) => {
+    return str1 != null && str2 != null
+      ? String(str1).trim().startsWith(String(str2).trim())
       : false
   },
 
-  EQUAL: (actual, expected) => {
-    return actual == null && expected == null ? true : expected === actual
+  EQUAL: (str1, str2) => {
+    return str1 == null && str2 == null ? true : str2 === str1
   },
 
-  INCLUDES: (actual, expected) => {
-    return actual == null || expected == null
+  INCLUDES: (str1, str2) => {
+    return str1 == null || str2 == null
       ? false
-      : String(expected).includes(String(actual))
+      : String(str1).includes(String(str2))
   },
 
   TEMPLATE: () => {
@@ -93,14 +94,14 @@ const operations: Record<
  * Dynamic column
  */
 export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
-  const { type, operation = 'EQUAL', testValue, range } = params
+  const { type, testOperation = 'EQUAL', testValue, range } = params
 
   const { x1, y1, x2, y2 } = getExcelRangeBound(range)
   const { x: xOffset, y: yOffset } = getExcelOffset(
     type !== 'ASSERT' ? params.offset ?? '' : ''
   )
 
-  const compareFn = operations[operation]
+  const compareFn = operations[testOperation]
 
   return async ({ header, getSourceGenerator }) => {
     let rowBuffer: TableRow[] = []
@@ -131,18 +132,20 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
       throw new Error('Rows offset out of range')
     }
 
-    const [searchFrameFirstColIndex, , , searchFrameLastColIndex] = [
+    /* eslint prefer-const:0 */
+    let [searchFrameFirstColIndex, , , searchFrameLastColIndex] = [
       x1,
       x1 + xOffset,
       x2,
       x2 + xOffset
     ].sort() as [number, number, number, number]
 
-    if (
-      searchFrameFirstColIndex < 0 ||
-      searchFrameLastColIndex > header.length
-    ) {
+    if (searchFrameFirstColIndex < 0) {
       throw new Error('Columns offset out of range')
+    }
+
+    if (searchFrameLastColIndex >= header.length) {
+      searchFrameLastColIndex = header.length - 1
     }
 
     const searchCell = (bufferRowIndex: number): FoundCell | null => {
@@ -155,6 +158,9 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         colIndex <= searchFrameLastColIndex;
         colIndex++
       ) {
+        // Search only in headers from source data, and skip added headers
+        if (header[colIndex]?.isFromSource !== true) continue
+
         if (compareFn(bufferRow[colIndex], testValue)) {
           cellColIndex = colIndex
           break
@@ -237,14 +243,16 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           }
         }
 
-        if (type !== 'ASSERT' && params.isOptional) {
+        if (type !== 'ASSERT' && params.isOptional === true) {
           yield rowBuffer
           isPassThrough = true
           rowBuffer = []
           continue
         }
 
-        throw new Error(`Cell "${testValue}" in "${range}" range not found`)
+        throw new TransformAssertError(
+          `Cell "${testValue}" in "${range}" range not found`
+        )
       }
     }
 

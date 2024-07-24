@@ -117,7 +117,7 @@ export interface ExcelRangeBound {
 }
 
 export function getExcelRangeBound(range: string): ExcelRangeBound {
-  let [cellFrom, cellTo] = range.split(':') as [string] | [string, string]
+  const [cellFrom, cellTo] = range.split(':') as [string] | [string, string]
 
   const cellFromCoord = getExcelAddressCoordinates(cellFrom)
 

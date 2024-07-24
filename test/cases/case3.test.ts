@@ -17,7 +17,7 @@ import {
 } from '../../src/index.js'
 
 test('complex transform #3', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
         columnName: 'RowIndex'
@@ -114,7 +114,7 @@ test('complex transform #3', async () => {
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )

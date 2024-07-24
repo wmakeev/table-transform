@@ -9,6 +9,8 @@ export type ColumnHeader = {
   index: number
 
   isDeleted: boolean
+
+  isFromSource?: boolean
 }
 
 /** Data row */
@@ -44,4 +46,9 @@ export type TableTransfromConfig = {
    * Use this option if table has't headers.
    */
   prependHeaders?: PrependHeadersStyle
+
+  /**
+   * Should emit header to result data (default: `true`)
+   */
+  skipHeader?: boolean
 }

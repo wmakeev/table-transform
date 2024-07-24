@@ -1,4 +1,4 @@
-import { compareTableHeader } from './compareTableHeader.js'
+import { compareTableRawHeader } from './compareTableHeader.js'
 import {
   ColumnHeader,
   PrependHeadersStyle,
@@ -45,7 +45,7 @@ const getInitialTableSource = async (params: {
   const firstRow = firstChunk[0]
 
   if (firstRow.length === 0) {
-    throw new Error('No columns in row')
+    throw new Error('Source have not any header')
   }
 
   let srcHeaderRow: TableRow
@@ -64,29 +64,47 @@ const getInitialTableSource = async (params: {
     firstChunk = firstChunk.slice(1)
   }
 
-  const srcTableHeaderMeta: ColumnHeader[] = srcHeaderRow.flatMap(
-    (h, index) => {
-      if (h === '' || h == null) return []
-
-      const colMeta: ColumnHeader = {
-        index: index,
-        name: String(h),
-        isDeleted: false
-      }
-
-      return colMeta
+  const srcTableHeaderMeta: ColumnHeader[] = srcHeaderRow.map((h, index) => {
+    const colMeta: ColumnHeader = {
+      index: index,
+      name: String(h),
+      isDeleted: false,
+      isFromSource: true
     }
-  )
+
+    return colMeta
+  })
+
+  const srcTableHeadeLength = srcTableHeaderMeta.length
 
   const rowsChunksNext = async function* () {
     yield firstChunk
 
+    firstChunk = []
+
     while (true) {
       const iterResult = await sourceIterator.next()
 
-      if (iterResult.done) return iterResult.value
+      if (iterResult.done === true) return iterResult.value
 
-      yield iterResult.value
+      const chunk = iterResult.value
+
+      if (!Array.isArray(chunk))
+        throw new Error('Rows chunk expected to be Array')
+
+      chunk.forEach(row => {
+        if (!Array.isArray(row)) {
+          throw new Error('Row expected to be Array')
+        }
+
+        if (row.length !== srcTableHeadeLength) {
+          throw new Error(
+            `Inconsistent row length (expected ${srcTableHeadeLength}, but got ${row.length})`
+          )
+        }
+      })
+
+      yield chunk
     }
   }
 
@@ -94,14 +112,11 @@ const getInitialTableSource = async (params: {
 }
 
 export const createTableTransformer = (config: TableTransfromConfig) => {
-  const { transforms, prependHeaders } = config
+  const { transforms, prependHeaders, skipHeader = false } = config
 
   return async function* (
     source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
   ) {
-    // TODO Возможно добавить настройку `emitHeaderMode = 'ALWAYS' | 'OMIT' | 'OMIT_WITHOUT_DATA'`
-    const shouldEmitHeader = true
-
     let tableSource = await getInitialTableSource({
       prependHeaders,
       chunkedRowsIterable: source
@@ -114,12 +129,12 @@ export const createTableTransformer = (config: TableTransfromConfig) => {
       tableSource = await transform(tableSource)
     }
 
-    const isHeaderChanged = !compareTableHeader(
+    const isHeaderChanged = !compareTableRawHeader(
       initialTableHeader,
       tableSource.header
     )
 
-    if (shouldEmitHeader) {
+    if (!skipHeader) {
       yield [tableSource.header.filter(h => !h.isDeleted).map(h => h.name)]
     }
 

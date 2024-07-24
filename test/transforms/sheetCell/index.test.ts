@@ -15,10 +15,10 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../src/index.js'
+} from '../../../src/index.js'
 
 test('sheetCell transform #1', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
         columnName: 'row'
@@ -111,16 +111,19 @@ test('sheetCell transform #1', async () => {
   })
 
   const transformedRowsStream: Readable = compose(
-    createReadStream(path.join(process.cwd(), 'test/cases/sheetCell1_in.csv'), {
-      highWaterMark: 16 * 1024,
-      encoding: 'utf8'
-    }),
+    createReadStream(
+      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      {
+        highWaterMark: 16 * 1024,
+        encoding: 'utf8'
+      }
+    ),
 
     parse({ bom: true }),
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -131,12 +134,12 @@ test('sheetCell transform #1', async () => {
 
   // // DEBUG
   // await writeFile(
-  //   path.join(process.cwd(), 'test/cases/sheetCell1_out.csv'),
+  //   path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_out.csv'),
   //   actualCsv
   // )
 
   const expectedCsv = await readFile(
-    path.join(process.cwd(), 'test/cases/sheetCell1_out.csv'),
+    path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_out.csv'),
     'utf-8'
   )
 
@@ -144,7 +147,7 @@ test('sheetCell transform #1', async () => {
 })
 
 test('sheetCell transform #1 (cell not found)', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
         columnName: 'Col1'
@@ -161,16 +164,19 @@ test('sheetCell transform #1 (cell not found)', async () => {
   })
 
   const transformedRowsStream: Readable = compose(
-    createReadStream(path.join(process.cwd(), 'test/cases/sheetCell1_in.csv'), {
-      highWaterMark: 16 * 1024,
-      encoding: 'utf8'
-    }),
+    createReadStream(
+      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      {
+        highWaterMark: 16 * 1024,
+        encoding: 'utf8'
+      }
+    ),
 
     parse({ bom: true }),
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -185,7 +191,7 @@ test('sheetCell transform #1 (cell not found)', async () => {
 })
 
 test('sheetCell transform #1 (assert)', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
         columnName: 'Col1'
@@ -201,16 +207,19 @@ test('sheetCell transform #1 (assert)', async () => {
   })
 
   const transformedRowsStream: Readable = compose(
-    createReadStream(path.join(process.cwd(), 'test/cases/sheetCell1_in.csv'), {
-      highWaterMark: 16 * 1024,
-      encoding: 'utf8'
-    }),
+    createReadStream(
+      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      {
+        highWaterMark: 16 * 1024,
+        encoding: 'utf8'
+      }
+    ),
 
     parse({ bom: true }),
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -222,4 +231,102 @@ test('sheetCell transform #1 (assert)', async () => {
     assert.ok(err instanceof Error)
     assert.equal(err.message, 'Cell "foo" in "A2:B4" range not found')
   }
+})
+
+test('sheetCell transform #2', async () => {
+  const tableTransformer = createTableTransformer({
+    transforms: [
+      transforms.column.add({
+        columnName: 'col1'
+      }),
+
+      transforms.column.add({
+        columnName: 'col2'
+      }),
+
+      transforms.column.add({
+        columnName: 'col3'
+      }),
+
+      transforms.column.add({
+        columnName: 'col4'
+      }),
+
+      transforms.column.add({
+        columnName: 'col5'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:K1',
+        testValue: 'One',
+        testOperation: 'EQUAL',
+        targetColumn: 'col1'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:K1',
+        testValue: 'Tow',
+        testOperation: 'STARTS_WITH',
+        targetColumn: 'col2'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:K1',
+        testValue: 'Три',
+        targetColumn: 'col3'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:K1',
+        testValue: 'Четыре',
+        testOperation: 'STARTS_WITH',
+        targetColumn: 'col4'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:K1',
+        testValue: ' 5',
+        testOperation: 'INCLUDES',
+        targetColumn: 'col5'
+      }),
+
+      transforms.column.select({
+        columns: ['col1', 'col2', 'col3', 'col4', 'col5']
+      })
+    ],
+    prependHeaders: 'EXCEL_STYLE'
+  })
+
+  const transformedRowsStream: Readable = compose(
+    createReadStream(
+      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell2.csv'),
+      'utf8'
+    ),
+
+    parse({ bom: true }),
+
+    new ChunkTransform({ batchSize: 2 }),
+
+    tableTransformer,
+
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    ['col1', 'col2', 'col3', 'col4', 'col5'],
+    [null, null, null, null, null],
+    ['11', '', '31', '', ''],
+    ['12', '21', '', '', ''],
+    ['13', '', '32', '', '55'],
+    ['', '22', '33', '', ''],
+    ['', '', '', '', ''],
+    ['', '23', '', '', '']
+  ])
 })

@@ -44,7 +44,12 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
       for await (const chunk of getSourceGenerator()) {
         chunk.forEach(row => {
           const newLen = row.push(defaultValue)
-          assert.equal(newLen, transformedHeader.length)
+
+          assert.equal(
+            newLen,
+            transformedHeader.length,
+            'Row length not satisfies header'
+          )
         })
 
         yield chunk

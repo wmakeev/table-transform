@@ -16,7 +16,7 @@ import {
 } from '../../src/index.js'
 
 test('No-opt transform #1', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: []
   })
 
@@ -30,7 +30,7 @@ test('No-opt transform #1', async () => {
 
     new ChunkTransform({ batchSize: 100 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -49,7 +49,7 @@ test('No-opt transform #1', async () => {
 })
 
 test('No-opt transform #2', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [async chunkInfo => chunkInfo]
   })
 
@@ -63,7 +63,7 @@ test('No-opt transform #2', async () => {
 
     new ChunkTransform({ batchSize: 100 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -82,7 +82,7 @@ test('No-opt transform #2', async () => {
 })
 
 test('column transform (basic) #1', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
         columnName: 'Наименование',
@@ -101,7 +101,7 @@ test('column transform (basic) #1', async () => {
 
     new ChunkTransform({ batchSize: 100 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )

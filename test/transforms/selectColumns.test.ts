@@ -13,7 +13,7 @@ import {
 } from '../../src/index.js'
 
 test('select header transform', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.select({
         columns: ['B']
@@ -34,7 +34,7 @@ test('select header transform', async () => {
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )

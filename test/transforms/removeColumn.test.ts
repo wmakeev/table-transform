@@ -13,7 +13,7 @@ import {
 } from '../../src/index.js'
 
 test('remove header transform #1', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.remove({
         columnName: 'A'
@@ -35,7 +35,7 @@ test('remove header transform #1', async () => {
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
@@ -56,7 +56,7 @@ test('remove header transform #1', async () => {
 })
 
 test('remove header transform #2', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.remove({
         columnName: 'Col',
@@ -78,7 +78,7 @@ test('remove header transform #2', async () => {
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )

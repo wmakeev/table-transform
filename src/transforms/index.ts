@@ -1,5 +1,6 @@
 export * from './TransformState/index.js'
 export * as column from './column/index.js'
+export * from './flatMapWith.js'
 
 export interface TransformExpressionParams {
   /**

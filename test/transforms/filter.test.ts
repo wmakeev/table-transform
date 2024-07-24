@@ -13,7 +13,7 @@ import {
 } from '../../src/index.js'
 
 test('filter transform', async () => {
-  const csvTransformer = createTableTransformer({
+  const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.filter({
         columnName: 'B',
@@ -58,7 +58,7 @@ test('filter transform', async () => {
 
     new ChunkTransform({ batchSize: 2 }),
 
-    csvTransformer,
+    tableTransformer,
 
     new FlattenTransform()
   )
