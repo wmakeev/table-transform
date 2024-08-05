@@ -15,10 +15,13 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../../src/index.js'
+} from '../../../../src/index.js'
 
-test('sheetCell transform #1', async () => {
+test('sheetCell transform (case1)', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.add({
         columnName: 'row'
@@ -106,13 +109,15 @@ test('sheetCell transform #1', async () => {
       transforms.column.select({
         columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5']
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      path.join(
+        process.cwd(),
+        'test/transforms/column/sheetCell/sheetCell1_in.csv'
+      ),
       {
         highWaterMark: 16 * 1024,
         encoding: 'utf8'
@@ -134,20 +139,26 @@ test('sheetCell transform #1', async () => {
 
   // // DEBUG
   // await writeFile(
-  //   path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_out.csv'),
+  //   path.join(process.cwd(), 'test/transforms/column/sheetCell/sheetCell1_out.csv'),
   //   actualCsv
   // )
 
   const expectedCsv = await readFile(
-    path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_out.csv'),
+    path.join(
+      process.cwd(),
+      'test/transforms/column/sheetCell/sheetCell1_out.csv'
+    ),
     'utf-8'
   )
 
   assert.equal(actualCsv, expectedCsv)
 })
 
-test('sheetCell transform #1 (cell not found)', async () => {
+test('sheetCell transform (case1) - cell not found', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.add({
         columnName: 'Col1'
@@ -159,13 +170,15 @@ test('sheetCell transform #1 (cell not found)', async () => {
         testValue: 'foo',
         targetColumn: 'Col1'
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      path.join(
+        process.cwd(),
+        'test/transforms/column/sheetCell/sheetCell1_in.csv'
+      ),
       {
         highWaterMark: 16 * 1024,
         encoding: 'utf8'
@@ -190,8 +203,11 @@ test('sheetCell transform #1 (cell not found)', async () => {
   }
 })
 
-test('sheetCell transform #1 (assert)', async () => {
+test('sheetCell transform (case1) - assert', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.add({
         columnName: 'Col1'
@@ -202,13 +218,15 @@ test('sheetCell transform #1 (assert)', async () => {
         range: 'A2:B4',
         testValue: 'foo'
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell1_in.csv'),
+      path.join(
+        process.cwd(),
+        'test/transforms/column/sheetCell/sheetCell1_in.csv'
+      ),
       {
         highWaterMark: 16 * 1024,
         encoding: 'utf8'
@@ -233,8 +251,11 @@ test('sheetCell transform #1 (assert)', async () => {
   }
 })
 
-test('sheetCell transform #2', async () => {
+test('sheetCell transform (case2)', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.add({
         columnName: 'col1'
@@ -298,13 +319,15 @@ test('sheetCell transform #2', async () => {
       transforms.column.select({
         columns: ['col1', 'col2', 'col3', 'col4', 'col5']
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(process.cwd(), 'test/transforms/sheetCell/sheetCell2.csv'),
+      path.join(
+        process.cwd(),
+        'test/transforms/column/sheetCell/sheetCell2.csv'
+      ),
       'utf8'
     ),
 

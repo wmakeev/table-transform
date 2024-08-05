@@ -10,16 +10,18 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../src/index.js'
+} from '../../../src/index.js'
 
 test('remove header transform #1', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.remove({
         columnName: 'A'
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   /* prettier-ignore */

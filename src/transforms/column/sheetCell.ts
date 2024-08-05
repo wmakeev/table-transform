@@ -251,7 +251,8 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         }
 
         throw new TransformAssertError(
-          `Cell "${testValue}" in "${range}" range not found`
+          `Cell "${testValue}" in "${range}" range not found`,
+          'SheetCell'
         )
       }
     }

@@ -1,3 +1,4 @@
+import { NonExistColumnTransformError } from '../../errors/index.js'
 import { ColumnHeader } from '../../index.js'
 import { TransformState } from './index.js'
 
@@ -27,7 +28,9 @@ export const getRowProxyHandler = (
     get(target, prop) {
       const indexes = transformState.fieldIndexesByName.get(prop as string)
 
-      if (indexes == null) return undefined
+      if (indexes == null) {
+        throw new NonExistColumnTransformError(String(prop))
+      }
 
       if (indexes.length === 1) {
         return target.curRow[indexes[0]!]

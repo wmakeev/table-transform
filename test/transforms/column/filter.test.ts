@@ -10,10 +10,13 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../src/index.js'
+} from '../../../src/index.js'
 
 test('filter transform', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.filter({
         columnName: 'B',
@@ -38,8 +41,7 @@ test('filter transform', async () => {
           }
         }
       )
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   /* prettier-ignore */

@@ -10,16 +10,18 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../src/index.js'
+} from '../../../src/index.js'
 
 test('select header transform', async () => {
   const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
     transforms: [
       transforms.column.select({
         columns: ['B']
       })
-    ],
-    prependHeaders: 'EXCEL_STYLE'
+    ]
   })
 
   const csv = [

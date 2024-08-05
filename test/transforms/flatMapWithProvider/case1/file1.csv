@@ -1,0 +1,7 @@
+code,,name,foo,bar,value
+1,,name-1,,,value-01
+2,,name-2,,,value-02
+,,,,,(none)
+3,,name-3,,,value-03
+4,,name-4,,,value-04
+5,,name-5,,,value-05

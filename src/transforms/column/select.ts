@@ -7,8 +7,19 @@ export interface SelectColumnsParams {
 
   keepSrcColumnsOrder?: boolean
 
-  eraseData?: boolean
+  clearDroppedColumns?: boolean
 }
+
+// #dh04fvxs
+
+// TODO Нужен структурный select (?) - columns: ['A', 'B', 'B', 'C', 'B']
+// .. это может быть важно для согласования структуры разных источников с
+// одинаковым набором колонок.
+// Текущий select не может гарантировать кол-во выходных колонок массива.
+
+// TODO Дополнительно можно добавить опцию, что выборка несуществующей колонки
+// создает ее. Чтобы избежать дополнительного добавления `add` перед `select`.
+// Так с `add` может возникнуть сложность с колонками-массивами.
 
 export const select = (params: SelectColumnsParams): TableChunksTransformer => {
   const { columns: selectedColumns, keepSrcColumnsOrder = false } = params
@@ -80,7 +91,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
 
     async function* getTransformedSourceGenerator() {
       for await (const chunk of getSourceGenerator()) {
-        if (params.eraseData === true) {
+        if (params.clearDroppedColumns === true) {
           chunk.forEach(row => {
             row.forEach((_, index) => {
               if (!selectedColumnsSrcIndexesSet.has(index)) {

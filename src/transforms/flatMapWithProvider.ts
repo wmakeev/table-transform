@@ -1,0 +1,61 @@
+import {
+  ColumnHeader,
+  SourceProvider,
+  TableChunksTransformer,
+  TableTransfromConfig,
+  createTableTransformer
+} from '../index.js'
+
+export interface FlatMapWithProviderParams {
+  sourceProvider: SourceProvider
+  outputColumns: string[]
+  transformConfig?: TableTransfromConfig & {}
+}
+
+// const TRANSFORM_NAME = 'FlatMapWithProvider'
+
+/**
+ * FlatMap data from source with provider
+ */
+export const flatMapWithProvider = (
+  params: FlatMapWithProviderParams
+): TableChunksTransformer => {
+  const { sourceProvider, transformConfig = {} } = params
+
+  return async ({ header, getSourceGenerator }) => {
+    const outputColumns = [
+      ...new Set([
+        ...params.outputColumns,
+        ...(transformConfig.errorHandle?.outputColumns ?? [])
+      ])
+    ]
+
+    const resultHeader: ColumnHeader[] = outputColumns.map((name, index) => ({
+      index,
+      name: String(name),
+      isDeleted: false
+    }))
+
+    async function* getTransformedSourceGenerator() {
+      for await (const chunk of getSourceGenerator()) {
+        for (const row of chunk) {
+          const transformer = createTableTransformer({
+            ...transformConfig,
+            outputHeader: {
+              ...transformConfig?.outputHeader,
+              forceColumns: outputColumns,
+              skip: true
+            }
+          })
+
+          yield* transformer(sourceProvider(header, row))
+        }
+      }
+    }
+
+    return {
+      header: resultHeader,
+      getSourceGenerator: getTransformedSourceGenerator
+    }
+  }
+}

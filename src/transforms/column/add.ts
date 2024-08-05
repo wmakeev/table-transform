@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { TransformBugError } from '../../errors/index.js'
 import {
   ColumnHeader,
   TableChunksSource,
@@ -7,7 +7,15 @@ import {
 
 export interface AddColumnParams {
   columnName: string
+
   defaultValue?: unknown
+
+  // TODO Заменить на явное указание размера колонки-массива
+  /**
+   * If the adding column(s) already exists, then add a new one with the same
+   * name.
+   */
+  force?: boolean
 }
 
 /**
@@ -16,7 +24,19 @@ export interface AddColumnParams {
 export const add = (params: AddColumnParams): TableChunksTransformer => {
   const defaultValue = params.defaultValue ?? null
 
-  return async ({ header, getSourceGenerator }) => {
+  return async chunkInfo => {
+    const isColumnExist =
+      chunkInfo.header.findIndex(
+        h => !h.isDeleted && h.name === params.columnName
+      ) !== -1
+
+    // Skip column adding?
+    if (params.force !== true && isColumnExist) {
+      return chunkInfo
+    }
+
+    const { header, getSourceGenerator } = chunkInfo
+
     const firstDeletedHeaderIndex = header.findIndex(h => h.isDeleted)
 
     // Add a cell at the end of a row or reuse a deleted cell
@@ -43,13 +63,15 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
     async function* getTransformedSourceGenerator() {
       for await (const chunk of getSourceGenerator()) {
         chunk.forEach(row => {
-          const newLen = row.push(defaultValue)
+          if (firstDeletedHeaderIndex === -1) {
+            row.push(defaultValue)
+          } else {
+            row[firstDeletedHeaderIndex] = defaultValue
+          }
 
-          assert.equal(
-            newLen,
-            transformedHeader.length,
-            'Row length not satisfies header'
-          )
+          if (row.length !== transformedHeader.length) {
+            throw new TransformBugError('Row length not satisfies header')
+          }
         })
 
         yield chunk

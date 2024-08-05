@@ -1,0 +1,3 @@
+name,file_path
+case1,test/transforms/flatMapWithProvider/case2/file1.csv
+case2,test/transforms/flatMapWithProvider/case2/file2.csv

@@ -3,7 +3,7 @@ import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 export interface RemoveColumnParams {
   columnName: string
   colIndex?: number
-  eraseData?: boolean
+  clearColumn?: boolean
 }
 
 /**
@@ -40,7 +40,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
 
     async function* getTransformedSourceGenerator() {
       for await (const chunk of getSourceGenerator()) {
-        if (params.eraseData === true) {
+        if (params.clearColumn === true) {
           chunk.forEach(row => {
             deletedColsSrcIndexes.forEach(index => {
               row[index] = null

@@ -1,4 +1,59 @@
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
+import { ColumnHeader, HeaderMode, TableRow } from '../index.js'
+import { TransformBugError } from '../errors/index.js'
+
+export const compareTableRawHeader = (a: ColumnHeader[], b: ColumnHeader[]) => {
+  if (a === b) return true
+  if (a.length !== b.length) return false
+
+  for (let i = 0; i <= a.length; i++) {
+    const aHead = a[i]
+    const bHead = b[i]
+
+    const isPass =
+      aHead?.index === bHead?.index && aHead?.isDeleted === bHead?.isDeleted
+
+    if (!isPass) return false
+  }
+
+  return true
+}
+
+export const compareTableActualHeader = (
+  a: ColumnHeader[],
+  b: ColumnHeader[]
+) => {
+  const aHeader = a.filter(h => !h.isDeleted).map(h => h.name)
+  const bHeader = b.filter(h => !h.isDeleted).map(h => h.name)
+
+  if (aHeader.length !== bHeader.length) return false
+
+  for (let i = 0; i <= aHeader.length; i++) {
+    if (aHeader[i] !== bHeader[i]) return false
+  }
+
+  return true
+}
+
+export function getChunkNormalizer(header: ColumnHeader[]) {
+  // TODO Optimize if header has no deleted columns
+
+  return function normalizeRowsChunk(rowsChunk: TableRow[]) {
+    const normalizedRowsChunk: TableRow[] = []
+
+    for (const row of rowsChunk) {
+      const resultRow: TableRow = []
+
+      for (const h of header) {
+        if (!h.isDeleted) resultRow.push(row[h.index])
+      }
+
+      normalizedRowsChunk.push(resultRow)
+    }
+
+    return normalizedRowsChunk
+  }
+}
 
 export function generateColumnNumHeader(colsCount: number) {
   assert.ok(colsCount <= 1000, 'Expected to be less then 1000 columns')
@@ -189,4 +244,45 @@ export function getExcelOffset(offset: string): Offset {
       y: match[1] == null ? 0 : Number.parseInt(match[1])
     }
   }
+}
+
+export const createTableHeader = (columnsNames: TableRow) => {
+  const header: ColumnHeader[] = columnsNames.map((h, index) => {
+    const colMeta: ColumnHeader = {
+      index: index,
+      name: String(h),
+      isDeleted: false,
+      isFromSource: true
+    }
+
+    return colMeta
+  })
+
+  return header
+}
+
+export const generateHeaderColumnNames = (
+  headerMode: HeaderMode,
+  count: number
+): string[] => {
+  let columnsNames: string[]
+
+  switch (headerMode) {
+    case 'COLUMN_NUM': {
+      columnsNames = generateColumnNumHeader(count)
+      break
+    }
+    case 'EXCEL_STYLE': {
+      columnsNames = generateExcelStyleHeader(count)
+      break
+    }
+
+    default: {
+      throw new TransformBugError(
+        `generateHeader: Unsupported header mode - ${headerMode}`
+      )
+    }
+  }
+
+  return columnsNames
 }
