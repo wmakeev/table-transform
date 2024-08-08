@@ -1,6 +1,6 @@
 import { TransformAssertError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
-import { getExcelOffset, getExcelRangeBound } from '../../tools/headers.js'
+import { getExcelOffset, getExcelRangeBound } from '../../tools/header/index.js'
 
 export type SheetCellParams = {
   /** Cell value to compare */

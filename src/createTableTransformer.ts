@@ -16,7 +16,7 @@ import {
   createTableHeader,
   generateHeaderColumnNames,
   getChunkNormalizer
-} from './tools/headers.js'
+} from './tools/header/index.js'
 
 export async function* getColumnCountForcerGen(
   source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>,

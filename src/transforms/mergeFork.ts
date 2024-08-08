@@ -7,7 +7,7 @@ import {
   transforms as tf
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
-import { getChunkNormalizer } from '../tools/headers.js'
+import { getChunkNormalizer } from '../tools/header/index.js'
 //import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
 
 export interface MergeForkParams {

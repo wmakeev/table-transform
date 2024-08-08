@@ -11,7 +11,7 @@ import {
   createTableTransformer,
   getTransformedSource
 } from '../index.js'
-import { getNormalizedHeaderRow } from '../tools/headers.js'
+import { getNormalizedHeaderRow } from '../tools/header/index.js'
 
 export interface SplitInParams {
   splitColumns: string[]

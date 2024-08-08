@@ -7,7 +7,7 @@ import {
   getExcelHeaderColumnNum,
   getExcelOffset,
   getExcelRangeBound
-} from '../../src/tools/headers.js'
+} from '../../src/tools/header/index.js'
 
 test('generateColumnNumHeader', () => {
   const header = generateColumnNumHeader(1000)
