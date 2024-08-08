@@ -12,11 +12,11 @@ export interface TapRowsParams {
 export const tapRows = (params: TapRowsParams): TableChunksTransformer => {
   const { tapFunction } = params
 
-  return async ({ header, getSourceGenerator }) => {
+  return source => {
     return {
-      header,
-      getSourceGenerator: async function* () {
-        for await (const chunk of getSourceGenerator()) {
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: async function* () {
+        for await (const chunk of source) {
           tapFunction(chunk)
           yield chunk
         }

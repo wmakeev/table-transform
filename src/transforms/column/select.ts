@@ -34,9 +34,11 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     throw new Error(`Select columns values has duplicates`)
   }
 
-  return async ({ header, getSourceGenerator }) => {
+  return source => {
+    const srcHeader = source.getHeader()
+
     //#region Ensure selected headers exist
-    const notDeletedHeaders = header.filter(h => !h.isDeleted)
+    const notDeletedHeaders = srcHeader.filter(h => !h.isDeleted)
 
     const notFoundColumnsNamesSet = new Set(notDeletedHeaders.map(h => h.name))
 
@@ -53,7 +55,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     //#endregion
 
     // Mark not selected columns as deleted
-    let transformedHeader: ColumnHeader[] = header.map(h => {
+    let transformedHeader: ColumnHeader[] = srcHeader.map(h => {
       return !h.isDeleted && selectedColumnsNamesSet.has(h.name)
         ? h
         : { ...h, isDeleted: true }
@@ -82,15 +84,15 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
       ]
     }
 
-    assert.equal(header.length, transformedHeader.length)
-
-    /** Indexes of all selected columns */
-    const selectedColumnsSrcIndexesSet = new Set(
-      transformedHeader.filter(h => !h.isDeleted).map(h => h.index)
-    )
+    assert.equal(srcHeader.length, transformedHeader.length)
 
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      /** Indexes of all selected columns */
+      const selectedColumnsSrcIndexesSet = new Set(
+        transformedHeader.filter(h => !h.isDeleted).map(h => h.index)
+      )
+
+      for await (const chunk of source) {
         if (params.clearDroppedColumns === true) {
           chunk.forEach(row => {
             row.forEach((_, index) => {
@@ -106,8 +108,8 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     }
 
     return {
-      header: transformedHeader,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => transformedHeader,
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

@@ -1,5 +1,6 @@
 export * from './column/index.js'
 export * from './flatMapWithProvider/index.js'
 export * from './mergeFork/index.test.js'
+export * from './splitIn.test.js'
 export * from './tapHeader.test.js'
 export * from './tapRows.test.js'

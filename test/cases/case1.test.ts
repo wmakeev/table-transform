@@ -55,7 +55,7 @@ test('No-opt transform (skip header)', async () => {
 
 test('No-opt transform #3', async () => {
   const tableTransformer = createTableTransformer({
-    transforms: [async chunkInfo => chunkInfo]
+    transforms: [chunkInfo => chunkInfo]
   })
 
   const transformedRowsStream: Readable = createTransformedRowsStreamFromCsv(

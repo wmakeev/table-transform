@@ -9,11 +9,13 @@ export const filter = (
   params: TransformExpressionParams,
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
-  return async ({ header, getSourceGenerator }) => {
-    const transformState = new TransformState(params, header, context)
-
+  return source => {
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      const header = source.getHeader()
+
+      const transformState = new TransformState(params, header, context)
+
+      for await (const chunk of source) {
         const filteredRows: TableRow[] = []
 
         for (const row of chunk) {
@@ -63,8 +65,8 @@ export const filter = (
     }
 
     return {
-      header,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

@@ -12,13 +12,13 @@ interface MapColumnParams {
 export const map = (params: MapColumnParams): TableChunksTransformer => {
   const { columnName, mapper, arrIndex } = params
 
-  return async ({ header, getSourceGenerator }) => {
-    const mappingColumns: ColumnHeader[] = header.filter(
-      h => h.name === columnName
-    )
-
+  return source => {
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      const mappingColumns: ColumnHeader[] = source
+        .getHeader()
+        .filter(h => h.name === columnName)
+
+      for await (const chunk of source) {
         chunk.forEach(row => {
           mappingColumns!.forEach((h, index) => {
             if (typeof arrIndex === 'number' && index !== arrIndex) return
@@ -34,8 +34,8 @@ export const map = (params: MapColumnParams): TableChunksTransformer => {
     }
 
     return {
-      header,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

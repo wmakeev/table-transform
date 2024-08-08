@@ -12,5 +12,8 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.formatOnSaveMode": "file"
+  "editor.formatOnSaveMode": "file",
+  "vscode_custom_css.imports": [
+    "file:///home/mvv/Documents/_vscode/pretty-ts-errors-hack.css"
+  ]
 }

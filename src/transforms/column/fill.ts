@@ -12,17 +12,17 @@ export interface FillColumnParams {
 export const fill = (params: FillColumnParams): TableChunksTransformer => {
   const { columnName, value, arrIndex } = params
 
-  return async ({ header, getSourceGenerator }) => {
-    const fillColumns: ColumnHeader[] = header.filter(
-      h => h.name === columnName
-    )
+  return source => {
+    const fillColumns: ColumnHeader[] = source
+      .getHeader()
+      .filter(h => h.name === columnName)
 
     if (fillColumns.length === 0) {
       throw new Error(`Column "${columnName}" not found and can't be filled`)
     }
 
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      for await (const chunk of source) {
         chunk.forEach(row => {
           fillColumns.forEach((h, index) => {
             if (typeof arrIndex === 'number' && index !== arrIndex) return
@@ -35,8 +35,8 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
     }
 
     return {
-      header,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

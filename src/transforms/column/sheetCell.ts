@@ -103,99 +103,102 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
   const compareFn = operations[testOperation]
 
-  return async ({ header, getSourceGenerator }) => {
-    let rowBuffer: TableRow[] = []
-
-    /** Pass chunks as is without modifications  */
-    let isPassThrough = false
-
-    let foundCell: FoundCell | null = null
-
-    const targetColHeader =
-      type !== 'ASSERT'
-        ? header.find(h => !h.isDeleted && h.name === params.targetColumn) ??
-          null
-        : null
-
-    if (type !== 'ASSERT' && targetColHeader === null) {
-      throw new Error(`Column "${params.targetColumn}" not found`)
-    }
-
-    const [searchFrameFirstRowIndex, , , searchFrameLastRowIndex] = [
-      y1,
-      y1 + yOffset,
-      y2,
-      y2 + yOffset
-    ].sort() as [number, number, number, number]
-
-    if (searchFrameFirstRowIndex < 0) {
-      throw new Error('Rows offset out of range')
-    }
-
-    /* eslint prefer-const:0 */
-    let [searchFrameFirstColIndex, , , searchFrameLastColIndex] = [
-      x1,
-      x1 + xOffset,
-      x2,
-      x2 + xOffset
-    ].sort() as [number, number, number, number]
-
-    if (searchFrameFirstColIndex < 0) {
-      throw new Error('Columns offset out of range')
-    }
-
-    if (searchFrameLastColIndex >= header.length) {
-      searchFrameLastColIndex = header.length - 1
-    }
-
-    const searchCell = (bufferRowIndex: number): FoundCell | null => {
-      let cellColIndex = -1
-
-      const bufferRow = rowBuffer[bufferRowIndex]!
-
-      for (
-        let colIndex = searchFrameFirstColIndex;
-        colIndex <= searchFrameLastColIndex;
-        colIndex++
-      ) {
-        // Search only in headers from source data, and skip added headers
-        if (header[colIndex]?.isFromSource !== true) continue
-
-        if (compareFn(bufferRow[colIndex], testValue)) {
-          cellColIndex = colIndex
-          break
-        }
-      }
-
-      if (cellColIndex === -1) return null
-
-      const rowIndex = bufferRowIndex + yOffset
-      const columnIndex = cellColIndex + xOffset
-
-      const value = rowBuffer[rowIndex]![columnIndex]
-
-      return { rowIndex, columnIndex, value }
-    }
-
-    const processChunk = (chunk: TableRow[], fromRow = 0) => {
-      if (targetColHeader === null || foundCell === null) return chunk
-
-      for (let i = fromRow; i < chunk.length; i++) {
-        chunk[i]![targetColHeader.index] =
-          type === 'CONSTANT'
-            ? foundCell.value
-            : chunk[i]![foundCell.columnIndex]
-      }
-
-      return chunk
-    }
-
+  return source => {
     async function* getTransformedSourceGenerator() {
+      const srcHeader = source.getHeader()
+
+      let rowBuffer: TableRow[] = []
+
+      /** Pass chunks as is without modifications  */
+      let isPassThrough = false
+
+      let foundCell: FoundCell | null = null
+
+      const targetColHeader =
+        type !== 'ASSERT'
+          ? srcHeader.find(
+              h => !h.isDeleted && h.name === params.targetColumn
+            ) ?? null
+          : null
+
+      if (type !== 'ASSERT' && targetColHeader === null) {
+        throw new Error(`Column "${params.targetColumn}" not found`)
+      }
+
+      const [searchFrameFirstRowIndex, , , searchFrameLastRowIndex] = [
+        y1,
+        y1 + yOffset,
+        y2,
+        y2 + yOffset
+      ].sort() as [number, number, number, number]
+
+      if (searchFrameFirstRowIndex < 0) {
+        throw new Error('Rows offset out of range')
+      }
+
+      /* eslint prefer-const:0 */
+      let [searchFrameFirstColIndex, , , searchFrameLastColIndex] = [
+        x1,
+        x1 + xOffset,
+        x2,
+        x2 + xOffset
+      ].sort() as [number, number, number, number]
+
+      if (searchFrameFirstColIndex < 0) {
+        throw new Error('Columns offset out of range')
+      }
+
+      if (searchFrameLastColIndex >= srcHeader.length) {
+        searchFrameLastColIndex = srcHeader.length - 1
+      }
+
+      const searchCell = (bufferRowIndex: number): FoundCell | null => {
+        let cellColIndex = -1
+
+        const bufferRow = rowBuffer[bufferRowIndex]!
+
+        for (
+          let colIndex = searchFrameFirstColIndex;
+          colIndex <= searchFrameLastColIndex;
+          colIndex++
+        ) {
+          // Search only in headers from source data, and skip added headers
+          if (srcHeader[colIndex]?.isFromSource !== true) continue
+
+          if (compareFn(bufferRow[colIndex], testValue)) {
+            cellColIndex = colIndex
+            break
+          }
+        }
+
+        if (cellColIndex === -1) return null
+
+        const rowIndex = bufferRowIndex + yOffset
+        const columnIndex = cellColIndex + xOffset
+
+        const value = rowBuffer[rowIndex]![columnIndex]
+
+        return { rowIndex, columnIndex, value }
+      }
+
+      const processChunk = (chunk: TableRow[], fromRow = 0) => {
+        if (targetColHeader === null || foundCell === null) return chunk
+
+        for (let i = fromRow; i < chunk.length; i++) {
+          chunk[i]![targetColHeader.index] =
+            type === 'CONSTANT'
+              ? foundCell.value
+              : chunk[i]![foundCell.columnIndex]
+        }
+
+        return chunk
+      }
+
       let bufferFirstRowIndex: number | null = null
 
       let curRowIndex = 0
 
-      chunkLoop: for await (const chunk of getSourceGenerator()) {
+      chunkLoop: for await (const chunk of source) {
         if (isPassThrough) {
           yield chunk
           continue
@@ -258,8 +261,8 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
     }
 
     return {
-      header,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

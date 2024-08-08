@@ -15,15 +15,17 @@ export const transform = (
     'transform columnName parameter expected to be string'
   )
 
-  return async ({ header, getSourceGenerator }) => {
-    const transformState: TransformState = new TransformState(
-      params,
-      header,
-      context
-    )
-
+  return source => {
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      const srcHeader = source.getHeader()
+
+      const transformState: TransformState = new TransformState(
+        params,
+        srcHeader,
+        context
+      )
+
+      for await (const chunk of source) {
         chunk.forEach(row => {
           transformState.nextRow(row)
 
@@ -44,8 +46,8 @@ export const transform = (
     }
 
     return {
-      header,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => source.getHeader(),
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

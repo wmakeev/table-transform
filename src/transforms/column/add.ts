@@ -1,7 +1,7 @@
 import { TransformBugError } from '../../errors/index.js'
 import {
   ColumnHeader,
-  TableChunksSource,
+  TableChunksAsyncIterable,
   TableChunksTransformer
 } from '../../index.js'
 
@@ -24,18 +24,16 @@ export interface AddColumnParams {
 export const add = (params: AddColumnParams): TableChunksTransformer => {
   const defaultValue = params.defaultValue ?? null
 
-  return async chunkInfo => {
+  return source => {
+    const header = source.getHeader()
+
     const isColumnExist =
-      chunkInfo.header.findIndex(
-        h => !h.isDeleted && h.name === params.columnName
-      ) !== -1
+      header.findIndex(h => !h.isDeleted && h.name === params.columnName) !== -1
 
     // Skip column adding?
     if (params.force !== true && isColumnExist) {
-      return chunkInfo
+      return source
     }
-
-    const { header, getSourceGenerator } = chunkInfo
 
     const firstDeletedHeaderIndex = header.findIndex(h => h.isDeleted)
 
@@ -61,7 +59,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
           )
 
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      for await (const chunk of source) {
         chunk.forEach(row => {
           if (firstDeletedHeaderIndex === -1) {
             row.push(defaultValue)
@@ -78,9 +76,9 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
       }
     }
 
-    const resultChunk: TableChunksSource = {
-      header: transformedHeader,
-      getSourceGenerator: getTransformedSourceGenerator
+    const resultChunk: TableChunksAsyncIterable = {
+      getHeader: () => transformedHeader,
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
 
     return resultChunk

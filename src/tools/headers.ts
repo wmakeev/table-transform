@@ -286,3 +286,7 @@ export const generateHeaderColumnNames = (
 
   return columnsNames
 }
+
+export const getNormalizedHeaderRow = (header: ColumnHeader[]): string[] => {
+  return header.filter(h => !h.isDeleted).map(h => h.name)
+}

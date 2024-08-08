@@ -9,10 +9,10 @@ export interface RenameColumnParams {
  * Rename header
  */
 export const rename = (params: RenameColumnParams): TableChunksTransformer => {
-  return async ({ header, getSourceGenerator }) => {
+  return source => {
     let isHeaderFound = false
 
-    const transformedHeaders: ColumnHeader[] = header.map(h => {
+    const transformedHeader: ColumnHeader[] = source.getHeader().map(h => {
       if (!h.isDeleted && h.name === params.oldColumnName) {
         isHeaderFound = true
 
@@ -32,8 +32,8 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
     }
 
     return {
-      header: transformedHeaders,
-      getSourceGenerator
+      getHeader: () => transformedHeader,
+      [Symbol.asyncIterator]: () => source[Symbol.asyncIterator]()
     }
   }
 }

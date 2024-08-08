@@ -10,12 +10,12 @@ export interface RemoveColumnParams {
  * Remove column
  */
 export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
-  return async ({ header, getSourceGenerator }) => {
+  return source => {
     const deletedColsSrcIndexes: number[] = []
 
     let headerIndex = 0
 
-    const transformedHeader: ColumnHeader[] = header.flatMap(h => {
+    const transformedHeader: ColumnHeader[] = source.getHeader().flatMap(h => {
       if (!h.isDeleted && h.name === params.columnName) {
         if (params.colIndex != null ? params.colIndex === headerIndex : true) {
           deletedColsSrcIndexes.push(h.index)
@@ -39,7 +39,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     }
 
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      for await (const chunk of source) {
         if (params.clearColumn === true) {
           chunk.forEach(row => {
             deletedColsSrcIndexes.forEach(index => {
@@ -53,8 +53,8 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     }
 
     return {
-      header: transformedHeader,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => transformedHeader,
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }

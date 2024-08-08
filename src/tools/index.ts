@@ -1,4 +1,9 @@
-import { ColumnHeader, TableRow } from '../types.js'
+import {
+  ColumnHeader,
+  TableChunksAsyncIterable,
+  TableChunksTransformer,
+  TableRow
+} from '../types.js'
 
 export * from './stream/index.js'
 
@@ -60,4 +65,17 @@ export function forceArrayLength(arr: unknown[], length: number): void {
   } else {
     arr.push(...Array(length - arr.length).fill(null))
   }
+}
+
+export function getTransformedSource(
+  source: TableChunksAsyncIterable,
+  transforms: TableChunksTransformer[]
+) {
+  let transfomedSource: TableChunksAsyncIterable = source
+
+  for (const transform of transforms) {
+    transfomedSource = transform(transfomedSource)
+  }
+
+  return transfomedSource
 }

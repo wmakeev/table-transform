@@ -16,17 +16,17 @@ export type ColumnHeader = {
 /** Data row */
 export type TableRow = Array<unknown | null>
 
-export type TableChunksSource = {
-  header: ColumnHeader[]
-  getSourceGenerator: () => AsyncGenerator<TableRow[]>
+export interface TableChunksAsyncIterable extends AsyncIterable<TableRow[]> {
+  getHeader: () => ColumnHeader[]
+  [Symbol.asyncIterator]: () => AsyncGenerator<TableRow[]>
 }
 
 /**
  * Table row transformer. Gets batch of rows and returns transformed batch.
  */
 export type TableChunksTransformer = (
-  rowsChunkInfo: TableChunksSource
-) => Promise<TableChunksSource>
+  rowsChunkInfo: TableChunksAsyncIterable
+) => TableChunksAsyncIterable
 
 export interface TableTransfromConfig {
   /** Transformers */

@@ -12,8 +12,8 @@ export interface TapHeaderParams {
 export const tapHeader = (params: TapHeaderParams): TableChunksTransformer => {
   const { tapFunction } = params
 
-  return async params => {
-    tapFunction(params.header)
-    return params
+  return source => {
+    tapFunction(source.getHeader())
+    return source
   }
 }

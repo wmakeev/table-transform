@@ -9,7 +9,7 @@ import {
 export interface FlatMapWithProviderParams {
   sourceProvider: SourceProvider
   outputColumns: string[]
-  transformConfig?: TableTransfromConfig & {}
+  transformConfig?: TableTransfromConfig
 }
 
 // const TRANSFORM_NAME = 'FlatMapWithProvider'
@@ -22,13 +22,15 @@ export const flatMapWithProvider = (
 ): TableChunksTransformer => {
   const { sourceProvider, transformConfig = {} } = params
 
-  return async ({ header, getSourceGenerator }) => {
+  return source => {
     const outputColumns = [
       ...new Set([
         ...params.outputColumns,
         ...(transformConfig.errorHandle?.outputColumns ?? [])
       ])
     ]
+
+    const srcHeader = source.getHeader()
 
     const resultHeader: ColumnHeader[] = outputColumns.map((name, index) => ({
       index,
@@ -37,7 +39,7 @@ export const flatMapWithProvider = (
     }))
 
     async function* getTransformedSourceGenerator() {
-      for await (const chunk of getSourceGenerator()) {
+      for await (const chunk of source) {
         for (const row of chunk) {
           const transformer = createTableTransformer({
             ...transformConfig,
@@ -48,14 +50,14 @@ export const flatMapWithProvider = (
             }
           })
 
-          yield* transformer(sourceProvider(header, row))
+          yield* transformer(sourceProvider(srcHeader, row))
         }
       }
     }
 
     return {
-      header: resultHeader,
-      getSourceGenerator: getTransformedSourceGenerator
+      getHeader: () => resultHeader,
+      [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
 }
