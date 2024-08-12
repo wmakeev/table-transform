@@ -306,7 +306,7 @@ export function createTableTransformer(
           })
         ],
         outputHeader: {
-          skip: isResultHeaderKnown
+          skip: isResultHeaderKnown || outputHeader?.forceColumns != null
         }
       })([[[errorHandle.errorColumn], [errorInfo]]])
     }

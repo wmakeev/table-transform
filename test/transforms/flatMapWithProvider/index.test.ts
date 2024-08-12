@@ -11,6 +11,7 @@ import test from 'node:test'
 import {
   ChunkTransform,
   FlattenTransform,
+  SourceProvider,
   TableTransfromConfig,
   createTableTransformer,
   transforms as tf
@@ -152,5 +153,103 @@ test('transforms:flatMapWithProvider (case2)', async () => {
     ['1003', '', null, null],
     ['1004', '14', null, null],
     [null, null, 'Error', 'Cell "Код" in "A2:E7" range not found']
+  ])
+})
+
+test('transforms:flatMapWithProvider (error handle)', async () => {
+  let sourceRowIndex = 0
+
+  const sourceProviderWithErrors: SourceProvider = async function* (
+    header,
+    row
+  ) {
+    const rowIndex = sourceRowIndex++
+
+    if (rowIndex === 1) {
+      throw new Error('Error №1 in SourceProvider')
+    }
+
+    const resultHeader = header.map(h => h.name)
+
+    yield [resultHeader]
+
+    for (let i = 0; i < 3; i++) {
+      if ((rowIndex === 3 && i === 2) || (rowIndex === 0 && i === 1)) {
+        throw new Error('Error №2 in SourceProvider')
+      }
+      yield [[...row]]
+    }
+  }
+
+  const tableTransformConfig: TableTransfromConfig = {
+    transforms: [
+      tf.flatMapWithProvider({
+        sourceProvider: sourceProviderWithErrors,
+        outputColumns: ['code', 'value'],
+        transformConfig: {
+          transforms: [
+            tf.tapHeader({
+              tapFunction(header) {
+                assert.ok(header)
+              }
+            }),
+            tf.tapRows({
+              tapFunction(chunk, header) {
+                assert.ok(chunk)
+                assert.ok(header)
+              }
+            }),
+
+            tf.column.rename({ oldColumnName: 'col1', newColumnName: 'code' }),
+            tf.column.rename({ oldColumnName: 'col2', newColumnName: 'value' })
+          ],
+          errorHandle: {
+            errorColumn: 'error',
+            outputColumns: ['error_message'],
+            transforms: [
+              tf.column.add({ columnName: 'error_message' }),
+              tf.column.transform({
+                columnName: 'error_message',
+                expression: `message of 'error'`
+              })
+            ]
+          }
+        }
+      })
+    ]
+  }
+
+  const transformedRowsStream: Readable = compose(
+    [
+      [
+        ['col1', 'col2'],
+        ['1', 'col2-val'],
+        ['2', 'col2-val']
+      ],
+      [
+        ['3', 'col2-val'],
+        ['4', 'col2-val']
+      ]
+    ].values(),
+
+    createTableTransformer(tableTransformConfig),
+
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  /* _prettier-ignore */
+  assert.deepEqual(transformedRows, [
+    ['code', 'value', 'error_message'],
+    ['1', 'col2-val', null],
+    [null, null, 'Error №2 in SourceProvider'],
+    [null, null, 'Error №1 in SourceProvider'],
+    ['3', 'col2-val', null],
+    ['3', 'col2-val', null],
+    ['3', 'col2-val', null],
+    ['4', 'col2-val', null],
+    ['4', 'col2-val', null],
+    [null, null, 'Error №2 in SourceProvider']
   ])
 })
