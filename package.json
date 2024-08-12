@@ -24,7 +24,7 @@
     "compile": "tsc --build tsconfig.prod.json",
     "build:dev": "npm run lint && npm run compile:dev",
     "build": "npm run cleanup && npm run lint && npm run compile",
-    "test": "npm run build && node -r dotenv/config ./build/test/index.js",
+    "test": "npm run build && node --env-file=.env --test \"build/**/*.test.js\" --test-reporter=spec",
     "version": "auto-changelog -p && git add CHANGELOG.md",
     "release": "np"
   },
@@ -57,7 +57,6 @@
     "auto-changelog": "^2.4.0",
     "csv-parse": "^5.5.5",
     "csv-stringify": "^6.4.6",
-    "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
