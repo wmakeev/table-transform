@@ -19,7 +19,12 @@ test('transforms:tapRows', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.tapRows({
-        tapFunction: chunk => {
+        tapFunction: (chunk, header) => {
+          assert.deepEqual(
+            ['col1', 'col2'],
+            header.map(h => h.name)
+          )
+
           rows.push(...chunk)
         }
       })

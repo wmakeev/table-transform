@@ -98,5 +98,5 @@ export type TableTransformer = (
 
 export type SourceProvider = (
   header: ColumnHeader[],
-  paramsRow: TableRow
+  row: TableRow
 ) => AsyncGenerator<TableRow[]>
