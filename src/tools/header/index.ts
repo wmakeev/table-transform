@@ -55,6 +55,7 @@ export function generateColumnNumHeader(colsCount: number) {
 
   return header
 }
+
 export const generateHeaderColumnNames = (
   headerMode: HeaderMode,
   count: number
