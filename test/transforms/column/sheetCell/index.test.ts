@@ -86,28 +86,48 @@ test('sheetCell transform (case1)', async () => {
       }),
       //#endregion
 
+      //#region NOOP - G1:I3
+      transforms.column.add({
+        columnName: 'Col5'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'G1:I3',
+        testOperation: 'NOOP',
+        testValue: undefined,
+        targetColumn: 'Col5'
+      }),
+      //#endregion
+
       transforms.column.sheetCell({
         type: 'ASSERT',
         range: 'H7:J9',
         testValue: 'Assert1'
       }),
 
+      transforms.column.sheetCell({
+        type: 'ASSERT',
+        range: 'B1',
+        testOperation: 'EMPTY'
+      }),
+
       //#region "foo"
       transforms.column.add({
-        columnName: 'Col5'
+        columnName: 'Col6'
       }),
 
       transforms.column.sheetCell({
         type: 'CONSTANT',
         range: 'H7:J9',
         testValue: 'foo',
-        targetColumn: 'Col5',
+        targetColumn: 'Col6',
         isOptional: true
       }),
       //#endregion
 
       transforms.column.select({
-        columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5']
+        columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6']
       })
     ]
   })
@@ -139,7 +159,10 @@ test('sheetCell transform (case1)', async () => {
 
   // // DEBUG
   // await writeFile(
-  //   path.join(process.cwd(), 'test/transforms/column/sheetCell/sheetCell1_out.csv'),
+  //   path.join(
+  //     process.cwd(),
+  //     'test/transforms/column/sheetCell/sheetCell1_out.csv'
+  //   ),
   //   actualCsv
   // )
 

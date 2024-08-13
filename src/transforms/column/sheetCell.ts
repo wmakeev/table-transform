@@ -2,24 +2,7 @@ import { TransformAssertError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import { getExcelOffset, getExcelRangeBound } from '../../tools/header/index.js'
 
-export type SheetCellParams = {
-  /** Cell value to compare */
-  testValue: unknown
-
-  /**
-   * The operation through which the comparison with `testValue` is handled.
-   *
-   * default: `EQUAL`
-   */
-  testOperation?: SheetCellOperations
-
-  /**
-   * The range in which to search for a cell.
-   *
-   * Excel style range like: `A1`, `A2:B10`
-   */
-  range: string
-} & (
+export type SheetCellParams =
   | {
       /**
        * Transform mode
@@ -28,10 +11,19 @@ export type SheetCellParams = {
        * - `CONSTANT` - use cell value as column value (usefull with offset)
        * - `HEADER` - interpret found cell as column header
        */
-      type: 'ASSERT'
-    }
-  | {
       type: 'CONSTANT' | 'HEADER'
+
+      /**
+       * The range in which to search for a cell.
+       *
+       * Excel style range like: `A1`, `A2:B10`
+       */
+      range: string
+
+      testOperation?: Exclude<SheetCellOperations, 'NOOP' | 'EMPTY'> | undefined
+
+      /** Cell value to compare */
+      testValue?: unknown
 
       /**
        * Collumn to place constant or column value
@@ -51,7 +43,36 @@ export type SheetCellParams = {
        */
       isOptional?: boolean
     }
-)
+  | {
+      type: 'CONSTANT' | 'HEADER'
+      range: string
+      testOperation: Extract<SheetCellOperations, 'NOOP'>
+      testValue: undefined
+      targetColumn: string
+      offset?: string
+      isOptional?: boolean
+    }
+  | {
+      type: 'CONSTANT' | 'HEADER'
+      range: string
+      testOperation: Extract<SheetCellOperations, 'EMPTY'>
+      testValue: undefined
+      targetColumn: string
+      offset?: string
+      isOptional?: boolean
+    }
+  | {
+      type: 'ASSERT'
+      range: string
+      testOperation: Extract<SheetCellOperations, 'EMPTY'>
+      testValue?: undefined
+    }
+  | {
+      type: 'ASSERT'
+      range: string
+      testOperation?: Exclude<SheetCellOperations, 'NOOP' | 'EMPTY'> | undefined
+      testValue: unknown
+    }
 
 interface FoundCell {
   rowIndex: number
@@ -64,6 +85,8 @@ export type SheetCellOperations =
   | 'EQUAL'
   | 'INCLUDES'
   | 'TEMPLATE'
+  | 'EMPTY'
+  | 'NOOP'
 
 const operations: Record<
   SheetCellOperations,
@@ -87,7 +110,16 @@ const operations: Record<
 
   TEMPLATE: () => {
     throw new Error('Not implemented')
-  }
+  },
+
+  EMPTY: (str1, str2) => {
+    if (str2 != null || (typeof str2 === 'string' && str2 !== '')) {
+      throw new Error('EMPTY function should receive empty second argument')
+    }
+    return str1 == null || str1 === ''
+  },
+
+  NOOP: () => true
 }
 
 /**
