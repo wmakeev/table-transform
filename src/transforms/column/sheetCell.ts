@@ -46,16 +46,7 @@ export type SheetCellParams =
   | {
       type: 'CONSTANT' | 'HEADER'
       range: string
-      testOperation: Extract<SheetCellOperations, 'NOOP'>
-      testValue: undefined
-      targetColumn: string
-      offset?: string
-      isOptional?: boolean
-    }
-  | {
-      type: 'CONSTANT' | 'HEADER'
-      range: string
-      testOperation: Extract<SheetCellOperations, 'EMPTY'>
+      testOperation: Extract<SheetCellOperations, 'NOOP' | 'EMPTY'>
       testValue: undefined
       targetColumn: string
       offset?: string
