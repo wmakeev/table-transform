@@ -1,10 +1,11 @@
-export * from './TransformState/index.js'
 export * as column from './column/index.js'
 export * from './flatMapWithProvider.js'
 export * from './mergeFork.js'
+export * from './normalize.js'
 export * from './splitIn.js'
 export * from './tapHeader.js'
 export * from './tapRows.js'
+export * from './TransformState/index.js'
 
 export interface TransformExpressionParams {
   /**

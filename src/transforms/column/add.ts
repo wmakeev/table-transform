@@ -10,7 +10,6 @@ export interface AddColumnParams {
 
   defaultValue?: unknown
 
-  // TODO Заменить на явное указание размера колонки-массива
   /**
    * If the adding column(s) already exists, then add a new one with the same
    * name.
@@ -27,11 +26,11 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
   return source => {
     const header = source.getHeader()
 
-    const isColumnExist =
-      header.findIndex(h => !h.isDeleted && h.name === params.columnName) !== -1
-
     // Skip column adding?
-    if (params.force !== true && isColumnExist) {
+    if (
+      params.force !== true &&
+      header.findIndex(h => !h.isDeleted && h.name === params.columnName) !== -1
+    ) {
       return source
     }
 

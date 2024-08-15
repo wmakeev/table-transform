@@ -9,8 +9,6 @@ export type ColumnHeader = {
   index: number
 
   isDeleted: boolean
-
-  isFromSource?: boolean
 }
 
 /** Data row */
@@ -75,16 +73,6 @@ export interface TableTransfromConfig {
      * Error handler transform
      */
     transforms?: TableChunksTransformer[]
-
-    /**
-     * Error handler output columns. Will be automaticaly selected after
-     * handler transform applied.
-     *
-     * This columns will be added to main table columns.
-     *
-     * default: contain `errorColumn`
-     */
-    outputColumns?: string[]
   }
 }
 

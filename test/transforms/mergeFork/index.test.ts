@@ -93,17 +93,20 @@ test('transforms:mergeFork #1', async () => {
     throw err
   }
 
+  assert.deepEqual(result.shift(), ['code', 'name'])
+
+  result.sort()
+
   assert.deepEqual(result, [
-    ['code', 'name'],
-    ['one', 'foo 1'],
-    ['tow', 'foo 2'],
-    ['three', 'foo 3'],
     ['one', 'bar 1'],
     ['one', 'baz 1'],
+    ['one', 'foo 1'],
+    ['three', 'bar 3'],
+    ['three', 'baz 3'],
+    ['three', 'foo 3'],
     ['tow', 'bar 2'],
     ['tow', 'baz 2'],
-    ['three', 'bar 3'],
-    ['three', 'baz 3']
+    ['tow', 'foo 2']
   ])
 })
 
@@ -117,7 +120,7 @@ test('transforms:mergeFork #2', async () => {
             transforms: [
               tf.flatMapWithProvider({
                 sourceProvider: csvSourceProvider,
-                outputColumns: ['code', 'value'],
+                outputColumns: ['code', 'value', 'error_name', 'error_message'],
                 transformConfig: {
                   inputHeader: {
                     mode: 'EXCEL_STYLE'
@@ -148,7 +151,6 @@ test('transforms:mergeFork #2', async () => {
                   ],
                   errorHandle: {
                     errorColumn: 'error',
-                    outputColumns: ['error_name', 'error_message'],
                     transforms: [
                       tf.column.add({ columnName: 'error_name' }),
                       tf.column.transform({
@@ -171,7 +173,7 @@ test('transforms:mergeFork #2', async () => {
             transforms: [
               tf.flatMapWithProvider({
                 sourceProvider: csvSourceProvider,
-                outputColumns: ['code', 'value'],
+                outputColumns: ['code', 'value', 'error_name', 'error_message'],
                 transformConfig: {
                   inputHeader: {
                     mode: 'EXCEL_STYLE'
@@ -201,12 +203,14 @@ test('transforms:mergeFork #2', async () => {
                   ],
                   errorHandle: {
                     errorColumn: 'error',
-                    outputColumns: ['error_name', 'error_message'],
                     transforms: [
+                      tf.column.add({ columnName: 'error_name' }),
                       tf.column.transform({
                         columnName: 'error_name',
                         expression: `name of 'error'`
                       }),
+
+                      tf.column.add({ columnName: 'error_message' }),
                       tf.column.transform({
                         columnName: 'error_message',
                         expression: `message of 'error'`

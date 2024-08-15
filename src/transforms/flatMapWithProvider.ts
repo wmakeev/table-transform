@@ -20,16 +20,9 @@ export interface FlatMapWithProviderParams {
 export const flatMapWithProvider = (
   params: FlatMapWithProviderParams
 ): TableChunksTransformer => {
-  const { sourceProvider, transformConfig = {} } = params
+  const { sourceProvider, transformConfig = {}, outputColumns } = params
 
   return source => {
-    const outputColumns = [
-      ...new Set([
-        ...params.outputColumns,
-        ...(transformConfig.errorHandle?.outputColumns ?? [])
-      ])
-    ]
-
     const srcHeader = source.getHeader()
 
     const resultHeader: ColumnHeader[] = outputColumns.map((name, index) => ({

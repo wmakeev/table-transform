@@ -12,89 +12,130 @@ import {
   transforms
 } from '../../../src/index.js'
 
-test('remove header transform #1', async () => {
-  const tableTransformer = createTableTransformer({
-    inputHeader: {
-      mode: 'EXCEL_STYLE'
-    },
-    transforms: [
-      transforms.column.remove({
-        columnName: 'A'
-      })
+test('transforms:column:remove', async t => {
+  await t.test('remove simple', async () => {
+    const tableTransformer = createTableTransformer({
+      inputHeader: {
+        mode: 'EXCEL_STYLE'
+      },
+      transforms: [
+        transforms.column.remove({
+          columnName: 'A'
+        })
+      ]
+    })
+
+    /* prettier-ignore */
+    const csv = [
+      ['', '' , ''],
+      ['', '1', ''],
+      ['', '' , ''],
+      ['', '2', '']
     ]
+
+    const transformedRowsStream: Readable = compose(
+      csv.values(),
+
+      new ChunkTransform({ batchSize: 2 }),
+
+      tableTransformer,
+
+      new FlattenTransform()
+    )
+
+    const transformedRows = await transformedRowsStream.toArray()
+
+    assert.deepEqual(
+      transformedRows,
+      /* prettier-ignore */
+      [
+        ['B', 'C'],
+        ['' , '' ],
+        ['1', '' ],
+        ['' , '' ],
+        ['2', '' ]
+      ]
+    )
   })
 
-  /* prettier-ignore */
-  const csv = [
-    ['', '' , ''],
-    ['', '1', ''],
-    ['', '' , ''],
-    ['', '2', '']
-  ]
+  await t.test('remove by index', async () => {
+    const tableTransformer = createTableTransformer({
+      transforms: [
+        transforms.column.remove({
+          columnName: 'Col',
+          colIndex: 1
+        })
+      ]
+    })
 
-  const transformedRowsStream: Readable = compose(
-    csv.values(),
-
-    new ChunkTransform({ batchSize: 2 }),
-
-    tableTransformer,
-
-    new FlattenTransform()
-  )
-
-  const transformedRows = await transformedRowsStream.toArray()
-
-  assert.deepEqual(
-    transformedRows,
     /* prettier-ignore */
-    [
-      ['B', 'C'],
-      ['' , '' ],
-      ['1', '' ],
-      ['' , '' ],
-      ['2', '' ]
+    const csv = [
+      ['Col', 'Foo', 'Col'],
+      [''   , '1'  , ''   ],
+      ['4'  , ''   , '3'  ],
+      [''   , '2'  , ''   ]
     ]
-  )
-})
 
-test('remove header transform #2', async () => {
-  const tableTransformer = createTableTransformer({
-    transforms: [
-      transforms.column.remove({
-        columnName: 'Col',
-        colIndex: 1
-      })
-    ]
+    const transformedRowsStream: Readable = compose(
+      csv.values(),
+
+      new ChunkTransform({ batchSize: 2 }),
+
+      tableTransformer,
+
+      new FlattenTransform()
+    )
+
+    const transformedRows = await transformedRowsStream.toArray()
+
+    assert.deepEqual(
+      transformedRows,
+      /* prettier-ignore */
+      [
+        ['Col', 'Foo'],
+        [''   , '1'  ],
+        ['4'  , ''   ],
+        [''   , '2'  ]
+      ]
+    )
   })
 
-  /* prettier-ignore */
-  const csv = [
-    ['Col', 'Foo', 'Col'],
-    [''   , '1'  , ''   ],
-    ['4'  , ''   , '3'  ],
-    [''   , '2'  , ''   ]
-  ]
+  await t.test('remove by internal index', async () => {
+    const tableTransformer = createTableTransformer({
+      transforms: [
+        transforms.column.remove({
+          columnName: 'Col',
+          colIndex: 2,
+          isInternalIndex: true
+        })
+      ]
+    })
 
-  const transformedRowsStream: Readable = compose(
-    csv.values(),
-
-    new ChunkTransform({ batchSize: 2 }),
-
-    tableTransformer,
-
-    new FlattenTransform()
-  )
-
-  const transformedRows = await transformedRowsStream.toArray()
-
-  assert.deepEqual(
-    transformedRows,
     /* prettier-ignore */
-    [
+    const csv = [
+      ['Col', 'Foo', 'Col'],
+      [''   , '1'  , ''   ],
+      ['4'  , ''   , '3'  ],
+      [''   , '2'  , ''   ]
+    ]
+
+    const transformedRowsStream: Readable = compose(
+      csv.values(),
+
+      new ChunkTransform({ batchSize: 2 }),
+
+      tableTransformer,
+
+      new FlattenTransform()
+    )
+
+    const transformedRows = await transformedRowsStream.toArray()
+
+    assert.deepEqual(transformedRows, [
       ['Col', 'Foo'],
-      [''   , '1'  ],
-      ['4'  , ''   ],
-      [''   , '2'  ]
-    ]
-  )
+      ['', '1'],
+      ['4', ''],
+      ['', '2']
+    ])
+  })
 })

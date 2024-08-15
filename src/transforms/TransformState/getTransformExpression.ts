@@ -32,7 +32,7 @@ export const getTransformExpression = (
             transformState.arrColIndex
           ]
 
-        return index === undefined ? '' : transformState.curRow[index] ?? ''
+        return index === undefined ? '' : (transformState.curRow[index] ?? '')
       },
 
       values: (columnName: unknown) => {

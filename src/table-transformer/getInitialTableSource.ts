@@ -1,22 +1,16 @@
-import assert from 'assert'
-import { TransformError } from './errors/index.js'
+import { TransformError } from '../errors/index.js'
 import {
-  ColumnHeader,
-  HeaderMode,
-  TableChunksAsyncIterable,
-  TableRow,
-  TableTransformer,
-  TableTransfromConfig,
-  forceArrayLength,
-  getTransformedSource,
-  transforms as tf
-} from './index.js'
-import {
-  compareTableRawHeader,
-  createTableHeader,
   generateHeaderColumnNames,
-  getChunkNormalizer
-} from './tools/header/index.js'
+  createTableHeader,
+  forceArrayLength
+} from '../tools/index.js'
+import {
+  HeaderMode,
+  ColumnHeader,
+  TableRow,
+  TableTransfromConfig,
+  TableChunksAsyncIterable
+} from '../types.js'
 
 export async function* getColumnCountForcerGen(
   source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>,
@@ -39,7 +33,7 @@ const generateForcedHeader = (
   return header
 }
 
-async function getInitialTableSource(params: {
+export async function getInitialTableSource(params: {
   chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
   inputHeaderOptions?: TableTransfromConfig['inputHeader']
 }): Promise<TableChunksAsyncIterable> {
@@ -175,140 +169,5 @@ async function getInitialTableSource(params: {
   return {
     getHeader: () => srcHeader,
     [Symbol.asyncIterator]: getSourceGenerator
-  }
-}
-
-export function createTableTransformer(
-  config: TableTransfromConfig
-): TableTransformer {
-  const { transforms = [], inputHeader, outputHeader, errorHandle } = config
-
-  const errorOutColumns =
-    errorHandle && (errorHandle.outputColumns ?? [errorHandle.errorColumn])
-
-  if (errorOutColumns?.length === 0) {
-    throw new Error('Error columns not specified')
-  }
-
-  // FIXME Сильно полиморфная функция. Не критично?
-  return async function* (
-    source:
-      | Iterable<TableRow[]>
-      | AsyncIterable<TableRow[]>
-      | TableChunksAsyncIterable
-  ) {
-    let tableSource: TableChunksAsyncIterable | null = null
-    let isResultHeaderKnown = false
-
-    try {
-      tableSource =
-        'getHeader' in source
-          ? source
-          : await getInitialTableSource({
-              inputHeaderOptions: inputHeader,
-              chunkedRowsIterable: source
-            })
-
-      const initialTableHeader = tableSource.getHeader()
-
-      const transforms_ = [
-        ...transforms,
-
-        // Ensure all error columns exist
-        ...(errorOutColumns != null
-          ? errorOutColumns.map(columnName => tf.column.add({ columnName }))
-          : []),
-
-        // Ensure all forsed columns exist and select
-        ...(outputHeader?.forceColumns
-          ? [
-              ...outputHeader.forceColumns.map(columnName =>
-                tf.column.add({ columnName })
-              ),
-              tf.column.select({
-                columns: [
-                  ...new Set([
-                    ...outputHeader.forceColumns,
-                    ...(errorOutColumns ?? [])
-                  ])
-                ]
-              })
-            ]
-          : [])
-      ]
-
-      // Chain transformations
-      tableSource = getTransformedSource(tableSource, transforms_)
-
-      const transfomedTableHeader = tableSource.getHeader()
-
-      const isHeaderChanged = !compareTableRawHeader(
-        initialTableHeader,
-        transfomedTableHeader
-      )
-
-      if (outputHeader?.skip !== true) {
-        yield [transfomedTableHeader.filter(h => !h.isDeleted).map(h => h.name)]
-      }
-
-      isResultHeaderKnown = tableSource != null // Always true here
-
-      const normalizeRowsChunk = getChunkNormalizer(transfomedTableHeader)
-
-      for await (const rowsChunk of tableSource) {
-        yield isHeaderChanged ? normalizeRowsChunk(rowsChunk) : rowsChunk
-      }
-    } catch (err) {
-      // #dhf042pf
-      assert.ok(err instanceof Error)
-
-      // TODO Вероятно нужно ловить только TransformError и наследников
-
-      if (errorHandle == null) throw err
-
-      assert.ok(errorOutColumns != null)
-
-      const sourceResultHeaders = isResultHeaderKnown
-        ? tableSource!
-            .getHeader()
-            .filter(h => !h.isDeleted)
-            .map(h => h.name)
-        : [
-            ...new Set([
-              ...(outputHeader?.forceColumns ?? []),
-              ...errorOutColumns
-            ])
-          ]
-
-      // TODO Сделать специальный класс ошибки
-      const errorInfo = {
-        name: err.name,
-        code: (err as any).code,
-        message: err.message
-      }
-
-      yield* createTableTransformer({
-        transforms: [
-          // Add source columns
-          ...sourceResultHeaders.map(col =>
-            tf.column.add({
-              columnName: col,
-              force: col !== errorHandle.errorColumn
-            })
-          ),
-
-          // Custom transforms
-          ...(errorHandle.transforms ?? []),
-
-          // Select columns
-          tf.column.select({
-            columns: sourceResultHeaders
-          })
-        ],
-        outputHeader: {
-          skip: isResultHeaderKnown || outputHeader?.forceColumns != null
-        }
-      })([[[errorHandle.errorColumn], [errorInfo]]])
-    }
   }
 }

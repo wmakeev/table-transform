@@ -74,7 +74,7 @@ test('transforms:flatMapWithProvider (case2)', async () => {
     transforms: [
       tf.flatMapWithProvider({
         sourceProvider: csvSourceProvider,
-        outputColumns: ['code', 'value'],
+        outputColumns: ['code', 'value', 'error_name', 'error_message'],
         transformConfig: {
           inputHeader: {
             mode: 'EXCEL_STYLE'
@@ -105,7 +105,6 @@ test('transforms:flatMapWithProvider (case2)', async () => {
           ],
           errorHandle: {
             errorColumn: 'error',
-            outputColumns: ['error_name', 'error_message'],
             transforms: [
               tf.column.add({ columnName: 'error_name' }),
               tf.column.transform({
@@ -185,7 +184,7 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
     transforms: [
       tf.flatMapWithProvider({
         sourceProvider: sourceProviderWithErrors,
-        outputColumns: ['code', 'value'],
+        outputColumns: ['code', 'value', 'error_message'],
         transformConfig: {
           transforms: [
             tf.tapHeader({
@@ -205,7 +204,6 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
           ],
           errorHandle: {
             errorColumn: 'error',
-            outputColumns: ['error_message'],
             transforms: [
               tf.column.add({ columnName: 'error_message' }),
               tf.column.transform({

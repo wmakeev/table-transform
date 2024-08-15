@@ -3,7 +3,7 @@ import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 export interface RemoveColumnParams {
   columnName: string
   colIndex?: number
-  clearColumn?: boolean
+  isInternalIndex?: boolean
 }
 
 /**
@@ -11,50 +11,46 @@ export interface RemoveColumnParams {
  */
 export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
   return source => {
+    const { columnName, colIndex, isInternalIndex = false } = params
+
+    if (isInternalIndex === true && colIndex == null) {
+      throw new Error('isInternalIndex is true, but colIndex is not specified')
+    }
+
     const deletedColsSrcIndexes: number[] = []
 
     let headerIndex = 0
 
-    const transformedHeader: ColumnHeader[] = source.getHeader().flatMap(h => {
-      if (!h.isDeleted && h.name === params.columnName) {
-        if (params.colIndex != null ? params.colIndex === headerIndex : true) {
-          deletedColsSrcIndexes.push(h.index)
+    const transformedHeader: ColumnHeader[] = source
+      .getHeader()
+      .flatMap((h, index) => {
+        if (!h.isDeleted && h.name === columnName) {
+          if (
+            colIndex != null
+              ? colIndex === (isInternalIndex ? index : headerIndex)
+              : true
+          ) {
+            deletedColsSrcIndexes.push(h.index)
 
-          return {
-            ...h,
-            isDeleted: true
+            return {
+              ...h,
+              isDeleted: true
+            }
           }
+
+          headerIndex++
         }
 
-        headerIndex++
-      }
-
-      return h
-    })
+        return h
+      })
 
     if (deletedColsSrcIndexes.length === 0) {
-      throw new Error(
-        `Column "${params.columnName}" not found and can't be removed`
-      )
-    }
-
-    async function* getTransformedSourceGenerator() {
-      for await (const chunk of source) {
-        if (params.clearColumn === true) {
-          chunk.forEach(row => {
-            deletedColsSrcIndexes.forEach(index => {
-              row[index] = null
-            })
-          })
-        }
-
-        yield chunk
-      }
+      throw new Error(`Column "${columnName}" not found and can't be removed`)
     }
 
     return {
       getHeader: () => transformedHeader,
-      [Symbol.asyncIterator]: getTransformedSourceGenerator
+      [Symbol.asyncIterator]: source[Symbol.asyncIterator]
     }
   }
 }

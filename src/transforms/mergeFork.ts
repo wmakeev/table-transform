@@ -1,14 +1,15 @@
 import {
   ColumnHeader,
+  TableChunksAsyncIterable,
   TableChunksTransformer,
   TableRow,
   TableTransfromConfig,
+  cloneChunk,
   createTableTransformer,
   transforms as tf
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
-import { getChunkNormalizer } from '../tools/header/index.js'
-//import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
+import { normalize } from './normalize.js'
 
 export interface MergeForkParams {
   outputColumns: string[]
@@ -16,6 +17,62 @@ export interface MergeForkParams {
 }
 
 // const TRANSFORM_NAME = 'MergeFork'
+
+async function flushAndCloseChannels(channels: AsyncChannel<any>[]) {
+  await Promise.all(
+    channels.map(async (chan): Promise<void> => {
+      await chan.flush()
+      chan.close()
+    })
+  )
+}
+
+async function forkProducer(
+  source: TableChunksAsyncIterable,
+  forkedChans: AsyncChannel<TableRow[]>[]
+) {
+  const normalizedSource = normalize({ immutable: false })(source)
+
+  const srcHeader = normalizedSource.getHeader()
+
+  const colNames = srcHeader.map(h => h.name)
+
+  // Put headers to forks
+  const headersPutResults = await Promise.all(
+    forkedChans.map(ch => {
+      if (ch.isClosed()) return false
+      return ch.put([[...colNames]])
+    })
+  )
+
+  // Not all forks is closed
+  if (headersPutResults.some(it => it === true)) {
+    // Multiplex source data to forks
+    for await (const chunk of normalizedSource) {
+      const chunkPutResults = await Promise.all(
+        forkedChans.map(ch => ch.put(cloneChunk(chunk)))
+      )
+
+      // all fork is closed
+      if (!chunkPutResults.some(it => it === true)) break
+    }
+  }
+
+  // Flush close forked channels (closed channel can have pending readers )
+  await flushAndCloseChannels(forkedChans)
+}
+
+async function pipeGenToChanAsync(
+  sourceGen: AsyncGenerator<TableRow[]>,
+  targetChan: AsyncChannel<TableRow[]>
+) {
+  for await (const chunk of sourceGen) {
+    if (targetChan.isClosed()) break
+    await targetChan.put(chunk)
+  }
+
+  await targetChan.flush()
+}
 
 /**
  * MergeFork
@@ -31,68 +88,21 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
     }))
 
     async function* getTransformedSourceGenerator() {
-      const srcHeader = source.getHeader()
-
-      const normalizeRowsChunk = getChunkNormalizer(srcHeader)
-
       const forkedChans = transformConfigs.map(
         () => new AsyncChannel<TableRow[]>()
       )
 
-      const mergedChan = new AsyncChannel<TableRow[]>()
-
-      async function forkProducer() {
-        const colNames = srcHeader.filter(h => !h.isDeleted).map(h => h.name)
-
-        // put headers
-        for (const forkedChan of forkedChans) {
-          const headerChunk = [[...colNames]]
-          const isOpen = await forkedChan.put(headerChunk)
-          if (!isOpen) return
-        }
-
-        for await (const chunk of source) {
-          let allClosed = true
-
-          for (const forkedChan of forkedChans) {
-            const normalizedRow = normalizeRowsChunk(chunk)
-            const isOpen = await forkedChan.put(normalizedRow)
-            if (isOpen) allClosed = false
-          }
-
-          if (allClosed) break
-        }
-
-        // close forked channels
-        await Promise.all(
-          forkedChans.map(async (chan): Promise<void> => {
-            await chan.flush()
-            chan.close()
-          })
-        )
-      }
-
-      async function mergeConsumer(gen: AsyncGenerator<TableRow[]>) {
-        for await (const chunk of gen) {
-          if (mergedChan.isClosed()) break
-          await mergedChan.put(chunk)
-        }
-
-        await mergedChan.flush()
-      }
+      const mergeChan = new AsyncChannel<TableRow[]>()
 
       const transformGens = transformConfigs.map((forkConfig, index) => {
         const forkTransform = createTableTransformer({
           ...forkConfig,
           transforms: [
             ...(forkConfig.transforms ?? []),
-
-            // TODO Не удобно. Нужно учитывать outputHeader.forceColumns и
-            // errorHandle.outputColumns. Легко запутаться.
-            // Нужно указывать колонки ошибок в outputHeader.forceColumns,
-            // либо они будут отбрасываться.
-            ...outputColumns.map(columnName => tf.column.add({ columnName })),
-            tf.column.select({ columns: outputColumns })
+            tf.column.select({
+              columns: outputColumns,
+              addMissingColumns: true
+            })
           ],
           outputHeader: {
             ...forkConfig.outputHeader,
@@ -104,15 +114,19 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
         return forkTransform(forkedChans[index]!)
       })
 
+      // Merge consumer
       Promise.all(
-        transformGens.map(transformGen => mergeConsumer(transformGen))
-      ).finally(() => {
-        mergedChan.close()
+        transformGens.map(transformGen =>
+          pipeGenToChanAsync(transformGen, mergeChan)
+        )
+      ).then(() => {
+        mergeChan.close()
       })
 
-      forkProducer()
+      // Fork consumer
+      forkProducer(source, forkedChans)
 
-      for await (const chunk of mergedChan) {
+      for await (const chunk of mergeChan) {
         yield chunk
       }
     }

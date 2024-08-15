@@ -121,7 +121,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
   const { x1, y1, x2, y2 } = getExcelRangeBound(range)
   const { x: xOffset, y: yOffset } = getExcelOffset(
-    type !== 'ASSERT' ? params.offset ?? '' : ''
+    type !== 'ASSERT' ? (params.offset ?? '') : ''
   )
 
   const compareFn = operations[testOperation]
@@ -139,9 +139,9 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
       const targetColHeader =
         type !== 'ASSERT'
-          ? srcHeader.find(
+          ? (srcHeader.find(
               h => !h.isDeleted && h.name === params.targetColumn
-            ) ?? null
+            ) ?? null)
           : null
 
       if (type !== 'ASSERT' && targetColHeader === null) {
@@ -185,9 +185,6 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           colIndex <= searchFrameLastColIndex;
           colIndex++
         ) {
-          // Search only in headers from source data, and skip added headers
-          if (srcHeader[colIndex]?.isFromSource !== true) continue
-
           if (compareFn(bufferRow[colIndex], testValue)) {
             cellColIndex = colIndex
             break

@@ -82,24 +82,10 @@ test('complex transform #3', async () => {
           'Some renamed',
           'NewCol 1',
           'list_arr',
-          'Num',
-          'Foo'
-        ]
-      }),
-
-      transforms.column.select({
-        columns: [
           'list_arr',
-          'Name',
-          'NewCol 1',
-          '№',
-          'Num',
-          'RowNum',
-          'Some renamed',
-          'Value',
-          'RowIndex'
-        ],
-        keepSrcColumnsOrder: true
+          'list_arr',
+          'Num'
+        ]
       })
     ]
   })

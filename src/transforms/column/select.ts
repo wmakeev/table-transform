@@ -1,115 +1,102 @@
 import assert from 'assert'
+import { TransformBugError } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { add, remove } from './index.js'
 
 export interface SelectColumnsParams {
   /** Columns that should be selected */
   columns: string[]
-
-  keepSrcColumnsOrder?: boolean
-
-  clearDroppedColumns?: boolean
+  addMissingColumns?: boolean
 }
 
-// #dh04fvxs
-
-// TODO Нужен структурный select (?) - columns: ['A', 'B', 'B', 'C', 'B']
-// .. это может быть важно для согласования структуры разных источников с
-// одинаковым набором колонок.
-// Текущий select не может гарантировать кол-во выходных колонок массива.
-
-// TODO Дополнительно можно добавить опцию, что выборка несуществующей колонки
-// создает ее. Чтобы избежать дополнительного добавления `add` перед `select`.
-// Так с `add` может возникнуть сложность с колонками-массивами.
+// TODO Не нравится как написан этот модуль. Постоянные переборы массивов.
+// .. не критично для этого кода, но может быть можно сделать более красиво.
 
 export const select = (params: SelectColumnsParams): TableChunksTransformer => {
-  const { columns: selectedColumns, keepSrcColumnsOrder = false } = params
+  const { columns: selectedColumns, addMissingColumns = false } = params
 
   if (selectedColumns.length === 0) {
     throw new Error('Columns to select not specified')
   }
 
-  const selectedColumnsNamesSet = new Set(selectedColumns)
-
-  if (selectedColumns.length !== selectedColumnsNamesSet.size) {
-    throw new Error(`Select columns values has duplicates`)
-  }
-
   return source => {
-    const srcHeader = source.getHeader()
+    let _source = source
 
-    //#region Ensure selected headers exist
-    const notDeletedHeaders = srcHeader.filter(h => !h.isDeleted)
+    //#region Ensure all selected headers exist
+    const headersSet = new Set(_source.getHeader().filter(h => !h.isDeleted))
 
-    const notFoundColumnsNamesSet = new Set(notDeletedHeaders.map(h => h.name))
+    const notFoundColumnsSet = new Set<string>()
 
-    notDeletedHeaders.forEach(h => {
-      notFoundColumnsNamesSet.delete(h.name)
-    })
+    for (const col of selectedColumns) {
+      const existHeader = [...headersSet].find(h => h.name === col)
 
-    if (notFoundColumnsNamesSet.size !== 0) {
+      if (existHeader === undefined) {
+        if (addMissingColumns) {
+          _source = add({ columnName: col, force: true })(_source)
+        } else {
+          // TODO В случае выборки колонок массивов может быть не понятно, если
+          // не указать что не найдена какая-либо n-ная колонка.
+          notFoundColumnsSet.add(col)
+        }
+      } else {
+        headersSet.delete(existHeader)
+      }
+    }
+
+    if (notFoundColumnsSet.size !== 0) {
       throw new Error(
-        "Columns not found and can't be selected: " +
-          [...notFoundColumnsNamesSet.values()].map(c => `"${c}"`).join(', ')
+        "Column(s) not found and can't be selected: " +
+          [...notFoundColumnsSet.values()].map(c => `"${c}"`).join(', ')
       )
     }
     //#endregion
 
-    // Mark not selected columns as deleted
-    let transformedHeader: ColumnHeader[] = srcHeader.map(h => {
-      return !h.isDeleted && selectedColumnsNamesSet.has(h.name)
-        ? h
-        : { ...h, isDeleted: true }
-    })
+    const header = _source.getHeader()
 
-    // Reorder columns
-    if (!keepSrcColumnsOrder) {
-      const orderedHeaders: ColumnHeader[] = []
+    const columnHeaderSet = new Set(header)
 
-      // Get selected headers
-      for (const colName of selectedColumns) {
-        const colNameHeaders = transformedHeader.filter(
-          h => !h.isDeleted && h.name === colName
-        )
+    const selected: ColumnHeader[] = []
 
-        if (colNameHeaders.length) {
-          orderedHeaders.push(...colNameHeaders)
-        }
-      }
-
-      transformedHeader = [
-        ...orderedHeaders,
-
-        // Other headers is deleted
-        ...transformedHeader.filter(h => h.isDeleted)
-      ]
-    }
-
-    assert.equal(srcHeader.length, transformedHeader.length)
-
-    async function* getTransformedSourceGenerator() {
-      /** Indexes of all selected columns */
-      const selectedColumnsSrcIndexesSet = new Set(
-        transformedHeader.filter(h => !h.isDeleted).map(h => h.index)
+    for (const col of selectedColumns) {
+      const colHeader = [...columnHeaderSet.values()].find(
+        h => !h.isDeleted && h.name === col
       )
 
-      for await (const chunk of source) {
-        if (params.clearDroppedColumns === true) {
-          chunk.forEach(row => {
-            row.forEach((_, index) => {
-              if (!selectedColumnsSrcIndexesSet.has(index)) {
-                row[index] = null
-              }
-            })
-          })
-        }
-
-        yield chunk
+      if (colHeader == null) {
+        throw new TransformBugError('colHeader should be found')
       }
+
+      selected.push(colHeader)
+      columnHeaderSet.delete(colHeader)
     }
 
+    const deleted = [...columnHeaderSet.values()]
+
+    // Remove other columns
+    for (const h of deleted) {
+      if (h.isDeleted) continue
+      _source = remove({
+        columnName: h.name,
+        colIndex: h.index,
+        isInternalIndex: true
+      })(_source)
+    }
+
+    const unorderedHeader = _source.getHeader()
+
+    const resultHeader = [
+      ...selected.map(h1 => unorderedHeader.find(h2 => h2.index === h1.index)),
+      ...deleted.map(h1 => unorderedHeader.find(h2 => h2.index === h1.index))
+    ]
+
+    assert.ok(unorderedHeader.length === resultHeader.length)
+    assert.ok(resultHeader.every(h => h != null))
+
     return {
-      getHeader: () => transformedHeader,
-      [Symbol.asyncIterator]: getTransformedSourceGenerator
+      getHeader() {
+        return resultHeader
+      },
+      [Symbol.asyncIterator]: _source[Symbol.asyncIterator]
     }
   }
 }

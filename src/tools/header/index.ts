@@ -3,11 +3,31 @@ import { TransformBugError } from '../../errors/index.js'
 import { ColumnHeader, HeaderMode, TableRow } from '../../index.js'
 import { generateExcelStyleHeader } from './excel.js'
 
-export * from './compare.js'
 export * from './excel.js'
 
-export function getChunkNormalizer(header: ColumnHeader[]) {
-  // TODO Optimize if header has no deleted columns
+/**
+ * @returns `true` if no columns is deleted or reordered
+ */
+export function isHeaderNormalized(header: ColumnHeader[]): boolean {
+  for (let i = 0; i < header.length; i++) {
+    const col = header[i]
+    if (col!.isDeleted || col!.index !== i) return false
+  }
+
+  return true
+}
+
+/**
+ * @param immutable
+ * @returns remove deleted columns and reorder
+ */
+export function getChunkNormalizer(header: ColumnHeader[], immutable = false) {
+  const actualHeader = header.filter(h => !h.isDeleted)
+
+  // Optimization if no columns is deleted or reordered
+  if (!immutable && isHeaderNormalized(header)) {
+    return (rowsChunk: TableRow[]) => rowsChunk
+  }
 
   return function normalizeRowsChunk(rowsChunk: TableRow[]) {
     const normalizedRowsChunk: TableRow[] = []
@@ -15,8 +35,8 @@ export function getChunkNormalizer(header: ColumnHeader[]) {
     for (const row of rowsChunk) {
       const resultRow: TableRow = []
 
-      for (const h of header) {
-        if (!h.isDeleted) resultRow.push(row[h.index])
+      for (const h of actualHeader) {
+        resultRow.push(row[h.index])
       }
 
       normalizedRowsChunk.push(resultRow)
@@ -31,8 +51,7 @@ export const createTableHeader = (columnsNames: TableRow) => {
     const colMeta: ColumnHeader = {
       index: index,
       name: String(h),
-      isDeleted: false,
-      isFromSource: true
+      isDeleted: false
     }
 
     return colMeta

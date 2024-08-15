@@ -3,13 +3,121 @@ import test from 'node:test'
 import {
   generateColumnNumHeader,
   generateExcelStyleHeader,
+  getChunkNormalizer,
   getExcelAddressCoordinates,
   getExcelHeaderColumnNum,
   getExcelOffset,
   getExcelRangeBound
-} from '../../src/tools/header/index.js'
+} from '../../../src/tools/header/index.js'
+import { ColumnHeader, TableRow } from '../../../src/types.js'
 
-test('generateColumnNumHeader', () => {
+test('tools:header:getChunkNormalizer', async t => {
+  await t.test('immutable=false | ordered', () => {
+    const header: ColumnHeader[] = [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ]
+
+    const normalizer = getChunkNormalizer(header)
+
+    const chunk: TableRow[] = [
+      [0, 1, 2, 3, 4, 5],
+      [6, 7, 8, 9]
+    ]
+
+    const result1 = normalizer(chunk)
+
+    assert.equal(result1, chunk)
+  })
+
+  await t.test('immutable=true | ordered', () => {
+    const header: ColumnHeader[] = [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ]
+
+    const normalizer = getChunkNormalizer(header, true)
+
+    const chunk: TableRow[] = [
+      [0, 1, 2, 3, 4, 5],
+      [6, 7, 8, 9]
+    ]
+
+    const result1 = normalizer(chunk)
+
+    assert.notEqual(result1, chunk)
+
+    assert.deepEqual(result1, [
+      [0, 1, 2],
+      [6, 7, 8]
+    ])
+  })
+
+  await t.test('immutable=true | unordered', () => {
+    const header: ColumnHeader[] = [
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ]
+
+    const normalizer = getChunkNormalizer(header)
+
+    const chunk: TableRow[] = [
+      [0, 1, 2, 3, 4, 5],
+      [6, 7, 8, 9]
+    ]
+
+    const result1 = normalizer(chunk)
+
+    assert.notEqual(result1, chunk)
+
+    assert.deepEqual(result1, [
+      [1, 0, 2],
+      [7, 6, 8]
+    ])
+  })
+})
+
+test('tools:header:generateColumnNumHeader', () => {
   const header = generateColumnNumHeader(1000)
 
   assert.ok(header)
@@ -20,7 +128,7 @@ test('generateColumnNumHeader', () => {
   assert.equal(header[999], 'Col1000')
 })
 
-test('generateExcelStyleHeader', () => {
+test('tools:header:generateExcelStyleHeader', () => {
   const header = generateExcelStyleHeader(1000)
 
   assert.ok(header)
@@ -38,7 +146,7 @@ test('generateExcelStyleHeader', () => {
   assert.equal(header[865], 'AGH')
 })
 
-test('getExcelHeaderColumnNum', () => {
+test('tools:header:getExcelHeaderColumnNum', () => {
   assert.equal(getExcelHeaderColumnNum('A'), 1)
   assert.equal(getExcelHeaderColumnNum('B'), 2)
   assert.equal(getExcelHeaderColumnNum('z'), 26)
@@ -69,7 +177,7 @@ test('getExcelHeaderColumnNum', () => {
   }, /To long Excel header name/)
 })
 
-test('getExcelAddressCoordinates', () => {
+test('tools:header:getExcelAddressCoordinates', () => {
   assert.deepEqual(getExcelAddressCoordinates('A1'), { x: 0, y: 0 })
   assert.deepEqual(getExcelAddressCoordinates('D15'), { x: 3, y: 14 })
   assert.deepEqual(getExcelAddressCoordinates('d15'), { x: 3, y: 14 })
@@ -87,7 +195,7 @@ test('getExcelAddressCoordinates', () => {
   }, /Incorrect Excel address/)
 })
 
-test('getExcelRangeBound', () => {
+test('tools:header:getExcelRangeBound', () => {
   assert.deepEqual(
     getExcelRangeBound('A1'),
     { x1: 0, y1: 0, x2: 0, y2: 0 },
@@ -145,7 +253,7 @@ test('getExcelRangeBound', () => {
   }, /Inverted Excel ranges not supported/)
 })
 
-test('getExcelOffset', () => {
+test('tools:header:getExcelOffset', () => {
   assert.deepEqual(getExcelOffset(''), { x: 0, y: 0 }, 'empty string')
   assert.deepEqual(getExcelOffset('RC'), { x: 0, y: 0 }, 'RC')
   assert.deepEqual(getExcelOffset('R[1]C'), { x: 0, y: 1 }, 'R[1]C')

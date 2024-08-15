@@ -1,6 +1,3 @@
-// ts-nocheck
-/* slint-disable */
-
 import assert from 'assert'
 import { TransformStepError } from '../errors/index.js'
 import {
