@@ -31,6 +31,11 @@ export type SheetCellParams =
       targetColumn: string
 
       /**
+       * Array index, if `targetColumn` is array column
+       */
+      targetColumnIndex?: number
+
+      /**
        * The offset to be shifted to target cell after the cell with `cellName`
        * is found in `range`.
        *
@@ -49,6 +54,7 @@ export type SheetCellParams =
       testOperation: Extract<SheetCellOperations, 'NOOP' | 'EMPTY'>
       testValue: undefined
       targetColumn: string
+      targetColumnIndex?: number
       offset?: string
       isOptional?: boolean
     }
@@ -139,9 +145,9 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
       const targetColHeader =
         type !== 'ASSERT'
-          ? (srcHeader.find(
+          ? (srcHeader.filter(
               h => !h.isDeleted && h.name === params.targetColumn
-            ) ?? null)
+            )?.[params.targetColumnIndex ?? 0] ?? null)
           : null
 
       if (type !== 'ASSERT' && targetColHeader === null) {

@@ -87,8 +87,9 @@ test('sheetCell transform (case1)', async () => {
       //#endregion
 
       //#region NOOP - G1:I3
-      transforms.column.add({
-        columnName: 'Col5'
+      transforms.column.addArray({
+        columnName: 'Col5',
+        length: 2
       }),
 
       transforms.column.sheetCell({
@@ -96,7 +97,8 @@ test('sheetCell transform (case1)', async () => {
         range: 'G1:I3',
         testOperation: 'NOOP',
         testValue: undefined,
-        targetColumn: 'Col5'
+        targetColumn: 'Col5',
+        targetColumnIndex: 1
       }),
       //#endregion
 
@@ -127,7 +129,7 @@ test('sheetCell transform (case1)', async () => {
       //#endregion
 
       transforms.column.select({
-        columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6']
+        columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col5', 'Col6']
       })
     ]
   })
@@ -157,7 +159,7 @@ test('sheetCell transform (case1)', async () => {
 
   const actualCsv = stringify(transformedRows)
 
-  // // DEBUG
+  // DEBUG
   // await writeFile(
   //   path.join(
   //     process.cwd(),
