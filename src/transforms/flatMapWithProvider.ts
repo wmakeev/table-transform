@@ -3,6 +3,7 @@ import {
   SourceProvider,
   TableChunksTransformer,
   TableTransfromConfig,
+  createTableHeader,
   createTableTransformer
 } from '../index.js'
 
@@ -25,11 +26,7 @@ export const flatMapWithProvider = (
   return source => {
     const srcHeader = source.getHeader()
 
-    const resultHeader: ColumnHeader[] = outputColumns.map((name, index) => ({
-      index,
-      name: String(name),
-      isDeleted: false
-    }))
+    const resultHeader: ColumnHeader[] = createTableHeader(outputColumns)
 
     async function* getTransformedSourceGenerator() {
       for await (const chunk of source) {
@@ -43,7 +40,7 @@ export const flatMapWithProvider = (
             }
           })
 
-          yield* transformer(sourceProvider(srcHeader, row))
+          yield* transformer(sourceProvider(srcHeader, [...row]))
         }
       }
     }

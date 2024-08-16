@@ -34,7 +34,7 @@ test('Empty headers #4 (error)', async () => {
     assert.fail('Error expected')
   } catch (err) {
     assert.ok(err instanceof Error)
-    assert.equal(err.message, 'Source have not any header')
+    assert.equal(err.message, 'Source header row is empty')
   }
 })
 

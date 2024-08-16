@@ -89,24 +89,30 @@ export async function getInitialTableSource(params: {
   }
 
   /** First incoming rows chunk */
-  let firstChunk = firstIteratorResult.value
+  let curChunk = firstIteratorResult.value
 
-  if (firstChunk[0] == null) {
-    throw new TransformError('Empty or incorrect rows chunk')
+  if (!Array.isArray(curChunk)) {
+    // TODO Добавить подробную ошибку с типом
+    throw new TransformError('Expected source to be array')
   }
 
-  const firstRow = firstChunk[0]
+  /** First row of incoming chunk */
+  const firstRow = curChunk[0]
+
+  if (firstRow == null) {
+    throw new TransformError('Expected source first row to be array')
+  }
 
   if (firstRow.length === 0) {
-    throw new TransformError('Source have not any header')
+    throw new TransformError('Source header row is empty')
   }
 
   /** Header row of incoming data */
-  let srcHeaderRow: TableRow
+  let headerRow: TableRow
 
   // No header. Header should be generated and prepended.
   if (shouldHeaderPrepended) {
-    srcHeaderRow = generateHeaderColumnNames(
+    headerRow = generateHeaderColumnNames(
       inputHeaderOptions.mode,
       firstRow.length // inputHeaderOptions.forceColumnsCount == null
     )
@@ -114,48 +120,39 @@ export async function getInitialTableSource(params: {
 
   // Header should exist. Extract header from first row.
   else {
-    srcHeaderRow = firstChunk[0]
-    firstChunk = firstChunk.slice(1)
+    headerRow = firstRow
+    curChunk = curChunk.slice(1)
   }
 
-  if (!Array.isArray(srcHeaderRow)) {
-    // TODO Добавить подробную ошибку с типом
-    throw new TransformError('Expected header row to be array')
-  }
+  // Get chunk without header
 
   /** Header of incoming data */
-  const srcHeader = createTableHeader(srcHeaderRow)
+  const header = createTableHeader(headerRow)
 
   /** Length of source data header (columns count) */
-  const srcHeadeLength = srcHeader.length
+  const headerLen = header.length
 
   const getSourceGenerator = async function* () {
     try {
-      if (firstChunk.length !== 0) {
-        yield firstChunk
-      }
-
-      firstChunk = []
-
       while (true) {
-        const iterResult = await sourceIterator.next()
-
-        if (iterResult.done === true) return iterResult.value
-
-        const chunk = iterResult.value
-
-        if (!Array.isArray(chunk))
+        if (!Array.isArray(curChunk))
           throw new TransformError('Rows chunk expected to be Array')
 
-        for (const row of chunk) {
+        for (const row of curChunk) {
           if (!Array.isArray(row)) {
             throw new TransformError('Row expected to be Array')
           }
 
-          forceArrayLength(row, srcHeadeLength)
+          forceArrayLength(row, headerLen)
         }
 
-        yield chunk
+        if (curChunk.length > 0) yield curChunk
+
+        const iterResult = await sourceIterator.next()
+
+        if (iterResult.done === true) return iterResult.value
+
+        curChunk = iterResult.value
       }
     } finally {
       // Allow custom error handling to make it work, and then stop the incoming stream. #dhf042pf
@@ -167,7 +164,7 @@ export async function getInitialTableSource(params: {
   }
 
   return {
-    getHeader: () => srcHeader,
+    getHeader: () => header,
     [Symbol.asyncIterator]: getSourceGenerator
   }
 }

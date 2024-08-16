@@ -1,6 +1,5 @@
 import assert from 'assert'
 import {
-  ColumnHeader,
   TableChunksAsyncIterable,
   TableRow,
   TableTransformer,
@@ -22,7 +21,7 @@ export function createTableTransformer(
       | TableChunksAsyncIterable
   ) {
     let tableSource: TableChunksAsyncIterable | null = null
-    let transfomedTableHeader: ColumnHeader[] | null = null
+    let transfomedTableColumns: string[] | null = null
 
     try {
       tableSource =
@@ -50,11 +49,11 @@ export function createTableTransformer(
       // Chain transformations
       tableSource = getTransformedSource(tableSource, transforms_)
 
-      transfomedTableHeader = tableSource.getHeader()
+      transfomedTableColumns = tableSource.getHeader().map(h => h.name)
 
       if (outputHeader?.skip !== true) {
         // header is just normalized
-        yield [transfomedTableHeader.map(h => h.name)]
+        yield [[...transfomedTableColumns]]
       }
 
       yield* tableSource
@@ -68,14 +67,8 @@ export function createTableTransformer(
         throw err
       }
 
-      const sourceResultHeaders =
-        outputHeader?.forceColumns ??
-        (transfomedTableHeader != null
-          ? tableSource
-              ?.getHeader()
-              .filter(h => !h.isDeleted)
-              .map(h => h.name)
-          : undefined)
+      const sourceResultColumns =
+        transfomedTableColumns ?? outputHeader?.forceColumns
 
       // TODO Сделать специальный класс ошибки
       const errorInfo = {
@@ -86,10 +79,10 @@ export function createTableTransformer(
 
       const _transforms = [...(errorHandle.transforms ?? [])]
 
-      if (sourceResultHeaders) {
+      if (sourceResultColumns) {
         _transforms.push(
           tf.column.select({
-            columns: sourceResultHeaders,
+            columns: sourceResultColumns,
             addMissingColumns: true
           })
         )
@@ -99,7 +92,7 @@ export function createTableTransformer(
         transforms: _transforms,
         outputHeader: {
           skip:
-            transfomedTableHeader != null || outputHeader?.forceColumns != null
+            sourceResultColumns != null || outputHeader?.forceColumns != null
         }
       })([[[errorHandle.errorColumn], [errorInfo]]])
     }
