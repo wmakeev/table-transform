@@ -56,6 +56,10 @@ export interface TableTransfromConfig {
       }
 
   outputHeader?: {
+    // TODO Причина добавления forceColumns?
+    // - унификация select'а
+    // - учитывается в errorHandle в отсутствии заголовка
+
     forceColumns?: string[]
 
     /** Should skip emit header to result data (default: `false`) */

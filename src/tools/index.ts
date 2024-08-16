@@ -1,12 +1,7 @@
-import {
-  ColumnHeader,
-  TableChunksAsyncIterable,
-  TableChunksTransformer,
-  TableRow
-} from '../types.js'
+import { ColumnHeader, TableRow } from '../types.js'
 
-export * from './stream/index.js'
 export * from './header/index.js'
+export * from './stream/index.js'
 
 export const UNICODE_SPACES_REGEX =
   /[\s\u00A0\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/gm
@@ -66,17 +61,4 @@ export function forceArrayLength(arr: unknown[], length: number): void {
   } else {
     arr.push(...Array(length - arr.length).fill(null))
   }
-}
-
-export function getTransformedSource(
-  source: TableChunksAsyncIterable,
-  transforms: TableChunksTransformer[]
-) {
-  let transfomedSource: TableChunksAsyncIterable = source
-
-  for (const transform of transforms) {
-    transfomedSource = transform(transfomedSource)
-  }
-
-  return transfomedSource
 }

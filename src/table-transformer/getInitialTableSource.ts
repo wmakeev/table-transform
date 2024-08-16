@@ -12,16 +12,6 @@ import {
   TableChunksAsyncIterable
 } from '../types.js'
 
-export async function* getColumnCountForcerGen(
-  source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>,
-  count: number
-): AsyncGenerator<TableRow[]> {
-  for await (const chunk of source) {
-    for (const row of chunk) forceArrayLength(row, count)
-    yield chunk
-  }
-}
-
 const generateForcedHeader = (
   headerMode: HeaderMode,
   count: number
@@ -57,11 +47,14 @@ export async function getInitialTableSource(params: {
 
     return {
       getHeader: () => header,
-      [Symbol.asyncIterator]: () =>
-        getColumnCountForcerGen(
-          chunkedRowsIterable,
-          inputHeaderOptions.forceColumnsCount!
-        )
+      async *[Symbol.asyncIterator]() {
+        const forcedLen = inputHeaderOptions.forceColumnsCount!
+
+        for await (const chunk of chunkedRowsIterable) {
+          for (const row of chunk) forceArrayLength(row, forcedLen)
+          yield chunk
+        }
+      }
     }
   }
   //#endregion

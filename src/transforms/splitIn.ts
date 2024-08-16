@@ -6,7 +6,7 @@ import {
   TableRow,
   TableTransfromConfig,
   createTableTransformer,
-  getTransformedSource
+  transforms as tf
 } from '../index.js'
 import { getNormalizedHeaderRow } from '../tools/header/index.js'
 
@@ -132,6 +132,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
   return source => {
     const srcHeader = source.getHeader()
 
+    // Drop headers from splits
     const transformConfig: TableTransfromConfig = {
       ...params.transformConfig,
       outputHeader: {
@@ -140,10 +141,38 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       }
     }
 
-    const transfomedHeader = getTransformedSource(
-      source,
-      transformConfig.transforms ?? []
-    ).getHeader()
+    //#region #jsgf360l
+
+    // TODO Этот блок копипаста из createTableTransformer.
+    // Явно есть просчеты в архитектуре, раз приходится городить такие костыли.
+    // Фактически сейчас без подобных костылей не получить заголовки по конфигурации.
+    // Возможно это нормально? Ведь в этом модуле приходится несколько раз вызывать
+    // трансформацию с одинаковым конфигом (все ли созданные трансформации можно
+    // вызывать повторно?), но выглядить это запутанно и очень сложно отлаживать.
+
+    const transforms_ = [...(transformConfig.transforms ?? [])]
+
+    // Ensure all forsed columns exist and select
+    if (transformConfig.outputHeader?.forceColumns != null) {
+      transforms_.push(
+        tf.column.select({
+          columns: transformConfig.outputHeader.forceColumns,
+          addMissingColumns: true
+        })
+      )
+    }
+
+    transforms_.push(tf.normalize({ immutable: false }))
+
+    let tableSource = source
+
+    // Chain transformations
+    for (const transform of transforms_) {
+      tableSource = transform(tableSource)
+    }
+
+    const transfomedHeader = tableSource.getHeader()
+    //#endregion
 
     async function* getTransformedSourceGenerator() {
       const normalizedHeaderColumns = getNormalizedHeaderRow(srcHeader)

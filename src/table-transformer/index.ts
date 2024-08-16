@@ -4,7 +4,6 @@ import {
   TableRow,
   TableTransformer,
   TableTransfromConfig,
-  getTransformedSource,
   transforms as tf
 } from '../index.js'
 import { getInitialTableSource } from './getInitialTableSource.js'
@@ -32,6 +31,7 @@ export function createTableTransformer(
               chunkedRowsIterable: source
             })
 
+      //#region #jsgf360l
       const transforms_ = [...transforms]
 
       // Ensure all forsed columns exist and select
@@ -47,9 +47,12 @@ export function createTableTransformer(
       transforms_.push(tf.normalize({ immutable: false }))
 
       // Chain transformations
-      tableSource = getTransformedSource(tableSource, transforms_)
+      for (const transform of transforms_) {
+        tableSource = transform(tableSource)
+      }
 
       transfomedTableColumns = tableSource.getHeader().map(h => h.name)
+      //#endregion
 
       if (outputHeader?.skip !== true) {
         // header is just normalized
