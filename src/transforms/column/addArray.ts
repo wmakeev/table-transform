@@ -1,5 +1,8 @@
+import { TransformStepError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
 import { add, remove } from './index.js'
+
+const TRANSFORM_NAME = 'Column:AddArray'
 
 export interface AddArrayColumnParams {
   columnName: string
@@ -17,7 +20,10 @@ export const addArray = (
   const { columnName, length, forceLength = false, defaultValue } = params
 
   if (!Number.isInteger(length) || length <= 0) {
-    throw new Error(`Array length expected to be positive number - ${length}`)
+    throw new TransformStepError(
+      `Array length expected to be positive number - ${length}`,
+      TRANSFORM_NAME
+    )
   }
 
   return source => {

@@ -73,11 +73,19 @@ export function createTableTransformer(
       const sourceResultColumns =
         transfomedTableColumns ?? outputHeader?.forceColumns
 
-      // TODO Сделать специальный класс ошибки
+      // TODO Подумать над тем как передавать разные типы ошибок
       const errorInfo = {
         name: err.name,
         code: (err as any).code,
-        message: err.message
+        message: err.message,
+        stepName: (err as any).stepName,
+        header: (err as any).header,
+        chunk: (err as any).chunk,
+        row: (err as any).row,
+        rowIndex: (err as any).rowIndex,
+        expression: (err as any).expression,
+        column: (err as any).column,
+        columnIndex: (err as any).columnIndex
       }
 
       const _transforms = [...(errorHandle.transforms ?? [])]

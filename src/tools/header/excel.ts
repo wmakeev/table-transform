@@ -6,6 +6,9 @@ import {
   EXCEL_RC_OFFSET_REGEX
 } from './constants.js'
 
+/**
+ * @throws {Error}
+ */
 function* excelHeaderGen(): Generator<string, any, undefined> {
   let init = -1
 
@@ -41,6 +44,7 @@ export function generateExcelStyleHeader(colsCount: number) {
 
 /**
  * @param excelHeaderName Name of Excel column like `AB`
+ * @throws {Error}
  */
 export function getExcelHeaderColumnNum(excelHeaderName: string) {
   const symbolsNumsReversed = excelHeaderName
@@ -70,6 +74,10 @@ export function getExcelHeaderColumnNum(excelHeaderName: string) {
   return colNum
 }
 
+/**
+ * @param address Excel style addres
+ * @throws {Error}
+ */
 export function getExcelAddressCoordinates(address: string): Coordinates {
   if (typeof address !== 'string' || address.length === 0) {
     throw new Error('Excel address should not to be empty string')
@@ -111,6 +119,9 @@ export interface Offset {
   y: number
 }
 
+/**
+ * @throws {Error}
+ */
 export function getExcelRangeBound(range: string): ExcelRangeBound {
   const [cellFrom, cellTo] = range.split(':') as [string] | [string, string]
 
@@ -138,6 +149,9 @@ export function getExcelRangeBound(range: string): ExcelRangeBound {
   return result
 }
 
+/**
+ * @throws {Error}
+ */
 export function getExcelOffset(offset: string): Offset {
   if (typeof offset !== 'string') {
     throw new Error('Expected offset to be string value')

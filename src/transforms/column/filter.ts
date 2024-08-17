@@ -1,3 +1,4 @@
+import { TransformRowExpressionError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
   TransformExpressionContext,
@@ -5,20 +6,27 @@ import {
   TransformState
 } from '../index.js'
 
+const TRANSFORM_NAME = 'Column:Filter'
+
 export const filter = (
   params: TransformExpressionParams,
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
   return source => {
     async function* getTransformedSourceGenerator() {
-      const header = source.getHeader()
+      const srcHeader = source.getHeader()
 
-      const transformState = new TransformState(params, header, context)
+      const transformState = new TransformState(
+        TRANSFORM_NAME,
+        params,
+        srcHeader,
+        context
+      )
 
       for await (const chunk of source) {
         const filteredRows: TableRow[] = []
 
-        for (const row of chunk) {
+        for (const [rowIndex, row] of chunk.entries()) {
           transformState.nextRow(row)
 
           let isPass = true
@@ -27,10 +35,30 @@ export const filter = (
           if (transformState.fieldColsIndexes.length === 0) {
             const result = transformState.evaluateExpression()
 
-            if (result instanceof Error) throw result
+            if (result instanceof Error) {
+              throw new TransformRowExpressionError(
+                result.message,
+                TRANSFORM_NAME,
+                srcHeader,
+                chunk,
+                rowIndex,
+                null,
+                params.expression,
+                { cause: result, rowNum: transformState.rowNum }
+              )
+            }
 
             if (typeof result !== 'boolean') {
-              throw new Error('Filter expression should return boolean result')
+              throw new TransformRowExpressionError(
+                'Filter expression should return boolean result',
+                TRANSFORM_NAME,
+                srcHeader,
+                chunk,
+                rowIndex,
+                null,
+                params.expression,
+                { rowNum: transformState.rowNum }
+              )
             }
 
             isPass = result
@@ -38,16 +66,37 @@ export const filter = (
 
           // Column specified
           else {
-            for (const arrColIndex of transformState.fieldColsIndexes.keys()) {
+            for (const [
+              arrColIndex,
+              headerColIndex
+            ] of transformState.fieldColsIndexes.entries()) {
               transformState.arrColIndex = arrColIndex
 
               const result = transformState.evaluateExpression()
 
-              if (result instanceof Error) throw result
+              if (result instanceof Error) {
+                throw new TransformRowExpressionError(
+                  result.message,
+                  TRANSFORM_NAME,
+                  srcHeader,
+                  chunk,
+                  rowIndex,
+                  headerColIndex,
+                  params.expression,
+                  { cause: result, rowNum: transformState.rowNum }
+                )
+              }
 
               if (typeof result !== 'boolean') {
-                throw new Error(
-                  'Filter expression should return boolean result'
+                throw new TransformRowExpressionError(
+                  'Filter expression should return boolean result',
+                  TRANSFORM_NAME,
+                  srcHeader,
+                  chunk,
+                  rowIndex,
+                  headerColIndex,
+                  params.expression,
+                  { rowNum: transformState.rowNum }
                 )
               }
 

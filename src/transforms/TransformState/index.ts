@@ -1,3 +1,4 @@
+import { TransformHeaderError } from '../../errors/index.js'
 import { ColumnHeader, TableRow } from '../../index.js'
 import { TransformExpressionParams } from '../index.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
@@ -32,6 +33,7 @@ export class TransformState {
   private transformExpression
 
   constructor(
+    public name: string,
     transformParams: TransformExpressionParams,
     header: ColumnHeader[],
     context?: TransformExpressionContext
@@ -47,7 +49,11 @@ export class TransformState {
       })
 
       if (this.fieldColsIndexes.length === 0) {
-        throw new Error(`Column "${columnName}" not found`)
+        throw new TransformHeaderError(
+          `Column "${columnName}" not found`,
+          name,
+          header
+        )
       }
     }
 
@@ -83,28 +89,8 @@ export class TransformState {
     this.arrColIndex = index
   }
 
-  evaluateExpression() {
+  evaluateExpression(): unknown | Error {
     const result = this.transformExpression(this.rowProxy)
-
-    if (result instanceof Error) {
-      const colIndex = this.fieldColsIndexes[this.arrColIndex]
-
-      const dump = [...this.fieldIndexesByName.entries()]
-        .flatMap(([field, indexes]) => {
-          return indexes.map(
-            i =>
-              (i === colIndex ? '*' : ' ') +
-              `  [${i}] "${field}": ${JSON.stringify(this.curRow[i])}` +
-              (i === colIndex ? ` - ${result.message}` : '')
-          )
-        })
-        .join('\n')
-
-      console.log(`rowNum: ${this.rowNum}, colIndex: ${colIndex}\n\n${dump}`)
-
-      throw result
-    }
-
     return result
   }
 }

@@ -1,12 +1,15 @@
+import assert from 'node:assert/strict'
 import test from 'node:test'
+import {
+  TransformColumnsNotFoundError,
+  TransformRowExpressionError
+} from '../../src/errors/index.js'
 import {
   TableRow,
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
-import assert from 'node:assert/strict'
 import { createTransformedRowsStreamFromCsv } from '../helpers/index.js'
-import { NonExistColumnTransformError } from '../../src/errors/index.js'
 
 test('Transform error handler', async t => {
   await t.test('place error name in created column', async () => {
@@ -48,7 +51,7 @@ test('Transform error handler', async t => {
 
     assert.equal(col1, null)
     assert.equal(col2, null)
-    assert.equal((col3 as any).name, 'Error')
+    assert.equal((col3 as any).name, 'TransformRowExpressionError')
 
     // 3
     nextResult = await gen.next()
@@ -128,7 +131,7 @@ test('Transform error handler', async t => {
       assert.deepEqual(result, [
         [['foo', 'bar', 'error']],
         [['тест 0+', 40, null]],
-        [[null, null, 'Accessing a non-existing column - "baz"']]
+        [[null, null, 'Column(s) not found: "baz"']]
       ])
     }
   )
@@ -158,8 +161,10 @@ test('Transform error handler', async t => {
 
       assert.fail('error expected')
     } catch (err) {
-      assert.ok(err instanceof NonExistColumnTransformError)
-      assert.equal(err.columnName, 'foo')
+      assert.ok(err instanceof TransformRowExpressionError)
+      assert.ok(err.cause instanceof TransformColumnsNotFoundError)
+      assert.deepEqual(err.cause.columns, ['foo'])
+      err.report()
     }
 
     assert.ok(result.length > 0)
@@ -211,7 +216,7 @@ test('Transform error handler', async t => {
     // #dhf042pf
     assert.deepEqual(errorRowWithHeader, [
       ['Код', 'Бренд', 'Наименование', 'Закупочная цена', 'Остаток', 'error'],
-      [null, null, null, null, null, 'Accessing a non-existing column - "foo"']
+      [null, null, null, null, null, 'Column(s) not found: "foo"']
     ])
   })
 
@@ -277,14 +282,7 @@ test('Transform error handler', async t => {
           'Остаток',
           'error_message'
         ],
-        [
-          null,
-          null,
-          null,
-          null,
-          null,
-          'Accessing a non-existing column - "foo"'
-        ]
+        [null, null, null, null, null, 'Column(s) not found: "foo"']
       ])
     }
   )
@@ -333,8 +331,9 @@ test('Transform error handler', async t => {
 
       assert.fail('error expected')
     } catch (err) {
-      assert.ok(err instanceof Error)
+      assert.ok(err instanceof TransformRowExpressionError)
       assert.equal(err.message, 'Property “bar” does not exist.')
+      err.report()
     }
 
     assert.equal(result.length, 900)

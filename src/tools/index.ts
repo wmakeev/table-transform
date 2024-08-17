@@ -38,8 +38,10 @@ export function getColumnIndexesByName(header: ColumnHeader[]) {
 
 export function getRowRecord(
   header: ColumnHeader[],
-  row: TableRow
+  row: TableRow | undefined
 ): Record<string, unknown | unknown[]> {
+  if (row == null) return {}
+
   const entries = [...getColumnIndexesByName(header).entries()].map(
     ([key, val]) => {
       if (val.length === 1) {

@@ -151,7 +151,7 @@ test('transforms:flatMapWithProvider (case2)', async () => {
     ['1002', '12', null, null],
     ['1003', '', null, null],
     ['1004', '14', null, null],
-    [null, null, 'Error', 'Cell "Код" in "A2:E7" range not found']
+    [null, null, 'TransformChunkError', 'Cell "Код" in "A2:E7" range not found']
   ])
 })
 

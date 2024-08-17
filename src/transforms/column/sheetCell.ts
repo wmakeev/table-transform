@@ -1,6 +1,13 @@
-import { TransformAssertError } from '../../errors/index.js'
+import assert from 'node:assert'
+import {
+  TransformChunkError,
+  TransformRowError,
+  TransformStepError
+} from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import { getExcelOffset, getExcelRangeBound } from '../../tools/header/index.js'
+
+const TRANSFORM_NAME = 'Column:SheetCell'
 
 export type SheetCellParams =
   | {
@@ -106,12 +113,15 @@ const operations: Record<
   },
 
   TEMPLATE: () => {
-    throw new Error('Not implemented')
+    throw new TransformStepError('Not implemented', TRANSFORM_NAME)
   },
 
   EMPTY: (str1, str2) => {
     if (str2 != null || (typeof str2 === 'string' && str2 !== '')) {
-      throw new Error('EMPTY function should receive empty second argument')
+      throw new TransformStepError(
+        'EMPTY function should receive empty second argument',
+        TRANSFORM_NAME
+      )
     }
     return str1 == null || str1 === ''
   },
@@ -151,7 +161,10 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           : null
 
       if (type !== 'ASSERT' && targetColHeader === null) {
-        throw new Error(`Column "${params.targetColumn}" not found`)
+        throw new TransformStepError(
+          `Column "${params.targetColumn}" not found`,
+          TRANSFORM_NAME
+        )
       }
 
       const [searchFrameFirstRowIndex, , , searchFrameLastRowIndex] = [
@@ -162,7 +175,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
       ].sort() as [number, number, number, number]
 
       if (searchFrameFirstRowIndex < 0) {
-        throw new Error('Rows offset out of range')
+        throw new TransformStepError('Rows offset out of range', TRANSFORM_NAME)
       }
 
       /* eslint prefer-const:0 */
@@ -174,7 +187,10 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
       ].sort() as [number, number, number, number]
 
       if (searchFrameFirstColIndex < 0) {
-        throw new Error('Columns offset out of range')
+        throw new TransformStepError(
+          'Columns offset out of range',
+          TRANSFORM_NAME
+        )
       }
 
       if (searchFrameLastColIndex >= srcHeader.length) {
@@ -191,9 +207,23 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           colIndex <= searchFrameLastColIndex;
           colIndex++
         ) {
-          if (compareFn(bufferRow[colIndex], testValue)) {
-            cellColIndex = colIndex
-            break
+          try {
+            if (compareFn(bufferRow[colIndex], testValue)) {
+              cellColIndex = colIndex
+              break
+            }
+          } catch (err) {
+            assert.ok(err instanceof Error)
+
+            throw new TransformRowError(
+              err.message,
+              TRANSFORM_NAME,
+              srcHeader,
+              rowBuffer,
+              bufferRowIndex,
+              colIndex,
+              { cause: err }
+            )
           }
         }
 
@@ -279,9 +309,11 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           continue
         }
 
-        throw new TransformAssertError(
+        throw new TransformChunkError(
           `Cell "${testValue}" in "${range}" range not found`,
-          'SheetCell'
+          TRANSFORM_NAME,
+          srcHeader,
+          rowBuffer
         )
       }
     }

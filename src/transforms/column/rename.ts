@@ -1,4 +1,7 @@
+import { TransformColumnsNotFoundError } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+
+const TRANSFORM_NAME = 'Column:Rename'
 
 export interface RenameColumnParams {
   oldColumnName: string
@@ -10,11 +13,13 @@ export interface RenameColumnParams {
  */
 export const rename = (params: RenameColumnParams): TableChunksTransformer => {
   return source => {
-    let isHeaderFound = false
+    let isColumnFound = false
 
-    const transformedHeader: ColumnHeader[] = source.getHeader().map(h => {
+    const srcHeader = source.getHeader()
+
+    const transformedHeader: ColumnHeader[] = srcHeader.map(h => {
       if (!h.isDeleted && h.name === params.oldColumnName) {
-        isHeaderFound = true
+        isColumnFound = true
 
         return {
           ...h,
@@ -25,10 +30,10 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
       return h
     })
 
-    if (!isHeaderFound) {
-      throw new Error(
-        `Header "${params.oldColumnName}" not found and can't be renamed`
-      )
+    if (!isColumnFound) {
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
+        params.oldColumnName
+      ])
     }
 
     return {

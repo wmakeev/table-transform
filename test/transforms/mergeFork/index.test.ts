@@ -257,7 +257,9 @@ test('transforms:mergeFork #2', async () => {
   transformedRows.shift()
 
   assert.equal(
-    transformedRows.filter((row: any) => row[2] === 'Error').length,
+    transformedRows.filter((row: any) => {
+      return row[2]?.includes('Error')
+    }).length,
     2
   )
 

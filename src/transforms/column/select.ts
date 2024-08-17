@@ -1,7 +1,13 @@
 import assert from 'assert'
-import { TransformBugError } from '../../errors/index.js'
+import {
+  TransformBugError,
+  TransformColumnsNotFoundError,
+  TransformStepError
+} from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 import { add, remove } from './index.js'
+
+const TRANSFORM_NAME = 'Column:Select'
 
 export interface SelectColumnsParams {
   /** Columns that should be selected */
@@ -16,7 +22,10 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
   const { columns: selectedColumns, addMissingColumns = false } = params
 
   if (selectedColumns.length === 0) {
-    throw new Error('Columns to select not specified')
+    throw new TransformStepError(
+      'Columns to select not specified',
+      TRANSFORM_NAME
+    )
   }
 
   return source => {
@@ -44,9 +53,10 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     }
 
     if (notFoundColumnsSet.size !== 0) {
-      throw new Error(
-        "Column(s) not found and can't be selected: " +
-          [...notFoundColumnsSet.values()].map(c => `"${c}"`).join(', ')
+      throw new TransformColumnsNotFoundError(
+        TRANSFORM_NAME,
+        source.getHeader(),
+        [...notFoundColumnsSet.values()]
       )
     }
     //#endregion

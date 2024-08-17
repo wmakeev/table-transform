@@ -1,4 +1,10 @@
+import {
+  TransformColumnsNotFoundError,
+  TransformStepError
+} from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+
+const TRANSFORM_NAME = 'Column:Remove'
 
 export interface RemoveColumnParams {
   columnName: string
@@ -14,38 +20,43 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     const { columnName, colIndex, isInternalIndex = false } = params
 
     if (isInternalIndex === true && colIndex == null) {
-      throw new Error('isInternalIndex is true, but colIndex is not specified')
+      throw new TransformStepError(
+        'isInternalIndex is true, but colIndex is not specified',
+        TRANSFORM_NAME
+      )
     }
 
     const deletedColsSrcIndexes: number[] = []
 
     let headerIndex = 0
 
-    const transformedHeader: ColumnHeader[] = source
-      .getHeader()
-      .flatMap((h, index) => {
-        if (!h.isDeleted && h.name === columnName) {
-          if (
-            colIndex != null
-              ? colIndex === (isInternalIndex ? index : headerIndex)
-              : true
-          ) {
-            deletedColsSrcIndexes.push(h.index)
+    const srcHeader = source.getHeader()
 
-            return {
-              ...h,
-              isDeleted: true
-            }
+    const transformedHeader: ColumnHeader[] = srcHeader.flatMap((h, index) => {
+      if (!h.isDeleted && h.name === columnName) {
+        if (
+          colIndex != null
+            ? colIndex === (isInternalIndex ? index : headerIndex)
+            : true
+        ) {
+          deletedColsSrcIndexes.push(h.index)
+
+          return {
+            ...h,
+            isDeleted: true
           }
-
-          headerIndex++
         }
 
-        return h
-      })
+        headerIndex++
+      }
+
+      return h
+    })
 
     if (deletedColsSrcIndexes.length === 0) {
-      throw new Error(`Column "${columnName}" not found and can't be removed`)
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
+        columnName
+      ])
     }
 
     return {

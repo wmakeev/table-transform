@@ -73,10 +73,7 @@ test('transform:column:select', async t => {
       assert.fail('should throw error')
     } catch (err) {
       assert.ok(err instanceof Error)
-      assert.equal(
-        err.message,
-        `Column(s) not found and can't be selected: "X"`
-      )
+      assert.equal(err.message, `Column(s) not found: "X"`)
     }
   })
 

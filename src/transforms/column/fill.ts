@@ -1,4 +1,7 @@
+import { TransformStepError } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+
+const TRANSFORM_NAME = 'Column:Fill'
 
 export interface FillColumnParams {
   columnName: string
@@ -18,7 +21,10 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
       .filter(h => h.name === columnName)
 
     if (fillColumns.length === 0) {
-      throw new Error(`Column "${columnName}" not found and can't be filled`)
+      throw new TransformStepError(
+        `Column "${columnName}" not found and can't be filled`,
+        TRANSFORM_NAME
+      )
     }
 
     async function* getTransformedSourceGenerator() {

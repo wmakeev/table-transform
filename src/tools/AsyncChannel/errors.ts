@@ -1,3 +1,5 @@
+export class AsyncChannelError extends Error {}
+
 export class AsyncChannelClosedError extends Error {
   constructor(public channelName?: string) {
     super(

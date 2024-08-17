@@ -5,6 +5,9 @@ import {
   TransformExpressionContext,
   TransformState
 } from '../index.js'
+import { TransformRowExpressionError } from '../../errors/index.js'
+
+const TRANSFORM_NAME = 'Column:Transform'
 
 export const transform = (
   params: ColumnTransformExpressionParams,
@@ -20,24 +23,38 @@ export const transform = (
       const srcHeader = source.getHeader()
 
       const transformState: TransformState = new TransformState(
+        TRANSFORM_NAME,
         params,
         srcHeader,
         context
       )
 
       for await (const chunk of source) {
-        chunk.forEach(row => {
+        chunk.forEach((row, rowIndex) => {
           transformState.nextRow(row)
 
           for (const [
-            arrIndex,
-            colIndex
+            arrColIndex,
+            headerColIndex
           ] of transformState.fieldColsIndexes.entries()) {
-            transformState.arrColIndex = arrIndex
+            transformState.arrColIndex = arrColIndex
 
             const result = transformState.evaluateExpression()
 
-            row[colIndex] = result
+            if (result instanceof Error) {
+              throw new TransformRowExpressionError(
+                result.message,
+                TRANSFORM_NAME,
+                srcHeader,
+                chunk,
+                rowIndex,
+                headerColIndex,
+                params.expression,
+                { cause: result, rowNum: transformState.rowNum }
+              )
+            }
+
+            row[headerColIndex] = result
           }
         })
 

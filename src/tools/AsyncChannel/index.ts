@@ -1,4 +1,5 @@
 import { setImmediate as setImmediateAsync } from 'node:timers/promises'
+import { AsyncChannelError } from './errors.js'
 
 export class AsyncChannel<T = unknown> {
   static readonly CLOSED: unique symbol = Symbol('CLOSED')
@@ -19,11 +20,11 @@ export class AsyncChannel<T = unknown> {
     this.#name = options?.name
 
     if (!Number.isInteger(bufferLength)) {
-      throw new Error('buffer argument should be number')
+      throw new AsyncChannelError('buffer argument should be number')
     }
 
     if (bufferLength < 0) {
-      throw new Error('buffer argument should be positive number')
+      throw new AsyncChannelError('buffer argument should be positive number')
     }
 
     this.#bufferLength = bufferLength
@@ -136,7 +137,7 @@ export class AsyncChannel<T = unknown> {
           if (this.isFlushed()) {
             resolve()
           } else {
-            reject(new Error('AsyncChannel flush is timed out'))
+            reject(new AsyncChannelError('AsyncChannel flush is timed out'))
           }
         }, params.timeout)
       }

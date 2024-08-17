@@ -1,4 +1,4 @@
-import { NonExistColumnTransformError } from '../../errors/index.js'
+import { TransformColumnsNotFoundError } from '../../errors/index.js'
 import { ColumnHeader } from '../../index.js'
 import { TransformState } from './index.js'
 
@@ -29,7 +29,9 @@ export const getRowProxyHandler = (
       const indexes = transformState.fieldIndexesByName.get(prop as string)
 
       if (indexes == null) {
-        throw new NonExistColumnTransformError(String(prop))
+        throw new TransformColumnsNotFoundError(transformState.name, header, [
+          String(prop)
+        ])
       }
 
       if (indexes.length === 1) {
