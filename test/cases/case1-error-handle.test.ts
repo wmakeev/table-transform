@@ -93,7 +93,7 @@ test('Transform error handler', async t => {
     async () => {
       const tableTransformer = createTableTransformer({
         outputHeader: {
-          forceColumns: ['foo', 'bar', 'error']
+          forceColumns: ['foo', 'bar', 'error_message', 'error_foo']
         },
         transforms: [
           tf.column.transform({
@@ -104,9 +104,16 @@ test('Transform error handler', async t => {
         errorHandle: {
           errorColumn: 'error',
           transforms: [
+            tf.column.add({ columnName: 'error_message' }),
             tf.column.transform({
-              columnName: 'error',
+              columnName: 'error_message',
               expression: `message of 'error'`
+            }),
+
+            tf.column.add({ columnName: 'error_foo' }),
+            tf.column.transform({
+              columnName: 'error_foo',
+              expression: `foo of rowRecord of 'error'`
             })
           ]
         }
@@ -129,9 +136,9 @@ test('Transform error handler', async t => {
       for await (const it of gen) result.push(it)
 
       assert.deepEqual(result, [
-        [['foo', 'bar', 'error']],
-        [['тест 0+', 40, null]],
-        [[null, null, 'Column(s) not found: "baz"']]
+        [['foo', 'bar', 'error_message', 'error_foo']],
+        [['тест 0+', 40, null, null]],
+        [[null, null, 'Column(s) not found: "baz"', 'тест 2']]
       ])
     }
   )

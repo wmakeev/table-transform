@@ -119,7 +119,7 @@ test('transforms:column:filter', async t => {
       assert.deepEqual(err.row, ['1', '2', '3'])
       assert.equal(err.rowIndex, 0)
       assert.equal(err.rowNum, 1)
-      assert.deepEqual(err.rowRecord, {
+      assert.deepEqual(err.getRowRecord(), {
         A: '1',
         B: '2',
         C: '3'
@@ -175,7 +175,7 @@ test('transforms:column:filter', async t => {
       assert.deepEqual(err.row, ['1', '2', '3'])
       assert.equal(err.rowIndex, 0)
       assert.equal(err.rowNum, 1)
-      assert.deepEqual(err.rowRecord, {
+      assert.deepEqual(err.getRowRecord(), {
         A: '1',
         B: '2',
         C: '3'

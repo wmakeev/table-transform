@@ -95,7 +95,6 @@ function rowReport(this: TransformChunkError, rowCaption: string) {
 }
 
 export class TransformChunkError extends TransformHeaderError {
-  public rowRecord: Record<string, unknown | unknown[]>
   public row: TableRow
 
   constructor(
@@ -108,11 +107,14 @@ export class TransformChunkError extends TransformHeaderError {
     super(message, stepName, header, options)
     this.name = this.constructor.name
     this.row = chunk[0] ?? []
-    this.rowRecord = getRowRecord(header, chunk?.[0])
   }
 
   override report(): void {
     rowReport.call(this, 'First row sample')
+  }
+
+  getRowRecord() {
+    return getRowRecord(this.header, this.chunk[0])
   }
 }
 
@@ -167,6 +169,10 @@ export class TransformRowError extends TransformChunkError {
     )
 
     console.groupEnd()
+  }
+
+  override getRowRecord(): Record<string, unknown> {
+    return getRowRecord(this.header, this.chunk[this.rowIndex])
   }
 }
 

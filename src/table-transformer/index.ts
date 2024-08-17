@@ -83,6 +83,7 @@ export function createTableTransformer(
         chunk: (err as any).chunk,
         row: (err as any).row,
         rowIndex: (err as any).rowIndex,
+        rowRecord: (err as any).getRowRecord?.(),
         expression: (err as any).expression,
         column: (err as any).column,
         columnIndex: (err as any).columnIndex
