@@ -1,4 +1,7 @@
-import { compileExpression } from '@wmakeev/filtrex'
+import {
+  compileExpression,
+  useDotAccessOperatorAndOptionalChaining
+} from '@wmakeev/filtrex'
 import { TransformExpressionParams, TransformState } from '../index.js'
 
 export interface TransformExpressionContext {
@@ -15,6 +18,8 @@ export const getTransformExpression = (
   context?: TransformExpressionContext
 ) => {
   const transformExpression = compileExpression(params.expression, {
+    customProp: useDotAccessOperatorAndOptionalChaining,
+
     symbols: {
       ...(context?.symbols ?? {}),
 

@@ -315,9 +315,14 @@ test('Transform error handler', async t => {
       errorHandle: {
         errorColumn: 'error',
         transforms: [
+          tf.column.add({ columnName: 'foo' }),
+          tf.column.transform({
+            columnName: 'foo',
+            expression: `bar of 'error'`
+          }),
           tf.column.transform({
             columnName: 'error',
-            expression: `bar of 'error'`
+            expression: `'bar'`
           })
         ]
       }
@@ -339,7 +344,7 @@ test('Transform error handler', async t => {
       assert.fail('error expected')
     } catch (err) {
       assert.ok(err instanceof TransformRowExpressionError)
-      assert.equal(err.message, 'Property “bar” does not exist.')
+      assert.equal(err.message, 'Column(s) not found: "bar"')
       err.report()
     }
 
