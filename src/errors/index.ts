@@ -87,7 +87,7 @@ function rowReport(this: TransformChunkError, rowCaption: string) {
       'column': h.name,
       'internal index': h.index,
       'deleted': h.isDeleted,
-      'value': this.row[h.index]
+      'value': this.row?.[h.index]
     }))
   )
   console.info(`${this.chunk.length} rows in chunk`)
@@ -95,7 +95,7 @@ function rowReport(this: TransformChunkError, rowCaption: string) {
 }
 
 export class TransformChunkError extends TransformHeaderError {
-  public row: TableRow
+  public row: TableRow | undefined
 
   constructor(
     message: string,
@@ -106,7 +106,7 @@ export class TransformChunkError extends TransformHeaderError {
   ) {
     super(message, stepName, header, options)
     this.name = this.constructor.name
-    this.row = chunk[0] ?? []
+    this.row = chunk[0]
   }
 
   override report(): void {
@@ -114,7 +114,7 @@ export class TransformChunkError extends TransformHeaderError {
   }
 
   getRowRecord() {
-    return getRowRecord(this.header, this.chunk[0])
+    return getRowRecord(this.header, this.chunk?.[0])
   }
 }
 
@@ -133,7 +133,7 @@ export class TransformRowError extends TransformChunkError {
   ) {
     super(message, stepName, header, chunk, options)
     this.name = this.constructor.name
-    this.row = [...chunk[rowIndex]!]
+    this.row = chunk[rowIndex]
     this.column = columnIndex != null ? header[columnIndex]?.name : undefined
     this.rowNum = options?.rowNum
   }
@@ -152,7 +152,7 @@ export class TransformRowError extends TransformChunkError {
         'column': h.name,
         'row index': h.index,
         'deleted': h.isDeleted,
-        'value': this.row[h.index],
+        'value': this.row?.[h.index],
         ...(h.index === this.columnIndex ? { error: this.message } : {})
       })),
       [
