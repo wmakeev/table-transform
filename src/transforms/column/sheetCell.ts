@@ -79,7 +79,7 @@ export type SheetCellParams =
     }
 
 interface FoundCell {
-  rowIndex: number
+  bufferRowIndex: number
   columnIndex: number
   value: any
 }
@@ -229,12 +229,12 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
         if (cellColIndex === -1) return null
 
-        const rowIndex = bufferRowIndex + yOffset
+        const foundRowIndex = bufferRowIndex + yOffset
         const columnIndex = cellColIndex + xOffset
 
-        const value = rowBuffer[rowIndex]![columnIndex]
+        const value = rowBuffer[foundRowIndex]![columnIndex]
 
-        return { rowIndex, columnIndex, value }
+        return { bufferRowIndex: foundRowIndex, columnIndex, value }
       }
 
       const processChunk = (chunk: TableRow[], fromRow = 0) => {
@@ -285,16 +285,17 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
         // Frame end inside buffer
 
-        for (let i = y1 - bufferFirstRowIndex; i <= y2; i++) {
+        for (
+          let i = y1 - bufferFirstRowIndex, len = y2 - bufferFirstRowIndex;
+          i <= len;
+          i++
+        ) {
           const found = searchCell(i)
 
           if (found !== null) {
             foundCell = found
 
-            yield processChunk(
-              rowBuffer,
-              found.rowIndex + 1 - bufferFirstRowIndex
-            )
+            yield processChunk(rowBuffer, found.bufferRowIndex + 1)
 
             rowBuffer = []
 

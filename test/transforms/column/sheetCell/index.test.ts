@@ -17,7 +17,7 @@ import {
   transforms
 } from '../../../../src/index.js'
 
-test('sheetCell transform (case1)', async () => {
+test('transforms:cell:sheetCell (case1)', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'EXCEL_STYLE'
@@ -179,7 +179,169 @@ test('sheetCell transform (case1)', async () => {
   assert.equal(actualCsv, expectedCsv)
 })
 
-test('sheetCell transform (case1) - cell not found', async () => {
+test('transforms:cell:sheetCell (case1 - shifted)', async () => {
+  const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
+    transforms: [
+      transforms.column.add({
+        columnName: 'row'
+      }),
+
+      transforms.column.transform({
+        columnName: 'row',
+        expression: 'row()'
+      }),
+
+      //#region Column1 - A1
+      transforms.column.add({
+        columnName: 'Col1'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A11',
+        testValue: 'Column1',
+        targetColumn: 'Col1'
+      }),
+      //#endregion
+
+      //#region Column2 - B2:D11
+      transforms.column.add({
+        columnName: 'Col2'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'B12:D21',
+        testValue: 'Column2',
+        targetColumn: 'Col2'
+      }),
+      //#endregion
+
+      //#region "Column3:" - B2:D11
+      transforms.column.add({
+        columnName: 'Col3'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'C11:E14',
+        testValue: 'Column3:',
+        offset: 'R[1]C[1]',
+        targetColumn: 'Col3'
+      }),
+      //#endregion
+
+      //#region "Const4:" - E4:G7
+      transforms.column.add({
+        columnName: 'Col4'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'CONSTANT',
+        range: 'E14:G17',
+        testValue: 'Const4:',
+        offset: 'R[-3]C[2]',
+        targetColumn: 'Col4'
+      }),
+      //#endregion
+
+      //#region NOOP - G1:I3
+      transforms.column.addArray({
+        columnName: 'Col5',
+        length: 2
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'G11:I13',
+        testOperation: 'NOOP',
+        testValue: undefined,
+        targetColumn: 'Col5',
+        targetColumnIndex: 1
+      }),
+      //#endregion
+
+      transforms.column.sheetCell({
+        type: 'ASSERT',
+        range: 'H17:J19',
+        testValue: 'Assert1'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'ASSERT',
+        range: 'B11',
+        testOperation: 'EMPTY'
+      }),
+
+      //#region "foo"
+      transforms.column.add({
+        columnName: 'Col6'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'CONSTANT',
+        range: 'H17:J19',
+        testValue: 'foo',
+        targetColumn: 'Col6',
+        isOptional: true
+      }),
+      //#endregion
+
+      transforms.column.select({
+        columns: ['row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col5', 'Col6']
+      })
+    ]
+  })
+
+  const transformedRowsStream: Readable = compose(
+    createReadStream(
+      path.join(
+        process.cwd(),
+        'test/transforms/column/sheetCell/sheetCell1_shifted_in.csv'
+      ),
+      {
+        highWaterMark: 16 * 1024,
+        encoding: 'utf8'
+      }
+    ),
+
+    parse({ bom: true }),
+
+    new ChunkTransform({ batchSize: 3 }),
+
+    tableTransformer,
+
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.take(100).toArray()
+
+  const actualCsv = stringify(transformedRows)
+
+  // DEBUG
+  // await writeFile(
+  //   path.join(
+  //     process.cwd(),
+  //     'test/transforms/column/sheetCell/sheetCell1_shifted_out.csv'
+  //   ),
+  //   actualCsv
+  // )
+
+  const expectedCsv = await readFile(
+    path.join(
+      process.cwd(),
+      'test/transforms/column/sheetCell/sheetCell1_shifted_out.csv'
+    ),
+    'utf-8'
+  )
+
+  assert.equal(actualCsv, expectedCsv)
+})
+
+test('transforms:cell:sheetCell (case1) - cell not found', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'EXCEL_STYLE'
@@ -228,7 +390,7 @@ test('sheetCell transform (case1) - cell not found', async () => {
   }
 })
 
-test('sheetCell transform (case1) - assert', async () => {
+test('transforms:cell:sheetCell (case1) - assert', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'EXCEL_STYLE'
@@ -276,7 +438,7 @@ test('sheetCell transform (case1) - assert', async () => {
   }
 })
 
-test('sheetCell transform (case2)', async () => {
+test('transforms:cell:sheetCell (case2)', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'EXCEL_STYLE'
