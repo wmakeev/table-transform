@@ -100,6 +100,12 @@ export function createTableTransformer(
         )
       }
 
+      // TODO Было бы не плохо иметь возможность передать ошибку в переменную,
+      // а не в колонку. Но это можно сделать сейчас только через контекст
+      // трансформации. Вероятно тут нужен как раз этот глобальный контекст.
+
+      // `createTableTransformer(config, context)` (???)
+
       yield* createTableTransformer({
         transforms: _transforms,
         outputHeader: {
