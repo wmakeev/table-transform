@@ -51,8 +51,21 @@ export async function getInitialTableSource(params: {
         const forcedLen = inputHeaderOptions.forceColumnsCount!
 
         for await (const chunk of chunkedRowsIterable) {
-          for (const row of chunk) forceArrayLength(row, forcedLen)
-          yield chunk
+          // TODO Аналогичные проверки на массив ниже. Можно/нужно объединить?
+          if (!Array.isArray(chunk)) {
+            throw new TransformError('Rows chunk expected to be Array')
+          }
+
+          if (chunk.length > 0) {
+            for (const row of chunk) {
+              if (!Array.isArray(row)) {
+                throw new TransformError('Row expected to be Array')
+              }
+              forceArrayLength(row, forcedLen)
+            }
+
+            yield chunk
+          }
         }
       }
     }
@@ -131,15 +144,17 @@ export async function getInitialTableSource(params: {
         if (!Array.isArray(curChunk))
           throw new TransformError('Rows chunk expected to be Array')
 
-        for (const row of curChunk) {
-          if (!Array.isArray(row)) {
-            throw new TransformError('Row expected to be Array')
+        if (curChunk.length > 0) {
+          for (const row of curChunk) {
+            if (!Array.isArray(row)) {
+              throw new TransformError('Row expected to be Array')
+            }
+
+            forceArrayLength(row, headerLen)
           }
 
-          forceArrayLength(row, headerLen)
+          yield curChunk
         }
-
-        if (curChunk.length > 0) yield curChunk
 
         const iterResult = await sourceIterator.next()
 

@@ -49,28 +49,29 @@ test('transforms:column:filter', async t => {
 
     /* prettier-ignore */
     const csv = [
-    ['' , '' , ''],
-    ['' , '1', ''],
-    ['' , '' , ''],
-    ['3', '2', ''],
-    ['' , '2', ''],
-    ['3', '2', ''],
-    ['' , '2', '']
-  ]
+      ['' , '',  ''],
+      ['' , '1', ''],
+      ['' , ''],
+      ['3', '2', ''],
+      [],
+      [],
+      ['' , '2', ''],
+      ['3', '2', ''],
+      ['' , '2', '']
+    ]
 
     const transformedRowsStream: Readable = compose(
       csv.values(),
       new ChunkTransform({ batchSize: 2 }),
-      tableTransformer,
-      new FlattenTransform()
+      tableTransformer
     )
 
     const transformedRows = await transformedRowsStream.toArray()
 
     assert.deepEqual(transformedRows, [
-      ['A', 'B', 'C'],
-      ['', '2', ''],
-      ['', '2', '']
+      [['A', 'B', 'C']],
+      [['', '2', '']],
+      [['', '2', '']]
     ])
   })
 

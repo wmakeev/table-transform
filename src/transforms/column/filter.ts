@@ -109,7 +109,9 @@ export const filter = (
           if (isPass) filteredRows.push(row)
         }
 
-        yield filteredRows
+        if (filteredRows.length > 0) {
+          yield filteredRows
+        }
       }
     }
 
