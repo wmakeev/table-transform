@@ -11,6 +11,8 @@ import {
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { normalize } from './normalize.js'
 
+const TRANSFORM_NAME = 'MergeFork'
+
 export interface MergeForkParams {
   outputColumns: string[]
   transformConfigs: TableTransfromConfig[]
@@ -89,10 +91,15 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
 
     async function* getTransformedSourceGenerator() {
       const forkedChans = transformConfigs.map(
-        () => new AsyncChannel<TableRow[]>()
+        (_, index) =>
+          new AsyncChannel<TableRow[]>({
+            name: `${TRANSFORM_NAME}:forkedChans[${index}]`
+          })
       )
 
-      const mergeChan = new AsyncChannel<TableRow[]>()
+      const mergeChan = new AsyncChannel<TableRow[]>({
+        name: `${TRANSFORM_NAME}:mergeChan`
+      })
 
       const transformGens = transformConfigs.map((forkConfig, index) => {
         const forkTransform = createTableTransformer({

@@ -503,3 +503,32 @@ test('AsyncChannel (buffer) #1', async () => {
     ]
   )
 })
+
+test.only('AsyncChannel (first take)', async () => {
+  const chan = new AsyncChannel<number>()
+
+  // async function* source() {
+  //   for (let i = 1; i <= 10; i++) {
+
+  //   }
+  // }
+
+  const consumer = (async () => {
+    for await (const it of chan) {
+      console.log(it)
+    }
+  })()
+
+  setImmediate(async () => {
+    await chan.put(1)
+    setTimeout(async () => {
+      await chan.put(2)
+      await chan.put(3)
+      await chan.flush()
+      chan.close()
+    })
+  })
+
+  // assert.ok(producer)
+  assert.ok(consumer)
+})

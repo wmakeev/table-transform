@@ -8,6 +8,7 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../index.js'
+import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { getNormalizedHeaderRow } from '../tools/header/index.js'
 
 export interface SplitInParams {
@@ -23,104 +24,93 @@ const getRowsComparator = (columnIndexes: number[]) => {
   }
 }
 
-class AsyncGeneratorProxy implements TableChunksAsyncIterable {
-  #sourceGenerator: AsyncGenerator<TableRow[], any, unknown> | null = null
-
-  #rowsComparator: (a: TableRow, b: TableRow) => boolean
-
-  #lastChunkRest: TableRow[] = []
-
-  #suspended = false
-
-  constructor(
-    splitColumns: string[],
-    private source: TableChunksAsyncIterable
-  ) {
-    this.#sourceGenerator = source[Symbol.asyncIterator]()
-
-    const splitColumnsSet = new Set(splitColumns)
-
-    const splitColumnIndexes = source
-      .getHeader()
-      .filter(h => !h.isDeleted && splitColumnsSet.has(h.name))
-      .map(h => h.index)
-
-    this.#rowsComparator = getRowsComparator(splitColumnIndexes)
+const createRowIndexNamer =
+  (splitColumnIndexes: number[]) => (row: TableRow) => {
+    return splitColumnIndexes.map(i => String(row[i])).join()
   }
 
-  async next() {
-    if (this.#suspended) {
-      return { done: true as const, value: undefined }
+async function pipeSourceToChannels(
+  source: TableChunksAsyncIterable,
+  targetChannelsChan: AsyncChannel<AsyncChannel<TableRow[]>>,
+  splitColumns: string[]
+): Promise<void> {
+  const splitColumnsSet = new Set(splitColumns)
+
+  const splitColumnIndexes = source
+    .getHeader()
+    .filter(h => !h.isDeleted && splitColumnsSet.has(h.name))
+    .map(h => h.index)
+
+  const getRowIndexName = createRowIndexNamer(splitColumnIndexes)
+
+  const rowsComparator = getRowsComparator(splitColumnIndexes)
+
+  let chan: AsyncChannel<TableRow[]>
+
+  let curPartRowSample: TableRow | undefined = undefined
+
+  for await (const chunk of source) {
+    // on iteration start
+    if (curPartRowSample === undefined) {
+      curPartRowSample = chunk[0]
+      chan = new AsyncChannel<TableRow[]>({
+        name: `${TRANSFORM_NAME}:chan("${getRowIndexName(curPartRowSample!)}")`
+      })
+      await targetChannelsChan.put(chan)
     }
 
-    const curChunk = [...this.#lastChunkRest]
+    let chanCurIndex = 0
 
-    if (this.#sourceGenerator != null) {
-      const nextResult = await this.#sourceGenerator.next()
+    while (true) {
+      let chanSplitIndex = -1
 
-      if (nextResult.done === true) {
-        this.#sourceGenerator = null
-      } else {
-        curChunk.push(...nextResult.value)
+      for (let i = chanCurIndex; i < chunk.length; i++) {
+        if (!rowsComparator(curPartRowSample!, chunk[i]!)) {
+          chanSplitIndex = i
+          break
+        }
       }
+
+      assert.ok(chan!)
+
+      if (chanSplitIndex === -1) {
+        if (!chan.isClosed())
+          await chan.put(chanCurIndex === 0 ? chunk : chunk.slice(chanCurIndex))
+
+        break
+      }
+
+      curPartRowSample = [...chunk[chanSplitIndex]!]
+
+      if (!chan.isClosed()) {
+        if (chanSplitIndex !== 0) {
+          await chan.put(
+            chanSplitIndex !== chanCurIndex
+              ? chunk.slice(chanCurIndex, chanSplitIndex)
+              : chanCurIndex === 0
+                ? chunk
+                : chunk.slice(chanCurIndex)
+          )
+        }
+
+        if (!chan.isFlushed()) await chan.flush()
+        chan.close()
+      }
+
+      chanCurIndex = chanSplitIndex
+
+      chan = new AsyncChannel<TableRow[]>({
+        name: `${TRANSFORM_NAME}:chan("${getRowIndexName(curPartRowSample!)}")`
+      })
+      await targetChannelsChan.put(chan)
     }
-
-    // Iterator is ended
-    if (curChunk[0] == null) {
-      return { done: true as const, value: undefined }
-    }
-
-    this.#lastChunkRest = []
-
-    const chunkFirstRow = curChunk[0]
-
-    const splitIndex = curChunk.findIndex(
-      row => !this.#rowsComparator(chunkFirstRow, row)
-    )
-
-    if (splitIndex === -1) {
-      return { done: false, value: curChunk }
-    }
-
-    const curChunkHead = curChunk.slice(0, splitIndex)
-    const curChunkTail = curChunk.slice(splitIndex)
-
-    this.#lastChunkRest = curChunkTail
-
-    this.suspend()
-
-    return { done: false, value: curChunkHead }
   }
 
-  return(value: any) {
-    assert.ok(this.#sourceGenerator)
-    return this.#sourceGenerator.return(value)
-  }
+  if (!chan!.isFlushed()) await chan!.flush()
+  chan!.close()
 
-  throw(e: any) {
-    assert.ok(this.#sourceGenerator)
-    return this.#sourceGenerator.throw(e)
-  }
-
-  getHeader() {
-    return this.source.getHeader()
-  }
-
-  [Symbol.asyncIterator]() {
-    return this
-  }
-
-  suspend() {
-    this.#suspended = true
-  }
-
-  contine() {
-    this.#suspended = false
-  }
-
-  isDone() {
-    return this.#sourceGenerator == null
-  }
+  if (!targetChannelsChan.isFlushed()) await targetChannelsChan.flush()
+  targetChannelsChan.close()
 }
 
 /**
@@ -195,13 +185,40 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       }
       //#endregion
 
-      const iteratorProxy = new AsyncGeneratorProxy(splitColumns, source)
+      const channels = new AsyncChannel<AsyncChannel<TableRow[]>>({
+        name: `${TRANSFORM_NAME}:channels`
+      })
 
-      while (true) {
-        yield* createTableTransformer(transformConfig)(iteratorProxy)
-        if (iteratorProxy.isDone()) break
-        iteratorProxy.contine()
+      const p = pipeSourceToChannels(source, channels, splitColumns)
+      // .catch(
+      //   async err => {
+      //     console.error(err)
+      //   }
+      // )
+
+      for await (const chan of channels) {
+        const tableChunksAsyncIterable: TableChunksAsyncIterable = {
+          getHeader: () => srcHeader,
+          [Symbol.asyncIterator]: chan[Symbol.asyncIterator].bind(chan)
+        }
+
+        const gen = createTableTransformer(transformConfig)(
+          tableChunksAsyncIterable
+        )
+
+        try {
+          for await (const chunk of gen) {
+            yield chunk
+          }
+        } catch (err) {
+          console.log(err)
+          throw err
+        } finally {
+          chan.close()
+        }
       }
+
+      await p
     }
 
     return {

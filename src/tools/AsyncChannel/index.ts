@@ -150,7 +150,12 @@ export class AsyncChannel<T = unknown> {
 
       if (value === AsyncChannel.CLOSED) break
 
-      yield value
+      try {
+        yield value
+      } catch (err) {
+        console.log('[AsyncChannel] generator error handled - ', err)
+        throw err
+      }
     }
   }
 }
