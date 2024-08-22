@@ -195,3 +195,5 @@ export class TransformRowExpressionError extends TransformRowError {
     super.report(`Expression: ${this.expression}`)
   }
 }
+
+export class TransformRowAssertError extends TransformRowExpressionError {}

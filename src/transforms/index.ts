@@ -1,3 +1,4 @@
+export * from './assertNotEmpty.js'
 export * as column from './column/index.js'
 export * from './flatMapWithProvider.js'
 export * from './mergeFork.js'
