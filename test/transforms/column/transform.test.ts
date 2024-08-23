@@ -47,7 +47,7 @@ test('transforms:column:transform (simple)', async () => {
 
   /* prettier-ignore */
   assert.deepEqual(transformedRows, [
-    ['col', 'col2', 'col3'],
+    ['col1', 'col2', 'col3'],
     [''    , '1+'  , ''    ],
     [''    , '+'   , null  ],
     ['3'   , '2+'  , ''    ],
