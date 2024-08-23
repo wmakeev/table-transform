@@ -172,7 +172,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         y1 + yOffset,
         y2,
         y2 + yOffset
-      ].sort() as [number, number, number, number]
+      ].sort((a, b) => a - b) as [number, number, number, number]
 
       if (searchFrameFirstRowIndex < 0) {
         throw new TransformStepError('Rows offset out of range', TRANSFORM_NAME)
@@ -184,7 +184,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         x1 + xOffset,
         x2,
         x2 + xOffset
-      ].sort() as [number, number, number, number]
+      ].sort((a, b) => a - b) as [number, number, number, number]
 
       if (searchFrameFirstColIndex < 0) {
         throw new TransformStepError(
