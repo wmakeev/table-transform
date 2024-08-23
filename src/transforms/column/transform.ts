@@ -37,6 +37,13 @@ export const transform = (
             arrColIndex,
             headerColIndex
           ] of transformState.fieldColsIndexes.entries()) {
+            if (
+              params.columnIndex != null &&
+              arrColIndex !== params.columnIndex
+            ) {
+              continue
+            }
+
             transformState.arrColIndex = arrColIndex
 
             const result = transformState.evaluateExpression()

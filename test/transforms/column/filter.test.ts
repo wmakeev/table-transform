@@ -75,6 +75,45 @@ test('transforms:column:filter', async t => {
     ])
   })
 
+  await t.test(
+    'transforms:column:filter (array with selected index)',
+    async () => {
+      const tableTransformer = createTableTransformer({
+        transforms: [
+          transforms.column.filter({
+            columnName: 'A',
+            expression: 'value() != "1"',
+            columnIndex: 1
+          })
+        ]
+      })
+
+      /* prettier-ignore */
+      const csv = [
+        ['A', 'B', 'A'],
+        ['1', '2', '' ],
+        ['' , '2', '1'],
+        ['1', '2', '' ],
+        ['' , '2', '1']
+      ]
+
+      const transformedRowsStream: Readable = compose(
+        csv.values(),
+        new ChunkTransform({ batchSize: 10 }),
+        tableTransformer,
+        new FlattenTransform()
+      )
+
+      const transformedRows = await transformedRowsStream.toArray()
+
+      assert.deepEqual(transformedRows, [
+        ['A', 'B', 'A'],
+        ['1', '2', ''],
+        ['1', '2', '']
+      ])
+    }
+  )
+
   await t.test('filter column error', async () => {
     const tableTransformer = createTableTransformer({
       inputHeader: {

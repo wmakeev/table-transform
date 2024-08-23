@@ -1,4 +1,7 @@
-import { TransformRowExpressionError } from '../../errors/index.js'
+import {
+  TransformRowExpressionError,
+  TransformStepError
+} from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
   TransformExpressionContext,
@@ -13,8 +16,34 @@ export const filter = (
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
   return source => {
+    if (params.columnName == null && params.columnIndex != null) {
+      throw new TransformStepError(
+        'columnIndex cannot be specified without columnName',
+        TRANSFORM_NAME
+      )
+    }
+
     async function* getTransformedSourceGenerator() {
       const srcHeader = source.getHeader()
+
+      const getErrArgs = (
+        message: string,
+        chunk: TableRow[],
+        rowIndex: number,
+        columnIndex: number | null,
+        cause?: Error
+      ) => {
+        return [
+          message,
+          TRANSFORM_NAME,
+          srcHeader,
+          chunk,
+          rowIndex,
+          columnIndex,
+          params.expression,
+          { rowNum: transformState.rowNum, cause }
+        ] as const
+      }
 
       const transformState = new TransformState(
         TRANSFORM_NAME,
@@ -37,27 +66,18 @@ export const filter = (
 
             if (result instanceof Error) {
               throw new TransformRowExpressionError(
-                result.message,
-                TRANSFORM_NAME,
-                srcHeader,
-                chunk,
-                rowIndex,
-                null,
-                params.expression,
-                { cause: result, rowNum: transformState.rowNum }
+                ...getErrArgs(result.message, chunk, rowIndex, null, result)
               )
             }
 
             if (typeof result !== 'boolean') {
               throw new TransformRowExpressionError(
-                'Filter expression should return boolean result',
-                TRANSFORM_NAME,
-                srcHeader,
-                chunk,
-                rowIndex,
-                null,
-                params.expression,
-                { rowNum: transformState.rowNum }
+                ...getErrArgs(
+                  'Filter expression should return boolean result',
+                  chunk,
+                  rowIndex,
+                  null
+                )
               )
             }
 
@@ -70,33 +90,37 @@ export const filter = (
               arrColIndex,
               headerColIndex
             ] of transformState.fieldColsIndexes.entries()) {
+              if (
+                params.columnIndex != null &&
+                arrColIndex !== params.columnIndex
+              ) {
+                continue
+              }
+
               transformState.arrColIndex = arrColIndex
 
               const result = transformState.evaluateExpression()
 
               if (result instanceof Error) {
                 throw new TransformRowExpressionError(
-                  result.message,
-                  TRANSFORM_NAME,
-                  srcHeader,
-                  chunk,
-                  rowIndex,
-                  headerColIndex,
-                  params.expression,
-                  { cause: result, rowNum: transformState.rowNum }
+                  ...getErrArgs(
+                    result.message,
+                    chunk,
+                    rowIndex,
+                    headerColIndex,
+                    result
+                  )
                 )
               }
 
               if (typeof result !== 'boolean') {
                 throw new TransformRowExpressionError(
-                  'Filter expression should return boolean result',
-                  TRANSFORM_NAME,
-                  srcHeader,
-                  chunk,
-                  rowIndex,
-                  headerColIndex,
-                  params.expression,
-                  { rowNum: transformState.rowNum }
+                  ...getErrArgs(
+                    'Filter expression should return boolean result',
+                    chunk,
+                    rowIndex,
+                    headerColIndex
+                  )
                 )
               }
 

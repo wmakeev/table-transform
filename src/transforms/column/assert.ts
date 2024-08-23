@@ -1,6 +1,7 @@
 import {
   TransformRowAssertError,
-  TransformRowExpressionError
+  TransformRowExpressionError,
+  TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
@@ -15,6 +16,13 @@ export const assert = (
   params: TransformExpressionParams & { message?: string },
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
+  if (params.columnName == null && params.columnIndex != null) {
+    throw new TransformStepError(
+      'columnIndex cannot be specified without columnName',
+      TRANSFORM_NAME
+    )
+  }
+
   return source => {
     async function* getTransformedSourceGenerator() {
       const srcHeader = source.getHeader()
@@ -88,6 +96,13 @@ export const assert = (
               arrColIndex,
               headerColIndex
             ] of transformState.fieldColsIndexes.entries()) {
+              if (
+                params.columnIndex != null &&
+                arrColIndex !== params.columnIndex
+              ) {
+                continue
+              }
+
               transformState.arrColIndex = arrColIndex
 
               const result = transformState.evaluateExpression()

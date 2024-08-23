@@ -18,6 +18,9 @@ export interface TransformExpressionParams {
 
   /** Expression */
   expression: string
+
+  /** Index of array column */
+  columnIndex?: number
 }
 
 export interface ColumnTransformExpressionParams {
@@ -26,4 +29,7 @@ export interface ColumnTransformExpressionParams {
 
   /** Expression */
   expression: string
+
+  /** Index of array column */
+  columnIndex?: number
 }
