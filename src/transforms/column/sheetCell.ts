@@ -48,7 +48,7 @@ export type SheetCellParams =
        *
        * Excel RC style offset like: `R1`, `C2`, `R1C1`
        */
-      offset?: string
+      offset?: string | undefined
 
       /**
        * If `true` not error was thrown if column not found
@@ -129,6 +129,8 @@ const operations: Record<
   NOOP: () => true
 }
 
+// TODO Вероятно надо переписать проверку буфера. Инкапсулировать логику в класс.
+
 /**
  * Dynamic column
  */
@@ -167,14 +169,14 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         )
       }
 
-      const [searchFrameFirstRowIndex, , , searchFrameLastRowIndex] = [
+      const [searchFrameStart_rowIndex] = [
         y1,
         y1 + yOffset,
         y2,
         y2 + yOffset
       ].sort((a, b) => a - b) as [number, number, number, number]
 
-      if (searchFrameFirstRowIndex < 0) {
+      if (searchFrameStart_rowIndex < 0) {
         throw new TransformStepError('Rows offset out of range', TRANSFORM_NAME)
       }
 
@@ -250,9 +252,9 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         return chunk
       }
 
-      let bufferFirstRowIndex: number | null = null
+      let bufferStart_rowIndex: number | null = null
 
-      let curRowIndex = 0
+      let cur_rowIndex = 0
 
       chunkLoop: for await (const chunk of source) {
         if (isPassThrough) {
@@ -266,8 +268,8 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         }
 
         // Pass all chunks before frame start
-        if (curRowIndex + chunk.length < searchFrameFirstRowIndex) {
-          curRowIndex += chunk.length
+        if (cur_rowIndex + chunk.length < searchFrameStart_rowIndex) {
+          cur_rowIndex += chunk.length
           yield chunk
           continue
         }
@@ -276,21 +278,27 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
         // Frame start inside buffer
 
-        if (bufferFirstRowIndex === null) bufferFirstRowIndex = curRowIndex
+        if (bufferStart_rowIndex === null) {
+          bufferStart_rowIndex = cur_rowIndex
+          cur_rowIndex = Math.max(cur_rowIndex, y1)
+        }
 
-        const bufferRowFrameEndRowIndex =
-          bufferFirstRowIndex + rowBuffer.length - 1
+        const bufferEnd_rowIndex = bufferStart_rowIndex + rowBuffer.length - 1
 
-        if (bufferRowFrameEndRowIndex < searchFrameLastRowIndex) continue
+        if (bufferEnd_rowIndex < y1 + yOffset) continue
 
         // Frame end inside buffer
 
+        const searchFrom_bufferIndex = cur_rowIndex - bufferStart_rowIndex
+        const searchTo_bufferIndex =
+          Math.min(bufferEnd_rowIndex, y2) - bufferStart_rowIndex
+
         for (
-          let i = y1 - bufferFirstRowIndex, len = y2 - bufferFirstRowIndex;
-          i <= len;
-          i++
+          let bufferIndex = searchFrom_bufferIndex;
+          bufferIndex <= searchTo_bufferIndex;
+          bufferIndex++, cur_rowIndex++
         ) {
-          const found = searchCell(i)
+          const found = searchCell(bufferIndex)
 
           if (found !== null) {
             foundCell = found
@@ -303,13 +311,25 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           }
         }
 
-        if (type !== 'ASSERT' && params.isOptional === true) {
-          yield rowBuffer
-          isPassThrough = true
-          rowBuffer = []
+        // Reached the end of the buffer but did not reach the end of the search frame.
+        if (cur_rowIndex <= y2) {
           continue
         }
 
+        //
+        else {
+          if (type !== 'ASSERT' && params.isOptional === true) {
+            yield rowBuffer
+            isPassThrough = true
+            rowBuffer = []
+            continue
+          }
+
+          break
+        }
+      }
+
+      if (!isPassThrough && foundCell == null) {
         throw new TransformChunkError(
           `Cell "${testValue}" in "${range}" range not found`,
           TRANSFORM_NAME,

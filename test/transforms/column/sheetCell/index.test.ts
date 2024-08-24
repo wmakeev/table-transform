@@ -45,7 +45,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
       }),
       //#endregion
 
-      //#region Column2 - B2:D11
+      //#region Column2
       transforms.column.add({
         columnName: 'Col2'
       }),
@@ -207,7 +207,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
       }),
       //#endregion
 
-      //#region Column2 - B2:D11
+      //#region Column2
       transforms.column.add({
         columnName: 'Col2'
       }),
@@ -220,7 +220,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
       }),
       //#endregion
 
-      //#region "Column3:" - B2:D11
+      //#region "Column3:"
       transforms.column.add({
         columnName: 'Col3'
       }),
@@ -539,4 +539,162 @@ test('transforms:cell:sheetCell (case2)', async () => {
     ['', '', '', '', ''],
     ['', '23', '', '', '']
   ])
+})
+
+test('transforms:cell:sheetCell (range y overflow)', async () => {
+  const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
+    transforms: [
+      transforms.column.add({
+        columnName: 'col1'
+      }),
+
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A1:B25',
+        testValue: '23',
+        testOperation: 'EQUAL',
+        targetColumn: 'col1'
+      }),
+
+      transforms.column.select({
+        columns: ['col1']
+      })
+    ]
+  })
+
+  const rows = [
+    ['10', '21'],
+    ['11', '22'],
+    ['12', '23'],
+    ['13', '24'],
+    ['14', '24'],
+    ['15', '25'],
+    ['16', '26'],
+    ['17', '27'],
+    ['18', '28'],
+    ['19', '29']
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    rows.values(),
+    new ChunkTransform({ batchSize: 3 }),
+    tableTransformer,
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    ['col1'],
+    [null],
+    [null],
+    [null],
+    ['24'],
+    ['24'],
+    ['25'],
+    ['26'],
+    ['27'],
+    ['28'],
+    ['29']
+  ])
+})
+
+test('transforms:cell:sheetCell (range y overflow)', async () => {
+  const getTransformerResult = async (
+    range: string,
+    testValue: string,
+    offset: string | undefined,
+    batchSize: number
+  ) => {
+    const tableTransformer = createTableTransformer({
+      inputHeader: {
+        mode: 'EXCEL_STYLE'
+      },
+      transforms: [
+        transforms.column.add({
+          columnName: 'col1'
+        }),
+
+        transforms.column.sheetCell({
+          type: 'HEADER',
+          range,
+          testValue,
+          offset,
+          testOperation: 'EQUAL',
+          targetColumn: 'col1'
+        }),
+
+        transforms.column.select({
+          columns: ['col1']
+        })
+      ]
+    })
+
+    const transformedRowsStream: Readable = compose(
+      rows.values(),
+      new ChunkTransform({ batchSize }),
+      tableTransformer,
+      new FlattenTransform()
+    )
+
+    const transformedRows = await transformedRowsStream.toArray()
+
+    return transformedRows.flat().map(it => it ?? '')
+  }
+
+  const rows = [
+    //A     B     C     D     E     F     G     H     I     J
+    ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09'], // 1
+    ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19'], // 2
+    ['20', '21', '22', '23', '24', '25', '26', '27', '28', '29'], // 3
+    ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39'], // 4
+    ['40', '41', '42', '43', '44', '45', '46', '47', '48', '49'], // 5
+    ['50', '51', '52', '53', '54', '55', '56', '57', '58', '59'], // 6
+    ['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'], // 7
+    ['70', '71', '72', '73', '74', '75', '76', '77', '78', '79'], // 8
+    ['80', '81', '82', '83', '84', '85', '86', '87', '88', '89'], // 9
+    ['90', '91', '92', '93', '94', '95', '96', '97', '98', '99'] // 10
+  ]
+
+  // TODO Добавить больше вариантов для теста
+  const cases: {
+    range: string
+    testValue: string
+    offset?: string | undefined
+    result: any[] | null
+  }[] = [
+    {
+      range: 'A1:C4',
+      testValue: '11',
+      offset: undefined,
+      result: ['col1', '', '', '21', '31', '41', '51', '61', '71', '81', '91']
+    },
+    {
+      range: 'H5:J10',
+      testValue: '79',
+      result: ['col1', '', '', '', '', '', '', '', '', '89', '99']
+    }
+  ]
+
+  for (const c of cases) {
+    let result
+
+    const label = `Range: ${c.range} Offset: ${c.offset}`
+
+    try {
+      result = await getTransformerResult(c.range, c.testValue, c.offset, 3)
+    } catch (err) {
+      console.debug(label)
+      throw err
+    }
+
+    if (c.result == null) {
+      console.log(label, JSON.stringify(result))
+    } else {
+      assert.deepEqual(result, c.result, label)
+    }
+  }
 })
