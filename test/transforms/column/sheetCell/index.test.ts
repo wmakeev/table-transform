@@ -541,7 +541,7 @@ test('transforms:cell:sheetCell (case2)', async () => {
   ])
 })
 
-test('transforms:cell:sheetCell (range y overflow)', async () => {
+test('transforms:cell:sheetCell (range y overflow and EQUAL trim)', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'EXCEL_STYLE'
@@ -554,7 +554,7 @@ test('transforms:cell:sheetCell (range y overflow)', async () => {
       transforms.column.sheetCell({
         type: 'HEADER',
         range: 'A1:B25',
-        testValue: '23',
+        testValue: ' 23',
         testOperation: 'EQUAL',
         targetColumn: 'col1'
       }),
@@ -568,7 +568,7 @@ test('transforms:cell:sheetCell (range y overflow)', async () => {
   const rows = [
     ['10', '21'],
     ['11', '22'],
-    ['12', '23'],
+    ['12', '23 '],
     ['13', '24'],
     ['14', '24'],
     ['15', '25'],
@@ -748,6 +748,12 @@ test('transforms:cell:sheetCell (variations)', async () => {
       range: 'H5:J10',
       testValue: '79',
       result: ['col1', '', '', '', '', '', '', '', '', '89', '99']
+    },
+    {
+      range: 'B1:D3',
+      testValue: '01',
+      offset: 'RC[-1]',
+      result: ['col1', '', '10', '20', '30', '40', '50', '60', '70', '80', '90']
     }
   ]
 

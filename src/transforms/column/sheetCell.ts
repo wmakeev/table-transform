@@ -103,7 +103,9 @@ const operations: Record<
   },
 
   EQUAL: (str1, str2) => {
-    return str1 == null && str2 == null ? true : str2 === str1
+    return str1 == null && str2 == null
+      ? true
+      : String(str2).trim() === String(str1).trim()
   },
 
   INCLUDES: (str1, str2) => {
