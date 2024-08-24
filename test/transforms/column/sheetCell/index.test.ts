@@ -602,7 +602,79 @@ test('transforms:cell:sheetCell (range y overflow)', async () => {
   ])
 })
 
-test('transforms:cell:sheetCell (cases)', async () => {
+test('transforms:cell:sheetCell (optional range y overflow)', async () => {
+  const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'EXCEL_STYLE'
+    },
+    transforms: [
+      transforms.column.add({
+        columnName: 'col1'
+      }),
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'B3:B25',
+        testValue: '25',
+        testOperation: 'EQUAL',
+        targetColumn: 'col1'
+      }),
+
+      transforms.column.add({
+        columnName: 'col2'
+      }),
+      transforms.column.sheetCell({
+        type: 'HEADER',
+        range: 'A2:B25',
+        testValue: 'foo',
+        testOperation: 'EQUAL',
+        targetColumn: 'col2',
+        isOptional: true
+      }),
+
+      transforms.column.select({
+        columns: ['col1', 'col2']
+      })
+    ]
+  })
+
+  const rows = [
+    ['10', '20'],
+    ['11', '21'],
+    ['12', '22'],
+    ['13', '23'],
+    ['14', '24'],
+    ['15', '25'],
+    ['16', '26'],
+    ['17', '27'],
+    ['18', '28'],
+    ['19', '29']
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    rows.values(),
+    new ChunkTransform({ batchSize: 3 }),
+    tableTransformer,
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    ['col1', 'col2'],
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+    ['26', null],
+    ['27', null],
+    ['28', null],
+    ['29', null]
+  ])
+})
+
+test('transforms:cell:sheetCell (variations)', async () => {
   const getTransformerResult = async (
     range: string,
     testValue: string,

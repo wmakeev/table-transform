@@ -329,13 +329,22 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         }
       }
 
-      if (!isPassThrough && foundCell == null) {
+      if (
+        !isPassThrough &&
+        foundCell == null &&
+        ('isOptional' in params ? params.isOptional !== true : true)
+      ) {
         throw new TransformChunkError(
           `Cell "${testValue}" in "${range}" range not found`,
           TRANSFORM_NAME,
           srcHeader,
           rowBuffer
         )
+      }
+
+      if (rowBuffer.length !== 0) {
+        yield rowBuffer
+        rowBuffer = []
       }
     }
 
