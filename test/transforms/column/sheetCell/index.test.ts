@@ -602,7 +602,7 @@ test('transforms:cell:sheetCell (range y overflow)', async () => {
   ])
 })
 
-test('transforms:cell:sheetCell (range y overflow)', async () => {
+test('transforms:cell:sheetCell (cases)', async () => {
   const getTransformerResult = async (
     range: string,
     testValue: string,
