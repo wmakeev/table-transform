@@ -1,6 +1,8 @@
 import { setImmediate as setImmediateAsync } from 'node:timers/promises'
 import { AsyncChannelError } from './errors.js'
 
+export * from './errors.js'
+
 export class AsyncChannel<T = unknown> {
   static readonly CLOSED: unique symbol = Symbol('CLOSED')
 

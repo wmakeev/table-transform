@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
-import { AsyncChannel } from '../../src/tools/AsyncChannel/index.js'
+import { AsyncChannel } from '../../src/index.js'
 
 test('AsyncChannel #1', async () => {
   const timeline: string[] = []

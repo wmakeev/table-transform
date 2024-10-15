@@ -1,5 +1,6 @@
 import { ColumnHeader, TableRow } from '../types.js'
 
+export * from './AsyncChannel/index.js'
 export * from './header/index.js'
 export * from './stream/index.js'
 
