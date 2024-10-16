@@ -1,4 +1,4 @@
-import { TransformStepError } from '../../errors/index.js'
+import { TransformColumnsNotFoundError } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Fill'
@@ -16,15 +16,14 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
   const { columnName, value, arrIndex } = params
 
   return source => {
-    const fillColumns: ColumnHeader[] = source
-      .getHeader()
-      .filter(h => h.name === columnName)
+    const header = source.getHeader()
+
+    const fillColumns: ColumnHeader[] = header.filter(
+      h => !h.isDeleted && h.name === columnName
+    )
 
     if (fillColumns.length === 0) {
-      throw new TransformStepError(
-        `Column "${columnName}" not found and can't be filled`,
-        TRANSFORM_NAME
-      )
+      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [columnName])
     }
 
     async function* getTransformedSourceGenerator() {
