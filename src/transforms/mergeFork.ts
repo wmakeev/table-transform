@@ -11,6 +11,7 @@ import {
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { normalize } from './normalize.js'
 
+// TODO Вероятно нужно подобрать более подходяее нименование
 const TRANSFORM_NAME = 'MergeFork'
 
 export interface MergeForkParams {
