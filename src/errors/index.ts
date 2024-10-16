@@ -1,4 +1,4 @@
-import { getRowRecord } from '../tools/index.js'
+import { createRecordFromRow } from '../tools/index.js'
 import { ColumnHeader, TableRow } from '../types.js'
 
 export interface ErrorWithReporter {
@@ -114,7 +114,7 @@ export class TransformChunkError extends TransformHeaderError {
   }
 
   getRowRecord() {
-    return getRowRecord(this.header, this.chunk?.[0])
+    return createRecordFromRow(this.header, this.chunk?.[0])
   }
 }
 
@@ -172,7 +172,7 @@ export class TransformRowError extends TransformChunkError {
   }
 
   override getRowRecord(): Record<string, unknown> {
-    return getRowRecord(this.header, this.chunk[this.rowIndex])
+    return createRecordFromRow(this.header, this.chunk[this.rowIndex])
   }
 }
 

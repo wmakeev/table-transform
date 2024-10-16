@@ -37,7 +37,7 @@ export function getColumnIndexesByName(header: ColumnHeader[]) {
   return columnIndexesByName
 }
 
-export function getRowRecord(
+export function createRecordFromRow(
   header: ColumnHeader[],
   row: TableRow | undefined
 ): Record<string, unknown | unknown[]> {

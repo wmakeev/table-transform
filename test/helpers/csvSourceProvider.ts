@@ -6,14 +6,14 @@ import {
   // @ts-expect-error no typings for compose
   compose
 } from 'node:stream'
-import { ChunkTransform, getRowRecord } from '../../src/index.js'
+import { ChunkTransform, createRecordFromRow } from '../../src/index.js'
 import { SourceProvider } from '../../src/types.js'
 
 export const csvSourceProvider: SourceProvider = async function* (
   header,
   paramsRow
 ) {
-  const options = getRowRecord(header, paramsRow)
+  const options = createRecordFromRow(header, paramsRow)
 
   const filePath = options['file_path']
 

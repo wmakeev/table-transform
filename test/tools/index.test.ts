@@ -3,7 +3,7 @@ import {
   ColumnHeader,
   TableRow,
   forceArrayLength,
-  getRowRecord
+  createRecordFromRow
 } from '../../src/index.js'
 import assert from 'node:assert'
 
@@ -38,7 +38,7 @@ test('Tools:getRowRecord', () => {
 
   const row: TableRow = ['foo0', 'bar1', 'foo2', 'baz3', 'foo4']
 
-  const result = getRowRecord(header, row)
+  const result = createRecordFromRow(header, row)
 
   assert.deepEqual(result, {
     Foo: ['foo2', 'foo4'],
