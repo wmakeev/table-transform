@@ -69,6 +69,66 @@ test('transforms:flatMapWithProvider (case1)', async () => {
   ])
 })
 
+test('transforms:flatMapWithProvider (case1) - passThroughColumns', async () => {
+  const tableTransformConfig: TableTransfromConfig = {
+    transforms: [
+      tf.column.rename({
+        oldColumnName: 'Path to file',
+        newColumnName: 'file_path'
+      }),
+
+      tf.flatMapWithProvider({
+        sourceProvider: csvSourceProvider,
+        passThroughColumns: ['Name'],
+        outputColumns: ['case_name', 'code', 'name', 'value'],
+        transformConfig: {
+          transforms: [
+            tf.column.rename({
+              oldColumnName: 'Name',
+              newColumnName: 'case_name'
+            })
+          ]
+        }
+      })
+    ]
+  }
+
+  const transformedRowsStream: Readable = compose(
+    createReadStream(
+      path.join(
+        process.cwd(),
+        'test/transforms/flatMapWithProvider/case1/source.csv'
+      ),
+      'utf8'
+    ),
+
+    parse({ bom: true }),
+
+    new ChunkTransform({ batchSize: 10 }),
+
+    createTableTransformer(tableTransformConfig),
+
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  /* prettier-ignore */
+  assert.deepEqual(transformedRows, [
+    ['case_name', 'code', 'name'  , 'value'   ],
+    ['case1'    , '1'   , 'name-1', 'value-01'],
+    ['case1'    , '2'   , 'name-2', 'value-02'],
+    ['case1'    , ''    , ''      , '(none)'  ],
+    ['case1'    , '3'   , 'name-3', 'value-03'],
+    ['case1'    , '4'   , 'name-4', 'value-04'],
+    ['case1'    , '5'   , 'name-5', 'value-05'],
+    ['case2'    , '6'   , 'name-6', 'value-06'],
+    ['case2'    , '7'   , 'name-7', 'value-07'],
+    ['case2'    , '8'   , ''      , 'value-08'],
+    ['case2'    , '9'   , 'name-9', 'value-09']
+  ])
+})
+
 test('transforms:flatMapWithProvider (case2)', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
