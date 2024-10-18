@@ -28,6 +28,7 @@ export const forkToChannel = (
         for await (const chunk of src) {
           if (prevPutPromise != null) {
             await prevPutPromise
+            prevPutPromise = undefined
           }
 
           if (!channel.isClosed()) {
@@ -35,6 +36,10 @@ export const forkToChannel = (
           }
 
           yield chunk
+        }
+
+        if (prevPutPromise != null) {
+          await prevPutPromise
         }
 
         if (!channel.isClosed()) {
