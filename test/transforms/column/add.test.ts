@@ -4,7 +4,11 @@ import {
   compose
 } from 'node:stream'
 import test from 'node:test'
-import { createTableTransformer, transforms } from '../../../src/index.js'
+import {
+  createTableTransformer,
+  FlattenTransform,
+  transforms as tf
+} from '../../../src/index.js'
 
 test('add header transform #1', async () => {
   const tableTransformer = createTableTransformer({
@@ -12,21 +16,26 @@ test('add header transform #1', async () => {
       mode: 'EXCEL_STYLE'
     },
     transforms: [
-      transforms.column.remove({
+      // ensure add handle reordered src columns
+      tf.column.select({
+        columns: ['D', 'C', 'A', 'B'],
+        addMissingColumns: true
+      }),
+      tf.column.remove({
         columnName: 'A'
       }),
-      transforms.column.add({
+      tf.column.add({
         columnName: 'C'
       }),
-      transforms.column.add({
-        columnName: 'D',
-        defaultValue: 'D'
+      tf.column.add({
+        columnName: 'F',
+        defaultValue: 'F'
       }),
-      transforms.column.add({
+      tf.column.add({
         columnName: 'C',
         defaultValue: 'C'
       }),
-      transforms.column.add({
+      tf.column.add({
         columnName: 'C',
         defaultValue: 'C2',
         force: true
@@ -34,34 +43,34 @@ test('add header transform #1', async () => {
     ]
   })
 
-  const table = [
+  const table =
+    /* prettier-ignore */
     [
-      ['a', '', ''],
-      ['a', '1', '']
-    ],
-    [
-      ['a', '', ''],
-      ['a', '2', '']
+      //  A    B    C
+      [
+        ['a', 'b', 'c'],
+        ['a', '1', '' ]
+      ],
+      [
+        ['a', 'b', 'c'],
+        ['a', '2', '' ]
+      ]
     ]
-  ]
 
-  const transformedRows: string[][] = await compose(() =>
-    tableTransformer(table)
+  const transformedRows: string[][] = await compose(
+    () => tableTransformer(table),
+    new FlattenTransform()
   ).toArray()
 
   assert.deepEqual(
     transformedRows,
     /* prettier-ignore */
     [
-      [['D', 'B', 'C', 'C']],
-      [
-        ['D', '', '', 'C2'],
-        ['D', '1', '', 'C2']
-      ],
-      [
-        ['D', '', '', 'C2'],
-        ['D', '2', '', 'C2']
-      ]
+      ['D' , 'C', 'F', 'B', 'C'],
+      [null, 'c', 'F', 'b', 'C2'],
+      [null, '' , 'F', '1', 'C2'],
+      [null, 'c', 'F', 'b', 'C2'],
+      [null, '' , 'F', '2', 'C2']
     ]
   )
 })

@@ -34,11 +34,11 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
       return source
     }
 
-    const firstDeletedHeaderIndex = header.findIndex(h => h.isDeleted)
+    const firstDeletedHeader = header.find(h => h.isDeleted)
 
     // Add a cell at the end of a row or reuse a deleted cell
     const transformedHeader: ColumnHeader[] =
-      firstDeletedHeaderIndex === -1
+      firstDeletedHeader === undefined
         ? [
             ...header,
             {
@@ -48,9 +48,9 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
             }
           ]
         : header.map(h =>
-            h.index === firstDeletedHeaderIndex
+            h === firstDeletedHeader
               ? {
-                  index: firstDeletedHeaderIndex,
+                  index: firstDeletedHeader.index,
                   name: params.columnName,
                   isDeleted: false
                 }
@@ -60,10 +60,10 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
     async function* getTransformedSourceGenerator() {
       for await (const chunk of source) {
         chunk.forEach(row => {
-          if (firstDeletedHeaderIndex === -1) {
+          if (firstDeletedHeader === undefined) {
             row.push(defaultValue)
           } else {
-            row[firstDeletedHeaderIndex] = defaultValue
+            row[firstDeletedHeader.index] = defaultValue
           }
 
           if (row.length !== transformedHeader.length) {
