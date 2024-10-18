@@ -150,7 +150,9 @@ export class AsyncChannel<T = unknown> {
     while (true) {
       const value = await this.take()
 
-      if (value === AsyncChannel.CLOSED) break
+      if (value === AsyncChannel.CLOSED) {
+        break
+      }
 
       try {
         yield value

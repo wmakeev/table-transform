@@ -92,3 +92,5 @@ export type SourceProvider = (
   header: ColumnHeader[],
   row: TableRow
 ) => AsyncGenerator<TableRow[]>
+
+export type HeaderChunkTuple = [header: ColumnHeader[], chunk: TableRow[]]
