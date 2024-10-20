@@ -32,11 +32,11 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
 
     const srcHeader = source.getHeader()
 
-    const transformedHeader: ColumnHeader[] = srcHeader.flatMap((h, index) => {
+    const transformedHeader: ColumnHeader[] = srcHeader.flatMap(h => {
       if (!h.isDeleted && h.name === columnName) {
         if (
           colIndex != null
-            ? colIndex === (isInternalIndex ? index : headerIndex)
+            ? colIndex === (isInternalIndex ? h.index : headerIndex)
             : true
         ) {
           deletedColsSrcIndexes.push(h.index)

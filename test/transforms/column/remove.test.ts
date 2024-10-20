@@ -9,7 +9,7 @@ import {
   ChunkTransform,
   FlattenTransform,
   createTableTransformer,
-  transforms
+  transforms as tf
 } from '../../../src/index.js'
 
 test('transforms:column:remove', async t => {
@@ -19,7 +19,7 @@ test('transforms:column:remove', async t => {
         mode: 'EXCEL_STYLE'
       },
       transforms: [
-        transforms.column.remove({
+        tf.column.remove({
           columnName: 'A'
         })
       ]
@@ -61,7 +61,7 @@ test('transforms:column:remove', async t => {
   await t.test('remove by index', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
-        transforms.column.remove({
+        tf.column.remove({
           columnName: 'Col',
           colIndex: 1
         })
@@ -103,10 +103,17 @@ test('transforms:column:remove', async t => {
   await t.test('remove by internal index', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
-        transforms.column.remove({
+        tf.column.select({
+          columns: ['X', 'Col', 'Foo', 'Col'],
+          addMissingColumns: true
+        }),
+        tf.column.remove({
           columnName: 'Col',
           colIndex: 2,
           isInternalIndex: true
+        }),
+        tf.column.remove({
+          columnName: 'X'
         })
       ]
     })
