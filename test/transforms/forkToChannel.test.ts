@@ -15,7 +15,7 @@ import {
 } from '../../src/index.js'
 
 test('transforms:channel #1', async () => {
-  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'requests' })
+  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'test' })
 
   const tableTransformer = createTableTransformer({
     transforms: [
@@ -53,10 +53,21 @@ test('transforms:channel #1', async () => {
 })
 
 test('transforms:channel #2', async () => {
-  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'requests' })
+  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'test' })
 
   const tableTransformer = createTableTransformer({
     transforms: [
+      tf.column.add({
+        columnName: 'col1',
+        defaultValue: 'col1'
+      }),
+
+      tf.column.assert({
+        message: 'index column should be number',
+        columnName: 'col1',
+        expression: `value() == "col1"`
+      }),
+
       tf.column.transform({
         columnName: 'index',
         expression: `value() + 1`
@@ -65,6 +76,10 @@ test('transforms:channel #2', async () => {
       tf.takeWhile({
         columnName: 'index',
         expression: `value() < 5`
+      }),
+
+      tf.column.select({
+        columns: ['col1', 'index']
       }),
 
       tf.forkToChannel({
@@ -89,5 +104,11 @@ test('transforms:channel #2', async () => {
     // console.debug(JSON.stringify(row))
   }
 
-  assert.deepEqual(result, [['index'], [1], [2], [3], [4]])
+  assert.deepEqual(result, [
+    ['col1', 'index'],
+    ['col1', 1],
+    ['col1', 2],
+    ['col1', 3],
+    ['col1', 4]
+  ])
 })
