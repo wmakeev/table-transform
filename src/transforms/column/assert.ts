@@ -13,7 +13,10 @@ import {
 const TRANSFORM_NAME = 'Column:Assert'
 
 export const assert = (
-  params: TransformExpressionParams & { message?: string },
+  params: TransformExpressionParams & {
+    // TODO Rename to "description"
+    message?: string
+  },
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
   if (params.columnName == null && params.columnIndex != null) {
