@@ -7,7 +7,7 @@ import { ColumnHeader, TableChunksTransformer, TableRow } from '../../index.js'
 const TRANSFORM_NAME = 'Column:Explode'
 
 export interface ExplodeColumnParams {
-  columnName: string
+  column: string
   arrIndex?: number
 }
 
@@ -17,24 +17,24 @@ export interface ExplodeColumnParams {
 export const explode = (
   params: ExplodeColumnParams
 ): TableChunksTransformer => {
-  const { columnName, arrIndex = 0 } = params
+  const { column, arrIndex = 0 } = params
 
   return source => {
     const header = source.getHeader()
 
     const explodeColumns: ColumnHeader[] = header.filter(
-      h => !h.isDeleted && h.name === columnName
+      h => !h.isDeleted && h.name === column
     )
 
     if (explodeColumns[0] === undefined) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [columnName])
+      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
     }
 
     const explodeColumn = explodeColumns[arrIndex]
 
     if (explodeColumn === undefined) {
       throw new TransformHeaderError(
-        `Column "${columnName}" with index ${arrIndex} not found`,
+        `Column "${column}" with index ${arrIndex} not found`,
         TRANSFORM_NAME,
         header
       )

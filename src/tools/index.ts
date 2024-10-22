@@ -1,6 +1,7 @@
-import { ColumnHeader, TableRow } from '../types.js'
+import { ColumnHeader, TableRow } from '../types/index.js'
 
 export * from './AsyncChannel/index.js'
+export * from './csvSourceFlatMapper.js'
 export * from './header/index.js'
 export * from './stream/index.js'
 

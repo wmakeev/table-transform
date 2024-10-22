@@ -20,7 +20,7 @@ test('transforms:column:remove', async t => {
       },
       transforms: [
         tf.column.remove({
-          columnName: 'A'
+          column: 'A'
         })
       ]
     })
@@ -62,7 +62,7 @@ test('transforms:column:remove', async t => {
     const tableTransformer = createTableTransformer({
       transforms: [
         tf.column.remove({
-          columnName: 'Col',
+          column: 'Col',
           colIndex: 1
         })
       ]
@@ -108,12 +108,12 @@ test('transforms:column:remove', async t => {
           addMissingColumns: true
         }),
         tf.column.remove({
-          columnName: 'Col',
+          column: 'Col',
           colIndex: 2,
           isInternalIndex: true
         }),
         tf.column.remove({
-          columnName: 'X'
+          column: 'X'
         })
       ]
     })

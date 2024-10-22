@@ -1,3 +1,5 @@
+export * from './guards.js'
+
 /** Metadata of column header */
 export type ColumnHeader = {
   /** Column name */
@@ -12,7 +14,7 @@ export type ColumnHeader = {
 }
 
 /** Data row */
-export type TableRow = Array<unknown | null>
+export type TableRow = Array<unknown>
 
 export interface TableChunksAsyncIterable extends AsyncIterable<TableRow[]> {
   getHeader: () => ColumnHeader[]
@@ -88,9 +90,14 @@ export type TableTransformer = (
   source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
 ) => AsyncGenerator<TableRow[]>
 
-export type SourceProvider = (
+export type HeaderChunkTuple = [header: ColumnHeader[], chunk: TableRow[]]
+
+export type TableRowFlatMapper = (
   header: ColumnHeader[],
   row: TableRow
 ) => AsyncGenerator<TableRow[]>
 
-export type HeaderChunkTuple = [header: ColumnHeader[], chunk: TableRow[]]
+export type TableChunksReducer = (source: TableChunksAsyncIterable) => {
+  outputColumns: string[]
+  getResult(): Promise<TableRow>
+}

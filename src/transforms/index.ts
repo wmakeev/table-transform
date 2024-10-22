@@ -1,9 +1,10 @@
 export * from './assertNotEmpty.js'
 export * as column from './column/index.js'
-export * from './flatMapWithProvider.js'
+export * from './flatMapWith.js'
 export * from './forkToChannel.js'
 export * from './mergeFork.js'
 export * from './normalize.js'
+export * from './reduceWith.js'
 export * from './splitIn.js'
 export * from './takeWhile.js'
 export * from './tapHeader.js'
@@ -16,7 +17,7 @@ export interface TransformExpressionParams {
    *
    * If column not specified, then `value()` experssion returns `null`.
    */
-  columnName?: string | undefined | null
+  column?: string | undefined | null
 
   /** Expression */
   expression: string
@@ -27,7 +28,7 @@ export interface TransformExpressionParams {
 
 export interface ColumnTransformExpressionParams {
   /** Column name */
-  columnName: string
+  column: string
 
   /** Expression */
   expression: string

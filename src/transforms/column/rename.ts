@@ -4,8 +4,8 @@ import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 const TRANSFORM_NAME = 'Column:Rename'
 
 export interface RenameColumnParams {
-  oldColumnName: string
-  newColumnName: string
+  oldColumn: string
+  newColumn: string
 }
 
 /**
@@ -18,12 +18,12 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
     const srcHeader = source.getHeader()
 
     const transformedHeader: ColumnHeader[] = srcHeader.map(h => {
-      if (!h.isDeleted && h.name === params.oldColumnName) {
+      if (!h.isDeleted && h.name === params.oldColumn) {
         isColumnFound = true
 
         return {
           ...h,
-          name: params.newColumnName
+          name: params.newColumn
         }
       }
 
@@ -32,7 +32,7 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
 
     if (!isColumnFound) {
       throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
-        params.oldColumnName
+        params.oldColumn
       ])
     }
 

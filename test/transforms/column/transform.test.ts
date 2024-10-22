@@ -17,7 +17,7 @@ test('transforms:column:transform (simple)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'col2',
+        column: 'col2',
         expression: 'value() & "+"'
       })
     ]
@@ -63,7 +63,7 @@ test('transforms:column:transform (array)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'col',
+        column: 'col',
         expression: 'arrayIndex()'
       })
     ]
@@ -108,7 +108,7 @@ test('transforms:column:transform (array with selected index)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'A',
+        column: 'A',
         expression: 'arrayIndex()',
         columnIndex: 1
       })
@@ -147,7 +147,7 @@ test('transforms:column:transform (error)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'A',
+        column: 'A',
         expression: 'foo',
         columnIndex: 1
       })

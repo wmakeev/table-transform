@@ -28,7 +28,7 @@ export const getTransformExpression = (
           throw new Error('values() argument expected to be string')
         }
 
-        const actualColumnName = columnName ?? params.columnName
+        const actualColumnName = columnName ?? params.column
 
         if (actualColumnName == null) return null
 
@@ -45,7 +45,7 @@ export const getTransformExpression = (
           throw new Error('values() argument expected to be string')
         }
 
-        const actualColumnName = columnName ?? params.columnName
+        const actualColumnName = columnName ?? params.column
 
         if (actualColumnName == null) return []
 
@@ -58,7 +58,7 @@ export const getTransformExpression = (
 
       row: () => transformState.rowNum,
 
-      column: () => transformState.columnName,
+      column: () => transformState.column,
 
       // TODO Name is not obvious
       arrayIndex: () => transformState.arrColIndex,

@@ -19,12 +19,12 @@ test('column transform (array) #2', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'List',
+        column: 'List',
         expression: `row() & ":" & arrayIndex() & if empty(value()) then "" else " - " & value()`
       }),
 
       transforms.column.transform({
-        columnName: 'Some',
+        column: 'Some',
         expression: `if row() == 3 then column() else value()`
       })
     ]
@@ -64,38 +64,38 @@ test('column transform (values)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
-        columnName: 'Value1'
+        column: 'Value1'
       }),
 
       transforms.column.transform({
-        columnName: 'Value1',
+        column: 'Value1',
         expression: `value("Num")`
       }),
 
       transforms.column.add({
-        columnName: 'Value2'
+        column: 'Value2'
       }),
 
       transforms.column.transform({
-        columnName: 'Value2',
+        column: 'Value2',
         expression: `value("List")`
       }),
 
       transforms.column.add({
-        columnName: 'Values1'
+        column: 'Values1'
       }),
 
       transforms.column.add({
-        columnName: 'Values2'
+        column: 'Values2'
       }),
 
       transforms.column.transform({
-        columnName: 'Values1',
+        column: 'Values1',
         expression: `values("Num")`
       }),
 
       transforms.column.transform({
-        columnName: 'Values2',
+        column: 'Values2',
         expression: `values("List")`
       }),
 

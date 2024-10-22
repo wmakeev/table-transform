@@ -17,7 +17,7 @@ test('transforms:assertNotEmpty', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.column.filter({
-        columnName: 'col2',
+        column: 'col2',
         expression: 'value() > 5'
       }),
       tf.assertNotEmpty()

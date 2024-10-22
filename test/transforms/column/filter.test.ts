@@ -21,7 +21,7 @@ test('transforms:column:filter', async t => {
       },
       transforms: [
         transforms.column.filter({
-          columnName: 'B',
+          column: 'B',
           expression: 'value() != "1"'
         }),
 
@@ -81,7 +81,7 @@ test('transforms:column:filter', async t => {
       const tableTransformer = createTableTransformer({
         transforms: [
           transforms.column.filter({
-            columnName: 'A',
+            column: 'A',
             expression: 'value() != "1"',
             columnIndex: 1
           })
@@ -121,7 +121,7 @@ test('transforms:column:filter', async t => {
       },
       transforms: [
         transforms.column.filter({
-          columnName: 'B',
+          column: 'B',
           expression: `'foo'`
         })
       ]

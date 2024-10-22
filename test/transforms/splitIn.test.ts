@@ -18,14 +18,14 @@ test('transforms:splitIn #1', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.splitIn({
-        splitColumns: ['key1', 'key2'],
+        keyColumns: ['key1', 'key2'],
         transformConfig: {
           transforms: [
             tf.column.add({
-              columnName: 'new'
+              column: 'new'
             }),
             tf.column.transform({
-              columnName: 'new',
+              column: 'new',
               expression: 'row()'
             })
           ]
@@ -92,14 +92,14 @@ test('transforms:splitIn #2', async () => {
     },
     transforms: [
       tf.splitIn({
-        splitColumns: ['key1', 'key2'],
+        keyColumns: ['key1', 'key2'],
         transformConfig: {
           transforms: [
             tf.column.add({
-              columnName: 'new'
+              column: 'new'
             }),
             tf.column.transform({
-              columnName: 'new',
+              column: 'new',
               expression: 'row()'
             })
           ]
@@ -160,21 +160,21 @@ test('transforms:splitIn #3', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.splitIn({
-        splitColumns: ['key1', 'key2'],
+        keyColumns: ['key1', 'key2'],
         transformConfig: {
           outputHeader: {
             forceColumns: ['key1', 'key2', 'col1', '_row_num', 'error']
           },
           transforms: [
             tf.column.add({
-              columnName: '_row_num'
+              column: '_row_num'
             }),
             tf.column.transform({
-              columnName: '_row_num',
+              column: '_row_num',
               expression: 'row()'
             }),
             tf.column.transform({
-              columnName: '_row_num',
+              column: '_row_num',
               expression: `
                 if 'key1' == "tow" then 'bar' else 'foo' & "_" & value()
               `
@@ -189,7 +189,7 @@ test('transforms:splitIn #3', async () => {
                 }
               }),
               tf.column.transform({
-                columnName: 'error',
+                column: 'error',
                 expression: `name of 'error'`
               }),
               tf.tapRows({

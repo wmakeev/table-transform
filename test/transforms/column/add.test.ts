@@ -22,21 +22,21 @@ test('add header transform #1', async () => {
         addMissingColumns: true
       }),
       tf.column.remove({
-        columnName: 'A'
+        column: 'A'
       }),
       tf.column.add({
-        columnName: 'C'
+        column: 'C'
       }),
       tf.column.add({
-        columnName: 'F',
+        column: 'F',
         defaultValue: 'F'
       }),
       tf.column.add({
-        columnName: 'C',
+        column: 'C',
         defaultValue: 'C'
       }),
       tf.column.add({
-        columnName: 'C',
+        column: 'C',
         defaultValue: 'C2',
         force: true
       })

@@ -1,4 +1,4 @@
-import { TableRow } from '../../types.js'
+import { TableRow } from '../../types/index.js'
 
 export * from './chunkSourceFromChannel.js'
 export * from './ChunkTransform.js'

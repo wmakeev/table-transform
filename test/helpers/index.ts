@@ -1,2 +1,2 @@
-export * from './csvSourceProvider.js'
+export * from '../../src/tools/csvSourceFlatMapper.js'
 export * from './createTransformedRowsStreamFromCsv.js'

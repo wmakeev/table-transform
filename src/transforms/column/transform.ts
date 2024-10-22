@@ -14,8 +14,8 @@ export const transform = (
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
   assert.ok(
-    typeof params.columnName === 'string',
-    'transform columnName parameter expected to be string'
+    typeof params.column === 'string',
+    'transform column parameter expected to be string'
   )
 
   return source => {

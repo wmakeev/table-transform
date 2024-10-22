@@ -20,12 +20,12 @@ test('transforms:channel #1', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.column.transform({
-        columnName: 'index',
+        column: 'index',
         expression: `value() + 1`
       }),
 
       tf.takeWhile({
-        columnName: 'index',
+        column: 'index',
         expression: `value() < 5`
       }),
 
@@ -58,23 +58,23 @@ test('transforms:channel #2', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.column.add({
-        columnName: 'col1',
+        column: 'col1',
         defaultValue: 'col1'
       }),
 
       tf.column.assert({
         message: 'index column should be number',
-        columnName: 'col1',
+        column: 'col1',
         expression: `value() == "col1"`
       }),
 
       tf.column.transform({
-        columnName: 'index',
+        column: 'index',
         expression: `value() + 1`
       }),
 
       tf.takeWhile({
-        columnName: 'index',
+        column: 'index',
         expression: `value() < 5`
       }),
 

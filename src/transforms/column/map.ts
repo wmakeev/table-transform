@@ -1,7 +1,7 @@
 import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 
 interface MapColumnParams {
-  columnName: string
+  column: string
   mapper: (value: unknown) => unknown
   arrIndex?: number
 }
@@ -10,13 +10,13 @@ interface MapColumnParams {
  * Map column values with specified function
  */
 export const map = (params: MapColumnParams): TableChunksTransformer => {
-  const { columnName, mapper, arrIndex } = params
+  const { column, mapper, arrIndex } = params
 
   return source => {
     async function* getTransformedSourceGenerator() {
       const mappingColumns: ColumnHeader[] = source
         .getHeader()
-        .filter(h => h.name === columnName)
+        .filter(h => h.name === column)
 
       for await (const chunk of source) {
         chunk.forEach(row => {

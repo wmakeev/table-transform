@@ -10,21 +10,21 @@ test('transforms:column:addArray', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.addArray({
-        columnName: 'A',
+        column: 'A',
         length: 2,
         defaultValue: '!'
       }),
       transforms.column.addArray({
-        columnName: 'B',
+        column: 'B',
         length: 1
       }),
       transforms.column.addArray({
-        columnName: 'C',
+        column: 'C',
         length: 1,
         forceLength: true
       }),
       transforms.column.addArray({
-        columnName: 'D',
+        column: 'D',
         length: 1,
         forceLength: true
       })

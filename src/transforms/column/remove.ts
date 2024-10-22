@@ -7,7 +7,7 @@ import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 const TRANSFORM_NAME = 'Column:Remove'
 
 export interface RemoveColumnParams {
-  columnName: string
+  column: string
   colIndex?: number
   isInternalIndex?: boolean
 }
@@ -17,7 +17,7 @@ export interface RemoveColumnParams {
  */
 export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
   return source => {
-    const { columnName, colIndex, isInternalIndex = false } = params
+    const { column, colIndex, isInternalIndex = false } = params
 
     if (isInternalIndex === true && colIndex == null) {
       throw new TransformStepError(
@@ -33,7 +33,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     const srcHeader = source.getHeader()
 
     const transformedHeader: ColumnHeader[] = srcHeader.flatMap(h => {
-      if (!h.isDeleted && h.name === columnName) {
+      if (!h.isDeleted && h.name === column) {
         if (
           colIndex != null
             ? colIndex === (isInternalIndex ? h.index : headerIndex)
@@ -55,7 +55,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
 
     if (deletedColsSrcIndexes.length === 0) {
       throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
-        columnName
+        column
       ])
     }
 

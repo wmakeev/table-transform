@@ -24,17 +24,17 @@ test('transforms:cell:sheetCell (case1)', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'row'
+        column: 'row'
       }),
 
       transforms.column.transform({
-        columnName: 'row',
+        column: 'row',
         expression: 'row()'
       }),
 
       //#region Column1 - A1
       transforms.column.add({
-        columnName: 'Col1'
+        column: 'Col1'
       }),
 
       transforms.column.sheetCell({
@@ -47,7 +47,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
       //#region Column2
       transforms.column.add({
-        columnName: 'Col2'
+        column: 'Col2'
       }),
 
       transforms.column.sheetCell({
@@ -60,7 +60,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
       //#region "Column3:" - B2:D11
       transforms.column.add({
-        columnName: 'Col3'
+        column: 'Col3'
       }),
 
       transforms.column.sheetCell({
@@ -74,7 +74,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
       //#region "Const4:" - E4:G7
       transforms.column.add({
-        columnName: 'Col4'
+        column: 'Col4'
       }),
 
       transforms.column.sheetCell({
@@ -88,7 +88,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
       //#region NOOP - G1:I3
       transforms.column.addArray({
-        columnName: 'Col5',
+        column: 'Col5',
         length: 2
       }),
 
@@ -116,7 +116,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
       //#region "foo"
       transforms.column.add({
-        columnName: 'Col6'
+        column: 'Col6'
       }),
 
       transforms.column.sheetCell({
@@ -186,17 +186,17 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'row'
+        column: 'row'
       }),
 
       transforms.column.transform({
-        columnName: 'row',
+        column: 'row',
         expression: 'row()'
       }),
 
       //#region Column1 - A1
       transforms.column.add({
-        columnName: 'Col1'
+        column: 'Col1'
       }),
 
       transforms.column.sheetCell({
@@ -209,7 +209,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
 
       //#region Column2
       transforms.column.add({
-        columnName: 'Col2'
+        column: 'Col2'
       }),
 
       transforms.column.sheetCell({
@@ -222,7 +222,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
 
       //#region "Column3:"
       transforms.column.add({
-        columnName: 'Col3'
+        column: 'Col3'
       }),
 
       transforms.column.sheetCell({
@@ -236,7 +236,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
 
       //#region "Const4:" - E4:G7
       transforms.column.add({
-        columnName: 'Col4'
+        column: 'Col4'
       }),
 
       transforms.column.sheetCell({
@@ -250,7 +250,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
 
       //#region NOOP - G1:I3
       transforms.column.addArray({
-        columnName: 'Col5',
+        column: 'Col5',
         length: 2
       }),
 
@@ -278,7 +278,7 @@ test('transforms:cell:sheetCell (case1 - shifted)', async () => {
 
       //#region "foo"
       transforms.column.add({
-        columnName: 'Col6'
+        column: 'Col6'
       }),
 
       transforms.column.sheetCell({
@@ -348,7 +348,7 @@ test('transforms:cell:sheetCell (case1) - cell not found', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'Col1'
+        column: 'Col1'
       }),
 
       transforms.column.sheetCell({
@@ -397,7 +397,7 @@ test('transforms:cell:sheetCell (case1) - assert', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'Col1'
+        column: 'Col1'
       }),
 
       transforms.column.sheetCell({
@@ -445,23 +445,23 @@ test('transforms:cell:sheetCell (case2)', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'col1'
+        column: 'col1'
       }),
 
       transforms.column.add({
-        columnName: 'col2'
+        column: 'col2'
       }),
 
       transforms.column.add({
-        columnName: 'col3'
+        column: 'col3'
       }),
 
       transforms.column.add({
-        columnName: 'col4'
+        column: 'col4'
       }),
 
       transforms.column.add({
-        columnName: 'col5'
+        column: 'col5'
       }),
 
       transforms.column.sheetCell({
@@ -548,7 +548,7 @@ test('transforms:cell:sheetCell (range y overflow and EQUAL trim)', async () => 
     },
     transforms: [
       transforms.column.add({
-        columnName: 'col1'
+        column: 'col1'
       }),
 
       transforms.column.sheetCell({
@@ -609,7 +609,7 @@ test('transforms:cell:sheetCell (optional range y overflow)', async () => {
     },
     transforms: [
       transforms.column.add({
-        columnName: 'col1'
+        column: 'col1'
       }),
       transforms.column.sheetCell({
         type: 'HEADER',
@@ -620,7 +620,7 @@ test('transforms:cell:sheetCell (optional range y overflow)', async () => {
       }),
 
       transforms.column.add({
-        columnName: 'col2'
+        column: 'col2'
       }),
       transforms.column.sheetCell({
         type: 'HEADER',
@@ -687,7 +687,7 @@ test('transforms:cell:sheetCell (variations)', async () => {
       },
       transforms: [
         transforms.column.add({
-          columnName: 'col1'
+          column: 'col1'
         }),
 
         transforms.column.sheetCell({

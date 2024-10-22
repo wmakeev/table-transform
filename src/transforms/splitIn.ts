@@ -12,7 +12,15 @@ import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { getNormalizedHeaderRow } from '../tools/header/index.js'
 
 export interface SplitInParams {
-  splitColumns: string[]
+  /**
+   * The columns by which the incoming stream is splited
+   */
+  keyColumns: string[]
+
+  /**
+   * The config of transformation through which each of the splited parts of
+   * the stream is passed.
+   */
   transformConfig: TableTransfromConfig
 }
 
@@ -32,13 +40,13 @@ const createRowIndexNamer =
 async function pipeSourceToChannels(
   source: TableChunksAsyncIterable,
   targetChannelsChan: AsyncChannel<AsyncChannel<TableRow[]>>,
-  splitColumns: string[]
+  keyColumns: string[]
 ): Promise<void> {
-  const splitColumnsSet = new Set(splitColumns)
+  const keyColumnsSet = new Set(keyColumns)
 
   const splitColumnIndexes = source
     .getHeader()
-    .filter(h => !h.isDeleted && splitColumnsSet.has(h.name))
+    .filter(h => !h.isDeleted && keyColumnsSet.has(h.name))
     .map(h => h.index)
 
   const getRowIndexName = createRowIndexNamer(splitColumnIndexes)
@@ -117,7 +125,7 @@ async function pipeSourceToChannels(
  * SplitIn
  */
 export const splitIn = (params: SplitInParams): TableChunksTransformer => {
-  const { splitColumns } = params
+  const { keyColumns } = params
 
   return source => {
     const srcHeader = source.getHeader()
@@ -173,7 +181,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
 
       const notFoundColumns = []
 
-      for (const col of splitColumns) {
+      for (const col of keyColumns) {
         if (!headerColumnsSet.has(col)) notFoundColumns.push(col)
       }
 
@@ -189,7 +197,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
         name: `${TRANSFORM_NAME}:channels`
       })
 
-      const p = pipeSourceToChannels(source, channels, splitColumns)
+      const p = pipeSourceToChannels(source, channels, keyColumns)
       // .catch(
       //   async err => {
       //     console.error(err)

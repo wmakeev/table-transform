@@ -19,9 +19,9 @@ export const assert = (
   },
   context?: TransformExpressionContext
 ): TableChunksTransformer => {
-  if (params.columnName == null && params.columnIndex != null) {
+  if (params.column == null && params.columnIndex != null) {
     throw new TransformStepError(
-      'columnIndex cannot be specified without columnName',
+      'columnIndex cannot be specified without column',
       TRANSFORM_NAME
     )
   }

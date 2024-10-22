@@ -11,23 +11,23 @@ import test from 'node:test'
 import {
   ChunkTransform,
   FlattenTransform,
-  SourceProvider,
+  TableRowFlatMapper,
   TableTransfromConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
-import { csvSourceProvider } from '../../helpers/index.js'
+import { csvSourceFlatMapper } from '../../helpers/index.js'
 
-test('transforms:flatMapWithProvider (case1)', async () => {
+test('transforms:flatMapWith (case1)', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
       tf.column.rename({
-        oldColumnName: 'Path to file',
-        newColumnName: 'file_path'
+        oldColumn: 'Path to file',
+        newColumn: 'file_path'
       }),
 
-      tf.flatMapWithProvider({
-        sourceProvider: csvSourceProvider,
+      tf.flatMapWith({
+        mapper: csvSourceFlatMapper,
         outputColumns: ['code', 'name', 'value']
       })
     ]
@@ -35,10 +35,7 @@ test('transforms:flatMapWithProvider (case1)', async () => {
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(
-        process.cwd(),
-        'test/transforms/flatMapWithProvider/case1/source.csv'
-      ),
+      path.join(process.cwd(), 'test/transforms/flatMapWith/case1/source.csv'),
       'utf8'
     ),
 
@@ -69,23 +66,23 @@ test('transforms:flatMapWithProvider (case1)', async () => {
   ])
 })
 
-test('transforms:flatMapWithProvider (case1) - passThroughColumns', async () => {
+test('transforms:flatMapWith (case1) - passThroughColumns', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
       tf.column.rename({
-        oldColumnName: 'Path to file',
-        newColumnName: 'file_path'
+        oldColumn: 'Path to file',
+        newColumn: 'file_path'
       }),
 
-      tf.flatMapWithProvider({
-        sourceProvider: csvSourceProvider,
+      tf.flatMapWith({
+        mapper: csvSourceFlatMapper,
         passThroughColumns: ['Name'],
         outputColumns: ['case_name', 'code', 'name', 'value'],
         transformConfig: {
           transforms: [
             tf.column.rename({
-              oldColumnName: 'Name',
-              newColumnName: 'case_name'
+              oldColumn: 'Name',
+              newColumn: 'case_name'
             })
           ]
         }
@@ -95,10 +92,7 @@ test('transforms:flatMapWithProvider (case1) - passThroughColumns', async () => 
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(
-        process.cwd(),
-        'test/transforms/flatMapWithProvider/case1/source.csv'
-      ),
+      path.join(process.cwd(), 'test/transforms/flatMapWith/case1/source.csv'),
       'utf8'
     ),
 
@@ -129,18 +123,18 @@ test('transforms:flatMapWithProvider (case1) - passThroughColumns', async () => 
   ])
 })
 
-test('transforms:flatMapWithProvider (case2)', async () => {
+test('transforms:flatMapWith (case2)', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
-      tf.flatMapWithProvider({
-        sourceProvider: csvSourceProvider,
+      tf.flatMapWith({
+        mapper: csvSourceFlatMapper,
         outputColumns: ['code', 'value', 'error_name', 'error_message'],
         transformConfig: {
           inputHeader: {
             mode: 'EXCEL_STYLE'
           },
           transforms: [
-            tf.column.add({ columnName: 'code' }),
+            tf.column.add({ column: 'code' }),
             tf.column.sheetCell({
               type: 'HEADER',
               testOperation: 'INCLUDES',
@@ -149,7 +143,7 @@ test('transforms:flatMapWithProvider (case2)', async () => {
               targetColumn: 'code'
             }),
 
-            tf.column.add({ columnName: 'value' }),
+            tf.column.add({ column: 'value' }),
             tf.column.sheetCell({
               type: 'HEADER',
               testOperation: 'STARTS_WITH',
@@ -159,22 +153,22 @@ test('transforms:flatMapWithProvider (case2)', async () => {
             }),
 
             tf.column.filter({
-              columnName: 'code',
+              column: 'code',
               expression: 'not empty(value())'
             })
           ],
           errorHandle: {
             errorColumn: 'error',
             transforms: [
-              tf.column.add({ columnName: 'error_name' }),
+              tf.column.add({ column: 'error_name' }),
               tf.column.transform({
-                columnName: 'error_name',
+                column: 'error_name',
                 expression: `name of 'error'`
               }),
 
-              tf.column.add({ columnName: 'error_message' }),
+              tf.column.add({ column: 'error_message' }),
               tf.column.transform({
-                columnName: 'error_message',
+                column: 'error_message',
                 expression: `message of 'error'`
               })
             ]
@@ -186,10 +180,7 @@ test('transforms:flatMapWithProvider (case2)', async () => {
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(
-        process.cwd(),
-        'test/transforms/flatMapWithProvider/case2/source.csv'
-      ),
+      path.join(process.cwd(), 'test/transforms/flatMapWith/case2/source.csv'),
       'utf8'
     ),
 
@@ -215,17 +206,17 @@ test('transforms:flatMapWithProvider (case2)', async () => {
   ])
 })
 
-test('transforms:flatMapWithProvider (error handle)', async () => {
+test('transforms:flatMapWith (error handle)', async () => {
   let sourceRowIndex = 0
 
-  const sourceProviderWithErrors: SourceProvider = async function* (
+  const flatMapperWithErrors: TableRowFlatMapper = async function* (
     header,
     row
   ) {
     const rowIndex = sourceRowIndex++
 
     if (rowIndex === 1) {
-      throw new Error('Error №1 in SourceProvider')
+      throw new Error('Error №1 in mapper')
     }
 
     const resultHeader = header.map(h => h.name)
@@ -234,7 +225,7 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
 
     for (let i = 0; i < 3; i++) {
       if ((rowIndex === 3 && i === 2) || (rowIndex === 0 && i === 1)) {
-        throw new Error('Error №2 in SourceProvider')
+        throw new Error('Error №2 in mapper')
       }
       yield [[...row]]
     }
@@ -242,8 +233,8 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
 
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
-      tf.flatMapWithProvider({
-        sourceProvider: sourceProviderWithErrors,
+      tf.flatMapWith({
+        mapper: flatMapperWithErrors,
         outputColumns: ['code', 'value', 'error_message'],
         transformConfig: {
           transforms: [
@@ -259,15 +250,15 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
               }
             }),
 
-            tf.column.rename({ oldColumnName: 'col1', newColumnName: 'code' }),
-            tf.column.rename({ oldColumnName: 'col2', newColumnName: 'value' })
+            tf.column.rename({ oldColumn: 'col1', newColumn: 'code' }),
+            tf.column.rename({ oldColumn: 'col2', newColumn: 'value' })
           ],
           errorHandle: {
             errorColumn: 'error',
             transforms: [
-              tf.column.add({ columnName: 'error_message' }),
+              tf.column.add({ column: 'error_message' }),
               tf.column.transform({
-                columnName: 'error_message',
+                column: 'error_message',
                 expression: `message of 'error'`
               })
             ]
@@ -297,17 +288,17 @@ test('transforms:flatMapWithProvider (error handle)', async () => {
 
   const transformedRows = await transformedRowsStream.toArray()
 
-  /* _prettier-ignore */
+  /* prettier-ignore */
   assert.deepEqual(transformedRows, [
-    ['code', 'value', 'error_message'],
-    ['1', 'col2-val', null],
-    [null, null, 'Error №2 in SourceProvider'],
-    [null, null, 'Error №1 in SourceProvider'],
-    ['3', 'col2-val', null],
-    ['3', 'col2-val', null],
-    ['3', 'col2-val', null],
-    ['4', 'col2-val', null],
-    ['4', 'col2-val', null],
-    [null, null, 'Error №2 in SourceProvider']
+    ['code', 'value'   , 'error_message'     ],
+    ['1'   , 'col2-val', null                ],
+    [null  , null      , 'Error №2 in mapper'],
+    [null  , null      , 'Error №1 in mapper'],
+    ['3'   , 'col2-val', null                ],
+    ['3'   , 'col2-val', null                ],
+    ['3'   , 'col2-val', null                ],
+    ['4'   , 'col2-val', null                ],
+    ['4'   , 'col2-val', null                ],
+    [null  , null      , 'Error №2 in mapper']
   ])
 })

@@ -6,7 +6,7 @@ import {
 } from '../../index.js'
 
 export interface AddColumnParams {
-  columnName: string
+  column: string
 
   defaultValue?: unknown
 
@@ -29,7 +29,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
     // Skip column adding?
     if (
       params.force !== true &&
-      header.findIndex(h => !h.isDeleted && h.name === params.columnName) !== -1
+      header.findIndex(h => !h.isDeleted && h.name === params.column) !== -1
     ) {
       return source
     }
@@ -43,7 +43,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
             ...header,
             {
               index: header.length,
-              name: params.columnName,
+              name: params.column,
               isDeleted: false
             }
           ]
@@ -51,7 +51,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
             h === firstDeletedHeader
               ? {
                   index: firstDeletedHeader.index,
-                  name: params.columnName,
+                  name: params.column,
                   isDeleted: false
                 }
               : h

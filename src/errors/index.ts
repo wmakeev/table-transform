@@ -1,5 +1,5 @@
 import { createRecordFromRow } from '../tools/index.js'
-import { ColumnHeader, TableRow } from '../types.js'
+import { ColumnHeader, TableRow } from '../types/index.js'
 
 export interface ErrorWithReporter {
   report: () => void
@@ -61,6 +61,21 @@ export class TransformHeaderError
       }))
     )
     console.groupEnd()
+  }
+}
+
+export class TransformColumnsError extends TransformHeaderError {
+  constructor(
+    message: string,
+    stepName: string,
+    header: ColumnHeader[],
+    public columns: string[],
+    options?: ErrorOptions
+  ) {
+    const _message = `${message}: ` + columns.map(c => `"${c}"`).join(', ')
+
+    super(_message, stepName, header, options)
+    this.name = this.constructor.name
   }
 }
 

@@ -21,7 +21,7 @@ test('transforms:column:assert', async () => {
     transforms: [
       transforms.column.assert({
         message: 'expected B to be equal "foo"',
-        columnName: 'B',
+        column: 'B',
         expression: 'value() == "foo"'
       })
     ]
@@ -56,7 +56,7 @@ test('transforms:column:assert (array with selected index)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.assert({
-        columnName: 'A',
+        column: 'A',
         expression: 'value() != "x"',
         columnIndex: 0
       })

@@ -15,7 +15,7 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
-import { csvSourceProvider } from '../../helpers/index.js'
+import { csvSourceFlatMapper } from '../../helpers/index.js'
 
 test('transforms:mergeFork #1', async () => {
   const transformConfig: TableTransfromConfig = {
@@ -36,27 +36,27 @@ test('transforms:mergeFork #1', async () => {
                 }
               }),
 
-              tf.column.add({ columnName: 'code', defaultValue: 'one' }),
+              tf.column.add({ column: 'code', defaultValue: 'one' }),
               tf.column.transform({
-                columnName: 'name',
+                column: 'name',
                 expression: 'value() & " 1"'
               })
             ]
           },
           {
             transforms: [
-              tf.column.add({ columnName: 'code', defaultValue: 'tow' }),
+              tf.column.add({ column: 'code', defaultValue: 'tow' }),
               tf.column.transform({
-                columnName: 'name',
+                column: 'name',
                 expression: 'value() & " 2"'
               })
             ]
           },
           {
             transforms: [
-              tf.column.add({ columnName: 'code', defaultValue: 'three' }),
+              tf.column.add({ column: 'code', defaultValue: 'three' }),
               tf.column.transform({
-                columnName: 'name',
+                column: 'name',
                 expression: 'value() & " 3"'
               })
             ]
@@ -118,15 +118,15 @@ test('transforms:mergeFork #2', async () => {
         transformConfigs: [
           {
             transforms: [
-              tf.flatMapWithProvider({
-                sourceProvider: csvSourceProvider,
+              tf.flatMapWith({
+                mapper: csvSourceFlatMapper,
                 outputColumns: ['code', 'value', 'error_name', 'error_message'],
                 transformConfig: {
                   inputHeader: {
                     mode: 'EXCEL_STYLE'
                   },
                   transforms: [
-                    tf.column.add({ columnName: 'code' }),
+                    tf.column.add({ column: 'code' }),
                     tf.column.sheetCell({
                       type: 'HEADER',
                       testOperation: 'INCLUDES',
@@ -135,7 +135,7 @@ test('transforms:mergeFork #2', async () => {
                       targetColumn: 'code'
                     }),
 
-                    tf.column.add({ columnName: 'value' }),
+                    tf.column.add({ column: 'value' }),
                     tf.column.sheetCell({
                       type: 'HEADER',
                       testOperation: 'STARTS_WITH',
@@ -145,22 +145,22 @@ test('transforms:mergeFork #2', async () => {
                     }),
 
                     tf.column.filter({
-                      columnName: 'code',
+                      column: 'code',
                       expression: 'not empty(value())'
                     })
                   ],
                   errorHandle: {
                     errorColumn: 'error',
                     transforms: [
-                      tf.column.add({ columnName: 'error_name' }),
+                      tf.column.add({ column: 'error_name' }),
                       tf.column.transform({
-                        columnName: 'error_name',
+                        column: 'error_name',
                         expression: `name of 'error'`
                       }),
 
-                      tf.column.add({ columnName: 'error_message' }),
+                      tf.column.add({ column: 'error_message' }),
                       tf.column.transform({
-                        columnName: 'error_message',
+                        column: 'error_message',
                         expression: `message of 'error'`
                       })
                     ]
@@ -171,15 +171,15 @@ test('transforms:mergeFork #2', async () => {
           },
           {
             transforms: [
-              tf.flatMapWithProvider({
-                sourceProvider: csvSourceProvider,
+              tf.flatMapWith({
+                mapper: csvSourceFlatMapper,
                 outputColumns: ['code', 'value', 'error_name', 'error_message'],
                 transformConfig: {
                   inputHeader: {
                     mode: 'EXCEL_STYLE'
                   },
                   transforms: [
-                    tf.column.add({ columnName: 'code' }),
+                    tf.column.add({ column: 'code' }),
                     tf.column.sheetCell({
                       type: 'HEADER',
                       testOperation: 'EQUAL',
@@ -188,7 +188,7 @@ test('transforms:mergeFork #2', async () => {
                       targetColumn: 'code'
                     }),
 
-                    tf.column.add({ columnName: 'value' }),
+                    tf.column.add({ column: 'value' }),
                     tf.column.sheetCell({
                       type: 'HEADER',
                       testValue: 'Value',
@@ -197,22 +197,22 @@ test('transforms:mergeFork #2', async () => {
                     }),
 
                     tf.column.filter({
-                      columnName: 'code',
+                      column: 'code',
                       expression: 'not empty(value())'
                     })
                   ],
                   errorHandle: {
                     errorColumn: 'error',
                     transforms: [
-                      tf.column.add({ columnName: 'error_name' }),
+                      tf.column.add({ column: 'error_name' }),
                       tf.column.transform({
-                        columnName: 'error_name',
+                        column: 'error_name',
                         expression: `name of 'error'`
                       }),
 
-                      tf.column.add({ columnName: 'error_message' }),
+                      tf.column.add({ column: 'error_message' }),
                       tf.column.transform({
-                        columnName: 'error_message',
+                        column: 'error_message',
                         expression: `message of 'error'`
                       })
                     ]
@@ -228,10 +228,7 @@ test('transforms:mergeFork #2', async () => {
 
   const transformedRowsStream: Readable = compose(
     createReadStream(
-      path.join(
-        process.cwd(),
-        'test/transforms/flatMapWithProvider/case2/source.csv'
-      ),
+      path.join(process.cwd(), 'test/transforms/flatMapWith/case2/source.csv'),
       'utf8'
     ),
 

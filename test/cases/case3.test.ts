@@ -20,56 +20,56 @@ test('complex transform #3', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.add({
-        columnName: 'RowIndex'
+        column: 'RowIndex'
       }),
 
       transforms.column.add({
-        columnName: 'NewCol 1',
+        column: 'NewCol 1',
         defaultValue: '*'
       }),
 
       transforms.column.add({
-        columnName: '_new_col 2'
+        column: '_new_col 2'
       }),
 
       transforms.column.rename({
-        oldColumnName: 'Some',
-        newColumnName: 'Some renamed'
+        oldColumn: 'Some',
+        newColumn: 'Some renamed'
       }),
 
       transforms.column.rename({
-        oldColumnName: 'List',
-        newColumnName: 'list_arr'
+        oldColumn: 'List',
+        newColumn: 'list_arr'
       }),
 
       transforms.column.fill({
-        columnName: 'Some renamed',
+        column: 'Some renamed',
         value: 'filled'
       }),
 
       transforms.column.fill({
-        columnName: 'list_arr',
+        column: 'list_arr',
         value: 42,
         arrIndex: 2
       }),
 
       transforms.column.filter({
-        columnName: 'Num',
+        column: 'Num',
         expression: 'value() != "20"'
       }),
 
       transforms.column.map({
-        columnName: 'Value',
+        column: 'Value',
         mapper: mappers.DECODE_HTML.mapper
       }),
 
       transforms.column.transform({
-        columnName: 'RowIndex',
+        column: 'RowIndex',
         expression: 'row()'
       }),
 
       transforms.column.transform({
-        columnName: 'NewCol 1',
+        column: 'NewCol 1',
         expression: 'if row() == 3 then "X" else value()'
       }),
 

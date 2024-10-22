@@ -5,7 +5,7 @@ import { add, remove } from './index.js'
 const TRANSFORM_NAME = 'Column:AddArray'
 
 export interface AddArrayColumnParams {
-  columnName: string
+  column: string
   length: number
   forceLength?: boolean
   defaultValue?: unknown
@@ -17,7 +17,7 @@ export interface AddArrayColumnParams {
 export const addArray = (
   params: AddArrayColumnParams
 ): TableChunksTransformer => {
-  const { columnName, length, forceLength = false, defaultValue } = params
+  const { column, length, forceLength = false, defaultValue } = params
 
   if (!Number.isInteger(length) || length <= 0) {
     throw new TransformStepError(
@@ -29,9 +29,7 @@ export const addArray = (
   return source => {
     const header = source.getHeader()
 
-    const existColumns = header.filter(
-      h => !h.isDeleted && h.name === columnName
-    )
+    const existColumns = header.filter(h => !h.isDeleted && h.name === column)
 
     // Array column just exist
     if (
@@ -49,7 +47,7 @@ export const addArray = (
 
       for (let i = 0; i < columnsCountToAdd; i++) {
         _source = add({
-          columnName,
+          column,
           defaultValue,
           force: true
         })(_source)
@@ -60,7 +58,7 @@ export const addArray = (
     else {
       for (let i = existColumns.length - 1; i >= length; i--) {
         _source = remove({
-          columnName,
+          column: column,
           colIndex: existColumns[i]!.index,
           isInternalIndex: true
         })(_source)

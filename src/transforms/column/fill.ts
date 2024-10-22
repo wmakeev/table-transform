@@ -4,7 +4,7 @@ import { ColumnHeader, TableChunksTransformer } from '../../index.js'
 const TRANSFORM_NAME = 'Column:Fill'
 
 export interface FillColumnParams {
-  columnName: string
+  column: string
   value: unknown
   arrIndex?: number
 }
@@ -13,17 +13,17 @@ export interface FillColumnParams {
  * Fill column with value
  */
 export const fill = (params: FillColumnParams): TableChunksTransformer => {
-  const { columnName, value, arrIndex } = params
+  const { column, value, arrIndex } = params
 
   return source => {
     const header = source.getHeader()
 
     const fillColumns: ColumnHeader[] = header.filter(
-      h => !h.isDeleted && h.name === columnName
+      h => !h.isDeleted && h.name === column
     )
 
     if (fillColumns.length === 0) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [columnName])
+      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
     }
 
     async function* getTransformedSourceGenerator() {

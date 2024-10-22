@@ -16,7 +16,7 @@ test('transforms:takeWhile', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.takeWhile({
-        columnName: 'col2',
+        column: 'col2',
         expression: `value() < 3`
       })
     ]

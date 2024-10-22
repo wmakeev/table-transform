@@ -10,7 +10,7 @@ import {
   TableRow,
   TableTransfromConfig,
   TableChunksAsyncIterable
-} from '../types.js'
+} from '../types/index.js'
 
 const generateForcedHeader = (
   headerMode: HeaderMode,

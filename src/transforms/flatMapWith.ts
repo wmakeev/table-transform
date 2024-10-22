@@ -1,6 +1,6 @@
 import {
   ColumnHeader,
-  SourceProvider,
+  TableRowFlatMapper,
   TableChunksTransformer,
   TableTransfromConfig,
   createRecordFromRow,
@@ -9,8 +9,8 @@ import {
   transforms as tf
 } from '../index.js'
 
-export interface FlatMapWithProviderParams {
-  sourceProvider: SourceProvider
+export interface FlatMapWithParams {
+  mapper: TableRowFlatMapper
 
   /**
    * Source columns that should be passed to the output columns.
@@ -25,15 +25,15 @@ export interface FlatMapWithProviderParams {
   transformConfig?: TableTransfromConfig
 }
 
-// const TRANSFORM_NAME = 'FlatMapWithProvider'
+// const TRANSFORM_NAME = 'FlatMapWith'
 
 /**
- * FlatMap data from source with provider
+ * FlatMap data from source with custom mapper
  */
-export const flatMapWithProvider = (
-  params: FlatMapWithProviderParams
+export const flatMapWith = (
+  params: FlatMapWithParams
 ): TableChunksTransformer => {
-  const { sourceProvider, transformConfig = {}, outputColumns } = params
+  const { mapper, transformConfig = {}, outputColumns } = params
 
   const passThroughColumns = [...new Set(params.passThroughColumns)]
 
@@ -57,7 +57,7 @@ export const flatMapWithProvider = (
               ...(rowRecord
                 ? passThroughColumns.map(col => {
                     return tf.column.add({
-                      columnName: col,
+                      column: col,
                       defaultValue: rowRecord[col]
                     })
                   })
@@ -73,7 +73,7 @@ export const flatMapWithProvider = (
             }
           })
 
-          yield* transformer(sourceProvider(srcHeader, [...row]))
+          yield* transformer(mapper(srcHeader, [...row]))
         }
       }
     }

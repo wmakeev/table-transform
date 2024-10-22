@@ -9,7 +9,7 @@ import {
   getExcelOffset,
   getExcelRangeBound
 } from '../../../src/tools/header/index.js'
-import { ColumnHeader, TableRow } from '../../../src/types.js'
+import { ColumnHeader, TableRow } from '../../../src/types/index.js'
 
 test('tools:header:getChunkNormalizer', async t => {
   await t.test('immutable=false | ordered', () => {

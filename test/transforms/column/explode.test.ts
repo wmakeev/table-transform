@@ -14,7 +14,7 @@ test('transforms:column:explode', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.explode({
-        columnName: 'arr'
+        column: 'arr'
       })
     ]
   })

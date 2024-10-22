@@ -17,7 +17,7 @@ export class TransformState {
   /**
    * Column name specified for this transform
    */
-  public columnName: string | null
+  public column: string | null
 
   /**
    * Indexes of source columns with transfomed column header name
@@ -38,19 +38,19 @@ export class TransformState {
     header: ColumnHeader[],
     context?: TransformExpressionContext
   ) {
-    const { columnName } = transformParams
+    const { column } = transformParams
 
-    this.columnName = columnName ?? null
+    this.column = column ?? null
 
-    if (columnName != null) {
+    if (column != null) {
       this.fieldColsIndexes = header.flatMap(h => {
-        if (!h.isDeleted && h.name === columnName) return h.index
+        if (!h.isDeleted && h.name === column) return h.index
         else return []
       })
 
       if (this.fieldColsIndexes.length === 0) {
         throw new TransformHeaderError(
-          `Column "${columnName}" not found`,
+          `Column "${column}" not found`,
           name,
           header
         )

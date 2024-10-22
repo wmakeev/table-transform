@@ -15,9 +15,9 @@ test('Transform error handler', async t => {
   await t.test('place error name in created column', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
-        tf.column.add({ columnName: 'error' }),
+        tf.column.add({ column: 'error' }),
         tf.column.transform({
-          columnName: 'foo',
+          column: 'foo',
           expression: `'baz'`
         })
       ],
@@ -64,7 +64,7 @@ test('Transform error handler', async t => {
     const tableTransformer = createTableTransformer({
       transforms: [
         tf.column.transform({
-          columnName: 'foo',
+          column: 'foo',
           expression: `'baz'`
         })
       ],
@@ -97,22 +97,22 @@ test('Transform error handler', async t => {
         },
         transforms: [
           tf.column.transform({
-            columnName: 'foo',
+            column: 'foo',
             expression: `if 'bar' == 42 then 'baz' else 'foo' & "+"`
           })
         ],
         errorHandle: {
           errorColumn: 'error',
           transforms: [
-            tf.column.add({ columnName: 'error_message' }),
+            tf.column.add({ column: 'error_message' }),
             tf.column.transform({
-              columnName: 'error_message',
+              column: 'error_message',
               expression: `message of 'error'`
             }),
 
-            tf.column.add({ columnName: 'error_foo' }),
+            tf.column.add({ column: 'error_foo' }),
             tf.column.transform({
-              columnName: 'error_foo',
+              column: 'error_foo',
               expression: `foo of rowRecord of 'error'`
             })
           ]
@@ -147,7 +147,7 @@ test('Transform error handler', async t => {
     const tableTransformer = createTableTransformer({
       transforms: [
         tf.column.transform({
-          columnName: 'Код',
+          column: 'Код',
           expression: `if value() == "AG01153" then 'foo' else value()`
         })
       ]
@@ -180,9 +180,9 @@ test('Transform error handler', async t => {
   await t.test('partially processed large csv with error handler', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
-        tf.column.add({ columnName: 'error' }),
+        tf.column.add({ column: 'error' }),
         tf.column.transform({
-          columnName: 'Код',
+          column: 'Код',
           expression: `if value() == "AG01153" then 'foo' else value()`
         })
       ],
@@ -190,7 +190,7 @@ test('Transform error handler', async t => {
         errorColumn: 'error',
         transforms: [
           tf.column.transform({
-            columnName: 'error',
+            column: 'error',
             expression: `message of 'error'`
           })
         ]
@@ -232,24 +232,24 @@ test('Transform error handler', async t => {
     async () => {
       const tableTransformer = createTableTransformer({
         transforms: [
-          tf.column.add({ columnName: 'error_message' }),
+          tf.column.add({ column: 'error_message' }),
           tf.column.transform({
-            columnName: 'Код',
+            column: 'Код',
             expression: `if value() == "1211IX352WDRH" then 'foo' else value()`
           })
         ],
         errorHandle: {
           errorColumn: 'error',
           transforms: [
-            tf.column.add({ columnName: 'error_name' }),
+            tf.column.add({ column: 'error_name' }),
             tf.column.transform({
-              columnName: 'error_name',
+              column: 'error_name',
               expression: `name of 'error'`
             }),
 
-            tf.column.add({ columnName: 'error_message' }),
+            tf.column.add({ column: 'error_message' }),
             tf.column.transform({
-              columnName: 'error_message',
+              column: 'error_message',
               expression: `message of 'error'`
             })
           ]
@@ -308,20 +308,20 @@ test('Transform error handler', async t => {
       },
       transforms: [
         tf.column.transform({
-          columnName: 'Код',
+          column: 'Код',
           expression: `if value() == "1211IX352WDRH" then 'foo' else value()`
         })
       ],
       errorHandle: {
         errorColumn: 'error',
         transforms: [
-          tf.column.add({ columnName: 'foo' }),
+          tf.column.add({ column: 'foo' }),
           tf.column.transform({
-            columnName: 'foo',
+            column: 'foo',
             expression: `bar of 'error'`
           }),
           tf.column.transform({
-            columnName: 'error',
+            column: 'error',
             expression: `'bar'`
           })
         ]

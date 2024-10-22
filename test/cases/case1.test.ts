@@ -81,7 +81,7 @@ test('Column transform (basic) #1', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       transforms.column.transform({
-        columnName: 'Наименование',
+        column: 'Наименование',
         expression: `'Бренд' & " " & 'Наименование'`
       })
     ]
