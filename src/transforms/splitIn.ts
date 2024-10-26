@@ -197,12 +197,11 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
         name: `${TRANSFORM_NAME}:channels`
       })
 
-      const p = pipeSourceToChannels(source, channels, keyColumns)
-      // .catch(
-      //   async err => {
-      //     console.error(err)
-      //   }
-      // )
+      const pipeSourceToChannelsPromise = pipeSourceToChannels(
+        source,
+        channels,
+        keyColumns
+      )
 
       for await (const chan of channels) {
         const tableChunksAsyncIterable: TableChunksAsyncIterable = {
@@ -218,15 +217,12 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
           for await (const chunk of gen) {
             yield chunk
           }
-        } catch (err) {
-          console.log(err)
-          throw err
         } finally {
           chan.close()
         }
       }
 
-      await p
+      await pipeSourceToChannelsPromise
     }
 
     return {
