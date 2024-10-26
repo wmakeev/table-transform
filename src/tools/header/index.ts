@@ -60,6 +60,12 @@ export const createTableHeader = (columnsNames: TableRow) => {
   return header
 }
 
+/**
+ * Return non deleted header columns names
+ *
+ * @param header Header
+ * @returns Normalized columns
+ */
 export const getNormalizedHeaderRow = (header: ColumnHeader[]): string[] => {
   return header.filter(h => !h.isDeleted).map(h => h.name)
 }
