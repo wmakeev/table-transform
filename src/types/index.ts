@@ -17,6 +17,7 @@ export type ColumnHeader = {
 export type TableRow = Array<unknown>
 
 export interface TableChunksAsyncIterable extends AsyncIterable<TableRow[]> {
+  // getPath: () => string[]
   getHeader: () => ColumnHeader[]
   // [Symbol.asyncIterator]: () => AsyncGenerator<TableRow[]>
 }
