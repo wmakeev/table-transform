@@ -1,4 +1,3 @@
-import assert from 'assert'
 import { TransformStepError } from '../errors/index.js'
 import {
   TableChunksAsyncIterable,
@@ -6,6 +5,7 @@ import {
   TableRow,
   TableTransfromConfig,
   createTableTransformer,
+  splitChunksBy,
   transforms as tf
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
@@ -26,92 +26,40 @@ export interface SplitInParams {
 
 const TRANSFORM_NAME = 'SplitIn'
 
-const getRowsComparator = (columnIndexes: number[]) => {
-  return (a: TableRow, b: TableRow): boolean => {
-    return columnIndexes.every(index => a[index] === b[index])
-  }
-}
-
-const createRowIndexNamer =
-  (splitColumnIndexes: number[]) => (row: TableRow) => {
-    return splitColumnIndexes.map(i => String(row[i])).join()
-  }
-
-async function pipeSourceToChannels(
+async function sourceSplitByToChannels(
   source: TableChunksAsyncIterable,
-  targetChannelsChan: AsyncChannel<AsyncChannel<TableRow[]>>,
-  keyColumns: string[]
+  keyColumns: string[],
+  targetChannelsChan: AsyncChannel<AsyncChannel<TableRow[]>>
 ): Promise<void> {
-  const keyColumnsSet = new Set(keyColumns)
+  let chan: AsyncChannel<TableRow[]> | null = null
 
-  const splitColumnIndexes = source
-    .getHeader()
-    .filter(h => !h.isDeleted && keyColumnsSet.has(h.name))
-    .map(h => h.index)
-
-  const getRowIndexName = createRowIndexNamer(splitColumnIndexes)
-
-  const rowsComparator = getRowsComparator(splitColumnIndexes)
-
-  let chan: AsyncChannel<TableRow[]>
-
-  let curPartRowSample: TableRow | undefined = undefined
-
-  for await (const chunk of source) {
-    // on iteration start
-    if (curPartRowSample === undefined) {
-      curPartRowSample = chunk[0]
-      chan = new AsyncChannel<TableRow[]>({
-        name: `${TRANSFORM_NAME}:chan("${getRowIndexName(curPartRowSample!)}")`
-      })
-      await targetChannelsChan.put(chan)
-    }
-
-    let chanCurIndex = 0
-
-    while (true) {
-      let chanSplitIndex = -1
-
-      for (let i = chanCurIndex; i < chunk.length; i++) {
-        if (!rowsComparator(curPartRowSample!, chunk[i]!)) {
-          chanSplitIndex = i
-          break
+  for await (const [isGroupFistChunk, chunk] of splitChunksBy(
+    source,
+    keyColumns
+  )) {
+    if (isGroupFistChunk) {
+      if (chan != null) {
+        if (!chan.isClosed()) {
+          if (!chan.isFlushed()) await chan.flush()
+          chan.close()
         }
       }
 
-      assert.ok(chan!)
-
-      if (chanSplitIndex === -1) {
-        if (!chan.isClosed())
-          await chan.put(chanCurIndex === 0 ? chunk : chunk.slice(chanCurIndex))
-
-        break
-      }
-
-      curPartRowSample = [...chunk[chanSplitIndex]!]
-
-      if (!chan.isClosed()) {
-        if (chanSplitIndex !== 0) {
-          await chan.put(
-            chanSplitIndex !== chanCurIndex
-              ? chunk.slice(chanCurIndex, chanSplitIndex)
-              : chanCurIndex === 0
-                ? chunk
-                : chunk.slice(chanCurIndex)
-          )
-        }
-
-        if (!chan.isFlushed()) await chan.flush()
-        chan.close()
-      }
-
-      chanCurIndex = chanSplitIndex
-
       chan = new AsyncChannel<TableRow[]>({
-        name: `${TRANSFORM_NAME}:chan("${getRowIndexName(curPartRowSample!)}")`
+        name: `${TRANSFORM_NAME}:chan`
       })
+
       await targetChannelsChan.put(chan)
     }
+
+    if (chan == null) continue
+
+    if (chan.isClosed()) {
+      chan = null
+      continue
+    }
+
+    chan.put(chunk)
   }
 
   if (!chan!.isFlushed()) await chan!.flush()
@@ -197,10 +145,10 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
         name: `${TRANSFORM_NAME}:channels`
       })
 
-      const pipeSourceToChannelsPromise = pipeSourceToChannels(
+      const pipeSourceToChannelsPromise = sourceSplitByToChannels(
         source,
-        channels,
-        keyColumns
+        keyColumns,
+        channels
       )
 
       for await (const chan of channels) {
