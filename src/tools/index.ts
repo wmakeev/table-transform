@@ -3,6 +3,7 @@ import { ColumnHeader, TableRow } from '../types/index.js'
 export * from './AsyncChannel/index.js'
 export * from './csvSourceFlatMapper.js'
 export * from './header/index.js'
+export * from './splitChunksBy.js'
 export * from './stream/index.js'
 
 export const UNICODE_SPACES_REGEX =
@@ -66,3 +67,8 @@ export function forceArrayLength(arr: unknown[], length: number): void {
     arr.push(...Array(length - arr.length).fill(null))
   }
 }
+
+// TODO Maybe usefull in future
+// export function getTransformPathName(transformPath: string[]) {
+//   return transformPath.join(' → ')
+// }
