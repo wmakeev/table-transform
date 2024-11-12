@@ -13,6 +13,9 @@ import { Context } from '../../table-transformer/Context.js'
 export interface ChunkSourceFromChannelParams {
   channel: AsyncChannel<HeaderChunkTuple>
   outputColumns?: string[]
+
+  // TODO Нужно думать над тем откуда брать контекст для канала при его создании
+  // Можно/нужно ли передавать контекст вместе с чанками и заголовками?
   context: Context
 }
 
