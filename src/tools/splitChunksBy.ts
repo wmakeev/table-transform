@@ -1,4 +1,4 @@
-import { TableChunksAsyncIterable, TableRow } from '../index.js'
+import { TableChunksSource, TableRow } from '../index.js'
 
 const getRowsComparator = (columnIndexes: number[]) => {
   return (a: TableRow | null, b: TableRow): boolean => {
@@ -8,7 +8,7 @@ const getRowsComparator = (columnIndexes: number[]) => {
 }
 
 export async function* splitChunksBy(
-  source: TableChunksAsyncIterable,
+  source: TableChunksSource,
   keyColumns: string[]
 ): AsyncGenerator<[isGroupFistChunk: boolean, chunk: TableRow[]]> {
   const keyColumnsSet = new Set(keyColumns)

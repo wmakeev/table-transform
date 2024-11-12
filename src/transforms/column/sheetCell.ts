@@ -351,6 +351,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

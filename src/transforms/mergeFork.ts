@@ -1,6 +1,6 @@
 import {
   ColumnHeader,
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableChunksTransformer,
   TableRow,
   TableTransfromConfig,
@@ -31,7 +31,7 @@ async function flushAndCloseChannels(channels: AsyncChannel<any>[]) {
 }
 
 async function forkProducer(
-  source: TableChunksAsyncIterable,
+  source: TableChunksSource,
   forkedChans: AsyncChannel<TableRow[]>[]
 ) {
   const normalizedSource = normalize({ immutable: false })(source)
@@ -140,6 +140,7 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

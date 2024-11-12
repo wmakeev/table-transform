@@ -152,6 +152,7 @@ export const assert = (
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

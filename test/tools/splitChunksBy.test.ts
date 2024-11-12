@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  Context,
   createTableHeader,
   splitChunksBy,
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableRow
 } from '../../src/index.js'
 
@@ -24,7 +25,10 @@ test('splitChunksBy', async () => {
     [[14], [15], [16]]
   ]
 
-  const tableChunksAsyncIterable: TableChunksAsyncIterable = {
+  const tableChunksAsyncIterable: TableChunksSource = {
+    getContext() {
+      return new Context()
+    },
     getHeader() {
       return createTableHeader(['foo'])
     },

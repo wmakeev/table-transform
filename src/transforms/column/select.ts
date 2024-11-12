@@ -103,6 +103,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     assert.ok(resultHeader.every(h => h != null))
 
     return {
+      ...source,
       getHeader() {
         return resultHeader
       },

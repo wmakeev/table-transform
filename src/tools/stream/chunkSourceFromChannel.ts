@@ -3,15 +3,17 @@ import {
   ColumnHeader,
   createTableTransformer,
   HeaderChunkTuple,
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableRow,
   transforms as tf
 } from '../../index.js'
 import { AsyncChannel } from '../index.js'
+import { Context } from '../../table-transformer/Context.js'
 
 export interface ChunkSourceFromChannelParams {
   channel: AsyncChannel<HeaderChunkTuple>
   outputColumns?: string[]
+  context: Context
 }
 
 /** Read chunks from channel */
@@ -19,7 +21,8 @@ export const chunkSourceFromChannel: (
   params: ChunkSourceFromChannelParams
 ) => AsyncIterable<TableRow[]> = ({
   channel,
-  outputColumns
+  outputColumns,
+  context
 }): AsyncIterable<TableRow[]> => ({
   async *[Symbol.asyncIterator]() {
     /** @type {string[] | undefined} */
@@ -43,7 +46,10 @@ export const chunkSourceFromChannel: (
 
       assert.ok(pickedColumnsNames)
 
-      const chunkIterable: TableChunksAsyncIterable = {
+      const chunkIterable: TableChunksSource = {
+        getContext() {
+          return context
+        },
         getHeader() {
           return header
         },

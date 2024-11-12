@@ -13,12 +13,18 @@ export type ColumnHeader = {
   isDeleted: boolean
 }
 
+export interface LaneContext {
+  getValue(key: string | Symbol): unknown
+  setValue(key: string | Symbol, value: unknown): boolean
+}
+
 /** Data row */
 export type TableRow = Array<unknown>
 
-export interface TableChunksAsyncIterable extends AsyncIterable<TableRow[]> {
+export interface TableChunksSource extends AsyncIterable<TableRow[]> {
   // getPath: () => string[]
-  getHeader: () => ColumnHeader[]
+  getHeader(): ColumnHeader[]
+  getContext(): LaneContext
   // [Symbol.asyncIterator]: () => AsyncGenerator<TableRow[]>
 }
 
@@ -26,8 +32,8 @@ export interface TableChunksAsyncIterable extends AsyncIterable<TableRow[]> {
  * Table row transformer. Gets batch of rows and returns transformed batch.
  */
 export type TableChunksTransformer = (
-  rowsChunkInfo: TableChunksAsyncIterable
-) => TableChunksAsyncIterable
+  rowsChunkInfo: TableChunksSource
+) => TableChunksSource
 
 export interface TableTransfromConfig {
   /** Transformers */
@@ -81,6 +87,9 @@ export interface TableTransfromConfig {
      */
     transforms?: TableChunksTransformer[]
   }
+
+  /** Transform context */
+  context?: Map<string | Symbol, unknown>
 }
 
 export type HeaderMode = NonNullable<
@@ -98,7 +107,7 @@ export type TableRowFlatMapper = (
   row: TableRow
 ) => AsyncGenerator<TableRow[]>
 
-export type TableChunksReducer = (source: TableChunksAsyncIterable) => {
+export type TableChunksReducer = (source: TableChunksSource) => {
   outputColumns: string[]
   getResult(): Promise<TableRow>
 }

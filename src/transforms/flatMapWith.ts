@@ -79,6 +79,7 @@ export const flatMapWith = (
     }
 
     return {
+      ...source,
       getHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

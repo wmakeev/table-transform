@@ -6,6 +6,7 @@ import {
 import test from 'node:test'
 import {
   AsyncChannel,
+  Context,
   FlattenTransform,
   HeaderChunkTuple,
   chunkSourceFromChannel,
@@ -37,9 +38,11 @@ test('transforms:channel #1', async () => {
 
   channel.put([createTableHeader(['index']), [[0]]])
 
+  const context = new Context()
+
   // Direct pass channel source to trnasformer
   const transformedRowsStream = tableTransformer(
-    chunkSourceFromChannel({ channel })
+    chunkSourceFromChannel({ channel, context })
   )
 
   const result = []
@@ -90,9 +93,11 @@ test('transforms:channel #2', async () => {
 
   channel.put([createTableHeader(['index']), [[0]]])
 
+  const context = new Context()
+
   // Use compose to pass channel source to trnasformer
   const transformedRowsStream = compose(
-    chunkSourceFromChannel({ channel }),
+    chunkSourceFromChannel({ channel, context }),
     tableTransformer,
     new FlattenTransform()
   )

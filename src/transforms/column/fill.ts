@@ -40,6 +40,7 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

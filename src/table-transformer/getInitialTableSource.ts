@@ -9,8 +9,9 @@ import {
   ColumnHeader,
   TableRow,
   TableTransfromConfig,
-  TableChunksAsyncIterable
+  TableChunksSource
 } from '../types/index.js'
+import { Context } from './Context.js'
 
 const generateForcedHeader = (
   headerMode: HeaderMode,
@@ -26,8 +27,12 @@ const generateForcedHeader = (
 export async function getInitialTableSource(params: {
   chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
   inputHeaderOptions?: TableTransfromConfig['inputHeader']
-}): Promise<TableChunksAsyncIterable> {
-  const { inputHeaderOptions, chunkedRowsIterable } = params
+  /** Transform context */
+  initialContext?: Map<string | Symbol, unknown> | undefined
+}): Promise<TableChunksSource> {
+  const { inputHeaderOptions, chunkedRowsIterable, initialContext } = params
+
+  const context = new Context(initialContext)
 
   //#region Predefined forced header
   if (
@@ -46,6 +51,7 @@ export async function getInitialTableSource(params: {
     )
 
     return {
+      getContext: () => context,
       getHeader: () => header,
       async *[Symbol.asyncIterator]() {
         const forcedLen = inputHeaderOptions.forceColumnsCount!
@@ -172,6 +178,7 @@ export async function getInitialTableSource(params: {
   }
 
   return {
+    getContext: () => context,
     getHeader: () => header,
     [Symbol.asyncIterator]: getSourceGenerator
   }

@@ -16,6 +16,7 @@ export const tapRows = (params: TapRowsParams): TableChunksTransformer => {
     const header = source.getHeader()
 
     return {
+      ...source,
       getHeader: () => header,
       [Symbol.asyncIterator]: async function* () {
         for await (const chunk of source) {

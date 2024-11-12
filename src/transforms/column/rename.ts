@@ -37,6 +37,7 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => transformedHeader,
       [Symbol.asyncIterator]: () => source[Symbol.asyncIterator]()
     }

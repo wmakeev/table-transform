@@ -30,6 +30,7 @@ export const normalize = (params?: NormalizeParams): TableChunksTransformer => {
     const chunkNormalizer = getChunkNormalizer(header, immutable)
 
     return {
+      ...source,
       getHeader: () => normalizedHeader,
       async *[Symbol.asyncIterator]() {
         for await (const chunk of source) {

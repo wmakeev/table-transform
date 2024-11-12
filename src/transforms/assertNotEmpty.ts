@@ -9,6 +9,7 @@ const TRANSFORM_NAME = 'AssertNotEmpty'
 export const assertNotEmpty = (): TableChunksTransformer => {
   return source => {
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       async *[Symbol.asyncIterator]() {
         let isEmpty = true

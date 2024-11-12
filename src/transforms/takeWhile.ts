@@ -153,6 +153,7 @@ export const takeWhile = (
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

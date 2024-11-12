@@ -60,6 +60,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => transformedHeader,
       [Symbol.asyncIterator]: source[Symbol.asyncIterator]
     }

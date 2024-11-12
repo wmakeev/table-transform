@@ -29,6 +29,7 @@ export const reduceWith = (
     }
 
     return {
+      ...source,
       getHeader: () => outHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

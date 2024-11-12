@@ -1,7 +1,7 @@
 import { TransformBugError } from '../../errors/index.js'
 import {
   ColumnHeader,
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableChunksTransformer
 } from '../../index.js'
 
@@ -75,7 +75,8 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
       }
     }
 
-    const resultChunk: TableChunksAsyncIterable = {
+    const resultChunk: TableChunksSource = {
+      ...source,
       getHeader: () => transformedHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

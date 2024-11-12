@@ -70,6 +70,7 @@ export const transform = (
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

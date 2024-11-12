@@ -1,6 +1,6 @@
 import { TransformStepError } from '../errors/index.js'
 import {
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableChunksTransformer,
   TableRow,
   TableTransfromConfig,
@@ -27,7 +27,7 @@ export interface SplitInParams {
 const TRANSFORM_NAME = 'SplitIn'
 
 async function sourceSplitByToChannels(
-  source: TableChunksAsyncIterable,
+  source: TableChunksSource,
   keyColumns: string[],
   targetChannelsChan: AsyncChannel<AsyncChannel<TableRow[]>>
 ): Promise<void> {
@@ -152,7 +152,8 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       )
 
       for await (const chan of channels) {
-        const tableChunksAsyncIterable: TableChunksAsyncIterable = {
+        const tableChunksAsyncIterable: TableChunksSource = {
+          ...source,
           getHeader: () => srcHeader,
           [Symbol.asyncIterator]: chan[Symbol.asyncIterator].bind(chan)
         }
@@ -174,6 +175,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => transfomedHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

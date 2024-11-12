@@ -16,7 +16,7 @@ export const map = (params: MapColumnParams): TableChunksTransformer => {
     async function* getTransformedSourceGenerator() {
       const mappingColumns: ColumnHeader[] = source
         .getHeader()
-        .filter(h => h.name === column)
+        .filter(h => !h.isDeleted && h.name === column)
 
       for await (const chunk of source) {
         chunk.forEach(row => {
@@ -34,6 +34,7 @@ export const map = (params: MapColumnParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => source.getHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }

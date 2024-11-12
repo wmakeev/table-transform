@@ -1,6 +1,6 @@
 import assert from 'assert'
 import {
-  TableChunksAsyncIterable,
+  TableChunksSource,
   TableRow,
   TableTransformer,
   TableTransfromConfig,
@@ -8,18 +8,23 @@ import {
 } from '../index.js'
 import { getInitialTableSource } from './getInitialTableSource.js'
 
+export * from './Context.js'
+
 export function createTableTransformer(
   config: TableTransfromConfig
 ): TableTransformer {
-  const { transforms = [], inputHeader, outputHeader, errorHandle } = config
+  const {
+    transforms = [],
+    inputHeader,
+    outputHeader,
+    errorHandle,
+    context
+  } = config
 
   return async function* (
-    source:
-      | Iterable<TableRow[]>
-      | AsyncIterable<TableRow[]>
-      | TableChunksAsyncIterable
+    source: Iterable<TableRow[]> | AsyncIterable<TableRow[]> | TableChunksSource
   ) {
-    let tableSource: TableChunksAsyncIterable | null = null
+    let tableSource: TableChunksSource | null = null
     let transfomedTableColumns: string[] | null = null
 
     try {
@@ -28,7 +33,8 @@ export function createTableTransformer(
           ? source
           : await getInitialTableSource({
               inputHeaderOptions: inputHeader,
-              chunkedRowsIterable: source
+              chunkedRowsIterable: source,
+              initialContext: context
             })
 
       //#region #jsgf360l

@@ -119,6 +119,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
     }
 
     return {
+      ...source,
       getHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
