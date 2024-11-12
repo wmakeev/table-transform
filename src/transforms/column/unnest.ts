@@ -106,7 +106,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
 
           for (const field of fields) {
             const index = headerColumnIndexByName.get(field)
-            assert.ok(index)
+            assert.ok(index !== undefined)
 
             if (Object.hasOwn(unnestObj, field)) {
               row[index] = (unnestObj as Record<string, unknown>)[field] ?? null
