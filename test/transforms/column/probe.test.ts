@@ -10,6 +10,7 @@ import {
   TableChunksReducer,
   TableRow,
   TableTransfromConfig,
+  createTableHeader,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
@@ -88,5 +89,71 @@ test('transforms:column:probe*', async () => {
   assert.deepEqual(transformedRows, [
     ['reduced', 'probe'],
     [6, 'foo']
+  ])
+})
+
+test('transforms:column:probe* - ahead generator', async () => {
+  const tableTransformConfig: TableTransfromConfig = {
+    transforms: [
+      tf.column.probeTake({
+        key: 'test_probe',
+        column: 'probe_value'
+      }),
+
+      src => {
+        return {
+          ...src,
+          getHeader: () => createTableHeader(['first']),
+          async *[Symbol.asyncIterator]() {
+            // Generate values before probe taken
+            yield [[10], [20]]
+            yield [[30], [40]]
+
+            for await (const chunk of src) {
+              yield [[chunk[0]![0]]]
+            }
+          }
+        }
+      },
+
+      tf.column.add({ column: 'probe' }),
+
+      tf.column.probePut({
+        key: 'test_probe',
+        column: 'probe'
+      })
+    ]
+  }
+
+  const sourceDataChunks: TableRow[][] = [
+    [
+      ['row_num', 'number', 'probe_value'],
+      [1, 1, 'foo'],
+      [2, 1, 'foo'],
+      [3, 1, 'bar']
+    ],
+    [
+      [4, 1, 'bar'],
+      [5, 1, 'bar'],
+      [6, 1, 'bar']
+    ]
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    sourceDataChunks,
+    createTableTransformer(tableTransformConfig),
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    ['first', 'probe'],
+    [10, 'foo'],
+    [20, 'foo'],
+    [30, 'foo'],
+    [40, 'foo'],
+    [1, 'foo'],
+    [4, 'foo']
   ])
 })

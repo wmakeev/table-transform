@@ -32,7 +32,7 @@ export interface TableChunksSource extends AsyncIterable<TableRow[]> {
  * Table row transformer. Gets batch of rows and returns transformed batch.
  */
 export type TableChunksTransformer = (
-  rowsChunkInfo: TableChunksSource
+  tableChunksSource: TableChunksSource
 ) => TableChunksSource
 
 export interface TableTransfromConfig {

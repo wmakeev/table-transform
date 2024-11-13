@@ -1,8 +1,10 @@
 import {
   TableChunksTransformer,
-  TransformColumnsNotFoundError
+  TableRow,
+  TransformColumnsNotFoundError,
+  TransformStepError
 } from '../../index.js'
-import { probesMapPropSymbol } from './index.js'
+import { ProbesMap, probesMapPropSymbol } from './index.js'
 
 interface ProbePutColumnParams {
   key: string
@@ -29,32 +31,63 @@ export const probePut = (
       throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
     }
 
+    const ctx = source.getContext()
+
+    let probesMap = ctx.getValue(probesMapPropSymbol) as ProbesMap
+
+    if (probesMap === undefined) {
+      probesMap = new Map()
+      ctx.setValue(probesMapPropSymbol, probesMap)
+    }
+
+    const colIndex = colHeader.index
+
+    const fillChunkColumn = (chunk: TableRow[], value: unknown) => {
+      for (const row of chunk) {
+        row[colIndex] = value
+      }
+    }
+
     return {
       ...source,
 
       async *[Symbol.asyncIterator]() {
-        const colIndex = colHeader.index
-
         let isProbeTaked = false
+        let probedValue = undefined
 
-        let probedValue: unknown
+        let chunksCache: TableRow[][] | undefined = []
 
         for await (const chunk of source) {
           if (isProbeTaked === false) {
-            const probesMap = source
-              .getContext()
-              .getValue(probesMapPropSymbol) as Map<string, unknown>
+            if (!probesMap.has(key)) {
+              chunksCache?.push(chunk)
+              continue
+            }
 
-            probedValue = probesMap != null ? probesMap.get(key) : undefined
+            probedValue = probesMap.get(key)
+
+            if (chunksCache !== undefined && chunksCache.length > 0) {
+              for (const chunk of chunksCache) {
+                fillChunkColumn(chunk, probedValue)
+                yield chunk
+              }
+            }
 
             isProbeTaked = true
+
+            chunksCache = undefined
           }
 
-          for (const row of chunk) {
-            row[colIndex] = probedValue
-          }
+          fillChunkColumn(chunk, probedValue)
 
           yield chunk
+        }
+
+        if (chunksCache !== undefined) {
+          throw new TransformStepError(
+            'Probe not taken in Column:ProbeTake',
+            TRANSFORM_NAME
+          )
         }
       }
     }
