@@ -23,7 +23,7 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
     )
 
     if (fillColumns.length === 0) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
     }
 
     async function* getTransformedSourceGenerator() {

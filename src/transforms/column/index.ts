@@ -13,6 +13,7 @@ export * from './select.js'
 export * from './sheetCell.js'
 export * from './transform.js'
 export * from './unnest.js'
+export * from './sort.js'
 
 export const probesMapPropSymbol = Symbol('ProbeMap')
 
