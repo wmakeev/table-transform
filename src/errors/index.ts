@@ -30,6 +30,19 @@ export class TransformStepError extends TransformError {
   }
 }
 
+export class TransformStepParameterError extends TransformStepError {
+  constructor(
+    message: string,
+    stepName: string,
+    public paramName: string,
+    public paramValue: unknown,
+    options?: ErrorOptions
+  ) {
+    super(message, stepName, options)
+    this.name = this.constructor.name
+  }
+}
+
 export class TransformAssertError extends TransformStepError {
   constructor(message: string, stepName: string, options?: ErrorOptions) {
     super(message, stepName, options)
