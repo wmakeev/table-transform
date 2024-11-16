@@ -13,6 +13,7 @@ export * from './rename.js'
 export * from './select.js'
 export * from './sheetCell.js'
 export * from './sort.js'
+export * from './tapValue.js'
 export * from './transform.js'
 export * from './unnest.js'
 
