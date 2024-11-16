@@ -7,8 +7,8 @@ import {
 import { ProbesMap, probesMapPropSymbol } from './index.js'
 
 interface ProbePutColumnParams {
-  key: string
   column: string
+  key?: string
   arrIndex?: number
 }
 
@@ -20,7 +20,7 @@ const TRANSFORM_NAME = 'Column:ProbePut'
 export const probePut = (
   params: ProbePutColumnParams
 ): TableChunksTransformer => {
-  const { key, column } = params
+  const { column, key = column } = params
 
   return source => {
     const header = source.getHeader()

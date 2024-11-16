@@ -96,7 +96,6 @@ test('transforms:column:probe* - ahead generator', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [
       tf.column.probeTake({
-        key: 'test_probe',
         column: 'probe_value'
       }),
 
@@ -116,11 +115,10 @@ test('transforms:column:probe* - ahead generator', async () => {
         }
       },
 
-      tf.column.add({ column: 'probe' }),
+      tf.column.add({ column: 'probe_value' }),
 
       tf.column.probePut({
-        key: 'test_probe',
-        column: 'probe'
+        column: 'probe_value'
       })
     ]
   }
@@ -148,7 +146,7 @@ test('transforms:column:probe* - ahead generator', async () => {
   const transformedRows = await transformedRowsStream.toArray()
 
   assert.deepEqual(transformedRows, [
-    ['first', 'probe'],
+    ['first', 'probe_value'],
     [10, 'foo'],
     [20, 'foo'],
     [30, 'foo'],
