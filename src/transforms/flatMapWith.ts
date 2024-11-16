@@ -13,16 +13,22 @@ export interface FlatMapWithParams {
   mapper: TableRowFlatMapper
 
   /**
-   * Source columns that should be passed to the output columns.
+   * Columns that will be added to the mapper result with constant values from
+   * the corresponding columns of the source row.
    */
   passThroughColumns?: string[]
 
   /**
-   * Columns that should be selected from inner transform.
+   * The inner transformation that the mapper result goes through with the added
+   * columns from the original row specified in `passThroughColumns`.
+   */
+  transformConfig?: TableTransfromConfig
+
+  /**
+   * Columns that should be selected (select transform applied) from inner
+   * transform output.
    */
   outputColumns: string[]
-
-  transformConfig?: TableTransfromConfig
 }
 
 // const TRANSFORM_NAME = 'FlatMapWith'
