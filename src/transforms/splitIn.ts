@@ -62,8 +62,8 @@ async function sourceSplitByToChannels(
     chan.put(chunk)
   }
 
-  if (!chan!.isFlushed()) await chan!.flush()
-  chan!.close()
+  if (chan?.isFlushed() === false) await chan?.flush()
+  chan?.close()
 
   if (!targetChannelsChan.isFlushed()) await targetChannelsChan.flush()
   targetChannelsChan.close()
