@@ -58,7 +58,7 @@ export const explode = (
           }
         }
 
-        yield explodedRows
+        if (explodedRows.length > 0) yield explodedRows
       }
     }
 

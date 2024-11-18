@@ -49,3 +49,34 @@ test('transforms:column:explode', async () => {
     ['a4', 'b4', 6    , 'c4']
   ])
 })
+
+test('transforms:column:explode (empty)', async () => {
+  const tableTransformer = createTableTransformer({
+    transforms: [
+      transforms.column.explode({
+        column: 'a'
+      })
+    ]
+  })
+
+  /* prettier-ignore */
+  const table = [
+    [
+      ['a'],
+      [[]],
+    ]
+  ]
+
+  const transformedRows: string[][] = await compose(() =>
+    tableTransformer(table)
+  ).toArray()
+
+  /* prettier-ignore */
+  assert.deepEqual(transformedRows, [
+  [
+    [
+      'a',
+    ],
+  ],
+])
+})
