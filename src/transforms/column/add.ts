@@ -34,6 +34,11 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
       return source
     }
 
+    // TODO Скорее всего нет большого смысла переиспользовать удаленные колонки.
+    // Если формировать размер строки заранее на основе вывода колонок в дорожке
+    // то добавление колонки (без значения по умолчанию) будет прозрачной
+    // операцией только на заголовках без необходимости итерации по массиву.
+
     const firstDeletedHeader = header.find(h => h.isDeleted)
 
     // Add a cell at the end of a row or reuse a deleted cell
