@@ -60,6 +60,11 @@ test('transforms:column:probe*', async () => {
       tf.column.probePut({
         key: 'test_probe',
         column: 'probe'
+      }),
+
+      tf.column.probeRestore({
+        key: 'test_probe',
+        column: 'probe_2'
       })
     ]
   }
@@ -87,8 +92,8 @@ test('transforms:column:probe*', async () => {
   const transformedRows = await transformedRowsStream.toArray()
 
   assert.deepEqual(transformedRows, [
-    ['reduced', 'probe'],
-    [6, 'foo']
+    ['reduced', 'probe', 'probe_2'],
+    [6, 'foo', 'foo']
   ])
 })
 
@@ -155,3 +160,5 @@ test('transforms:column:probe* - ahead generator', async () => {
     [4, 'foo']
   ])
 })
+
+// TODO Errors

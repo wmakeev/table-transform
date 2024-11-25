@@ -6,7 +6,7 @@ import {
 } from '../../index.js'
 import { ProbesMap, probesMapPropSymbol } from './index.js'
 
-interface ProbePutColumnParams {
+export interface ProbePutColumnParams {
   column: string
   key?: string
   arrIndex?: number
