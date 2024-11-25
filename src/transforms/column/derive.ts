@@ -25,7 +25,7 @@ export const derive = (
       undefined
     ) {
       throw new TransformColumnsError(
-        `Can't drive already exist column`,
+        `Can't derive already exist column`,
         TRANSFORM_NAME,
         source.getHeader(),
         [column]
