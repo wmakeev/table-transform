@@ -18,6 +18,7 @@ export * from './sort.js'
 export * from './tapValue.js'
 export * from './transform.js'
 export * from './unnest.js'
+export * from './wait.js'
 
 export const probesMapPropSymbol = Symbol('ProbeMap')
 
