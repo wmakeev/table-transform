@@ -1,6 +1,7 @@
 export * from './add.js'
 export * from './addArray.js'
 export * from './assert.js'
+export * from './clear.js'
 export * from './collect.js'
 export * from './derive.js'
 export * from './explode.js'
