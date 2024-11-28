@@ -7,41 +7,13 @@ import {
 import test from 'node:test'
 import {
   FlattenTransform,
-  TableChunksReducer,
   TableRow,
   TableTransfromConfig,
   createTableHeader,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
-
-const getFieldSumReducer: (column: string) => TableChunksReducer =
-  column => src => {
-    const sumColHeader = src
-      .getHeader()
-      .find(h => h.isDeleted === false && h.name === column)
-
-    if (sumColHeader === undefined) {
-      throw new Error(`Column "${column}" not found`)
-    }
-
-    return {
-      outputColumns: ['reduced'],
-      async getResult() {
-        let reducedSum = 0
-
-        for await (const chunk of src) {
-          reducedSum = chunk.reduce((res, row) => {
-            const num = row[sumColHeader.index]
-
-            return typeof num === 'number' ? res + num : res
-          }, reducedSum)
-        }
-
-        return [reducedSum]
-      }
-    }
-  }
+import { getFieldSumReducer } from '../../helpers/index.js'
 
 test('transforms:column:probe*', async () => {
   const tableTransformConfig: TableTransfromConfig = {
