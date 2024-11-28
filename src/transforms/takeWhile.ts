@@ -47,6 +47,7 @@ export const takeWhile = (
         ] as const
       }
 
+      // FIXME Не обработанная ошибка если некорректное выражение "Error: Parse error on line 1:"
       const transformState = new TransformState(
         TRANSFORM_NAME,
         params,

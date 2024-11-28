@@ -97,6 +97,57 @@ test('transforms:column:probe*', async () => {
   ])
 })
 
+test('transforms:column:probe*Many', async () => {
+  const tableTransformConfig: TableTransfromConfig = {
+    transforms: [
+      tf.column.probeTakeMany({
+        columns: ['col1', 'col2', 'col3', 'col4']
+      }),
+
+      tf.reduceWith({
+        reducer: getFieldSumReducer('val')
+      }),
+
+      tf.column.add({ column: 'col1' }),
+      tf.column.add({ column: 'col3' }),
+
+      tf.column.probePutMany({
+        columns: ['col1', 'col3']
+      }),
+
+      tf.column.probeRestoreMany({
+        columns: ['col2', 'col4']
+      })
+    ]
+  }
+
+  const sourceDataChunks: TableRow[][] = [
+    [
+      ['col1', 'col2', 'col3', 'col4', 'val'],
+      [11, 12, 13, 14, 1],
+      [21, 22, 23, 24, 1],
+      [31, 32, 33, 34, 1]
+    ],
+    [
+      [41, 42, 43, 44, 1],
+      [51, 52, 53, 54, 1]
+    ]
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    sourceDataChunks,
+    createTableTransformer(tableTransformConfig),
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    ['reduced', 'col1', 'col3', 'col2', 'col4'],
+    [5, 11, 13, 12, 14]
+  ])
+})
+
 test('transforms:column:probe* - ahead generator', async () => {
   const tableTransformConfig: TableTransfromConfig = {
     transforms: [

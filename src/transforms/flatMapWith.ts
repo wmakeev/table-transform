@@ -12,6 +12,8 @@ import {
 export interface FlatMapWithParams {
   mapper: TableRowFlatMapper
 
+  // TODO Этот праметр можно убрать т.к. есть column.probeTake/Put
+
   /**
    * Columns that will be added to the mapper result with constant values from
    * the corresponding columns of the source row.
