@@ -13,8 +13,10 @@ export class AsyncChannel<T = unknown> {
   #buffer: T[] = []
   #bufferLength: number
 
-  #putQueue = [] as Array<(closed?: boolean) => void>
-  #takeQueue = [] as Array<(value: typeof AsyncChannel.CLOSED | T) => void>
+  #putQueue = [] as Array<(closed?: boolean, err?: Error) => void>
+  #takeQueue = [] as Array<
+    (value: typeof AsyncChannel.CLOSED | T, err?: Error) => void
+  >
 
   constructor(options?: { name?: string; bufferLength?: number }) {
     const { bufferLength = 0 } = options ?? {}
@@ -53,8 +55,13 @@ export class AsyncChannel<T = unknown> {
       return true
     }
 
-    return new Promise(resolve => {
-      this.#putQueue.push((closed = false) => {
+    return new Promise((resolve, reject) => {
+      this.#putQueue.push((closed = false, err?: Error) => {
+        if (err != null) {
+          reject(err)
+          return
+        }
+
         if (closed) {
           resolve(false)
         } else {
@@ -81,13 +88,36 @@ export class AsyncChannel<T = unknown> {
       return this.#buffer.shift()!
     }
 
-    return await new Promise(resolve => this.#takeQueue.push(resolve))
+    return await new Promise((resolve, reject) =>
+      this.#takeQueue.push((val, err) => {
+        if (err) {
+          reject(err)
+          return
+        }
+
+        resolve(val)
+      })
+    )
   }
 
-  close() {
+  close(err?: Error) {
     // TODO Нужно подумать как закрвать не деструктивно ..
     // .. напр. ждать опустошения очередей на чтение и запись
     this.#closed = true
+
+    if (err != null) {
+      if (this.#takeQueue.length !== 0) {
+        this.#takeQueue[0]!(AsyncChannel.CLOSED, err)
+        return
+      }
+
+      if (this.#putQueue.length !== 0) {
+        this.#putQueue[0]!(true, err)
+        return
+      }
+
+      throw err
+    }
 
     this.#takeQueue.forEach(reader => {
       reader(AsyncChannel.CLOSED)

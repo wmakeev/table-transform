@@ -527,3 +527,29 @@ test('AsyncChannel (first take)', async () => {
 
   assert.ok(consumer)
 })
+
+test('AsyncChannel (errors)', async () => {
+  const chan = new AsyncChannel<number>()
+
+  const producer = async () => {
+    await chan.put(1)
+    await chan.put(2)
+    await chan.put(3)
+    setTimeout(() => chan.close(new Error('Channel error')), 0)
+    await chan.put(4)
+  }
+
+  producer()
+
+  try {
+    for await (const num of chan) {
+      assert.ok(typeof num === 'number')
+    }
+  } catch (err) {
+    assert.ok(err instanceof Error)
+    assert.equal(err.message, 'Channel error')
+    return
+  }
+
+  assert.fail('Error expected')
+})
