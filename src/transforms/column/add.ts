@@ -10,6 +10,7 @@ export interface AddColumnParams {
 
   defaultValue?: unknown
 
+  // TODO force неоднозначен. Можно понимать как принудительную инициализацию колонки.
   /**
    * If the adding column(s) already exists, then add a new one with the same
    * name.

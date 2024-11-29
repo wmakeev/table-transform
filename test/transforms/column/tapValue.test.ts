@@ -20,8 +20,9 @@ test('transforms:column:tapValue', async () => {
     transforms: [
       tf.column.tapValue({
         column: 'val',
-        tapFunction: val => {
+        tapFunction: (val, row, index) => {
           values.push(val)
+          assert.equal(val, row[index])
         }
       })
     ]
