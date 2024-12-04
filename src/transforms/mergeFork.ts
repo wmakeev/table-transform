@@ -1,5 +1,6 @@
 import {
   ColumnHeader,
+  Context,
   TableChunksSource,
   TableChunksTransformer,
   TableRow,
@@ -104,6 +105,7 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
 
       const transformGens = transformConfigs.map((forkConfig, index) => {
         const forkTransform = createTableTransformer({
+          context: new Context(source.getContext()),
           ...forkConfig,
           transforms: [
             ...(forkConfig.transforms ?? []),

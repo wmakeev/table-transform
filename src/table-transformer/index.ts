@@ -1,5 +1,6 @@
 import assert from 'assert'
 import {
+  Context,
   TableChunksSource,
   TableRow,
   TableTransformer,
@@ -34,7 +35,7 @@ export function createTableTransformer(
           : await getInitialTableSource({
               inputHeaderOptions: inputHeader,
               chunkedRowsIterable: source,
-              initialContext: context
+              context
             })
 
       //#region #jsgf360l
@@ -110,14 +111,13 @@ export function createTableTransformer(
       // а не в колонку. Но это можно сделать сейчас только через контекст
       // трансформации. Вероятно тут нужен как раз этот глобальный контекст.
 
-      // `createTableTransformer(config, context)` (???)
-
       yield* createTableTransformer({
         transforms: _transforms,
         outputHeader: {
           skip:
             sourceResultColumns != null || outputHeader?.forceColumns != null
-        }
+        },
+        context: new Context(context)
       })([[[errorHandle.errorColumn], [errorInfo]]])
     }
   }

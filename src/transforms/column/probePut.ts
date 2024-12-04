@@ -4,7 +4,7 @@ import {
   TransformColumnsNotFoundError,
   TransformStepError
 } from '../../index.js'
-import { ProbesMap, probesMapPropSymbol } from './index.js'
+import { probeScopeSymbol } from './index.js'
 
 export interface ProbePutColumnParams {
   column: string
@@ -33,13 +33,6 @@ export const probePut = (
 
     const ctx = source.getContext()
 
-    let probesMap = ctx.getValue(probesMapPropSymbol) as ProbesMap
-
-    if (probesMap === undefined) {
-      probesMap = new Map()
-      ctx.setValue(probesMapPropSymbol, probesMap)
-    }
-
     const colIndex = colHeader.index
 
     const fillChunkColumn = (chunk: TableRow[], value: unknown) => {
@@ -59,12 +52,12 @@ export const probePut = (
 
         for await (const chunk of source) {
           if (isProbeTaked === false) {
-            if (!probesMap.has(key)) {
+            if (ctx.has(probeScopeSymbol, key) === false) {
               chunksCache?.push(chunk)
               continue
             }
 
-            probedValue = probesMap.get(key)
+            probedValue = ctx.get(probeScopeSymbol, key)
 
             if (chunksCache !== undefined && chunksCache.length > 0) {
               for (const chunk of chunksCache) {

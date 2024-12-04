@@ -1,21 +1,52 @@
-import { LaneContext } from '../types/index.js'
+export type ContextScopeMap = Map<string | Symbol, unknown>
 
-export class Context implements LaneContext {
-  #context
+export class Context {
+  #parentContext: Context | null = null
+  #currentContextScopeMap
 
-  constructor(
-    initialContext?: Map<string | Symbol, unknown> | undefined | null
-  ) {
-    this.#context = initialContext ?? new Map<string | Symbol, unknown>()
+  constructor(parent?: Context) {
+    this.#currentContextScopeMap = new Map<Symbol, ContextScopeMap>()
+    this.#parentContext = parent ?? null
   }
 
-  getValue(key: string | Symbol): unknown {
-    return this.#context.get(key)
+  getScopeMapWithKey(
+    scope: Symbol,
+    key: string | Symbol
+  ): ContextScopeMap | undefined {
+    const scopeMap = this.#currentContextScopeMap.get(scope)
+
+    if (scopeMap?.has(key) === true) {
+      return scopeMap
+    }
+
+    return this.#parentContext?.getScopeMapWithKey(scope, key)
   }
 
-  setValue(key: string | Symbol, value: unknown): boolean {
-    const hasValue = this.#context.has(key)
-    this.#context.set(key, value)
-    return hasValue
+  has(scope: Symbol, key: string | Symbol): boolean {
+    const scopeMap = this.getScopeMapWithKey(scope, key)
+    return scopeMap != null
+  }
+
+  get(scope: Symbol, key: string | Symbol): unknown {
+    const scopeMap = this.getScopeMapWithKey(scope, key)
+
+    if (scopeMap == null) return undefined
+
+    return scopeMap.get(key)
+  }
+
+  set(scope: Symbol, key: string | Symbol, value: unknown): boolean {
+    let curScopeMap = this.#currentContextScopeMap.get(scope)
+
+    if (curScopeMap === undefined) {
+      curScopeMap = new Map()
+      this.#currentContextScopeMap.set(scope, curScopeMap)
+    }
+
+    const hasValue = curScopeMap.has(key)
+
+    curScopeMap.set(key, value)
+
+    return !hasValue
   }
 }

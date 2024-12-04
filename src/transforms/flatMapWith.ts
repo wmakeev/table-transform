@@ -6,7 +6,8 @@ import {
   createRecordFromRow,
   createTableHeader,
   createTableTransformer,
-  transforms as tf
+  transforms as tf,
+  Context
 } from '../index.js'
 
 export interface FlatMapWithParams {
@@ -59,8 +60,8 @@ export const flatMapWith = (
               : undefined
 
           const transformer = createTableTransformer({
+            context: new Context(source.getContext()),
             ...transformConfig,
-
             transforms: [
               ...(rowRecord
                 ? passThroughColumns.map(col => {
@@ -70,10 +71,8 @@ export const flatMapWith = (
                     })
                   })
                 : []),
-
               ...(transformConfig.transforms ?? [])
             ],
-
             outputHeader: {
               ...transformConfig?.outputHeader,
               forceColumns: outputColumns,

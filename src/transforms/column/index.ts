@@ -24,6 +24,4 @@ export * from './transform.js'
 export * from './unnest.js'
 export * from './wait.js'
 
-export const probesMapPropSymbol = Symbol('ProbeMap')
-
-export type ProbesMap = Map<string, unknown>
+export const probeScopeSymbol = Symbol('ProbeScope')

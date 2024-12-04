@@ -3,7 +3,7 @@ import {
   TableChunksTransformer,
   TransformColumnsNotFoundError
 } from '../../index.js'
-import { ProbesMap, probesMapPropSymbol } from './index.js'
+import { probeScopeSymbol } from './index.js'
 
 interface ProbeTakeColumnParams {
   column: string
@@ -36,13 +36,6 @@ export const probeTake = (
 
     const ctx = source.getContext()
 
-    let probesMap = ctx.getValue(probesMapPropSymbol) as ProbesMap | undefined
-
-    if (probesMap === undefined) {
-      probesMap = new Map()
-      ctx.setValue(probesMapPropSymbol, probesMap)
-    }
-
     return {
       ...source,
 
@@ -53,7 +46,7 @@ export const probeTake = (
           if (!isProbeTaken) {
             const probeValue = chunk[0]![columnHeader.index]
 
-            probesMap.set(key, probeValue)
+            ctx.set(probeScopeSymbol, key, probeValue)
 
             isProbeTaken = true
           }

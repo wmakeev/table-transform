@@ -1,5 +1,6 @@
 import { TransformStepError } from '../errors/index.js'
 import {
+  Context,
   TableChunksSource,
   TableChunksTransformer,
   TableRow,
@@ -81,6 +82,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
     // Drop headers from splits
     const transformConfig: TableTransfromConfig = {
       ...params.transformConfig,
+
       outputHeader: {
         ...params.transformConfig.outputHeader,
         skip: true
@@ -158,9 +160,10 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
           [Symbol.asyncIterator]: chan[Symbol.asyncIterator].bind(chan)
         }
 
-        const gen = createTableTransformer(transformConfig)(
-          tableChunksAsyncIterable
-        )
+        const gen = createTableTransformer({
+          context: new Context(source.getContext()),
+          ...transformConfig
+        })(tableChunksAsyncIterable)
 
         try {
           for await (const chunk of gen) {

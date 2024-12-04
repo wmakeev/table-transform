@@ -1,15 +1,15 @@
 import { TransformError } from '../errors/index.js'
 import {
-  generateHeaderColumnNames,
   createTableHeader,
-  forceArrayLength
+  forceArrayLength,
+  generateHeaderColumnNames
 } from '../tools/index.js'
 import {
-  HeaderMode,
   ColumnHeader,
+  HeaderMode,
+  TableChunksSource,
   TableRow,
-  TableTransfromConfig,
-  TableChunksSource
+  TableTransfromConfig
 } from '../types/index.js'
 import { Context } from './Context.js'
 
@@ -28,11 +28,11 @@ export async function getInitialTableSource(params: {
   chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
   inputHeaderOptions?: TableTransfromConfig['inputHeader']
   /** Transform context */
-  initialContext?: Map<string | Symbol, unknown> | undefined
+  context?: Context | undefined
 }): Promise<TableChunksSource> {
-  const { inputHeaderOptions, chunkedRowsIterable, initialContext } = params
+  const { inputHeaderOptions, chunkedRowsIterable } = params
 
-  const context = new Context(initialContext)
+  const context = params.context ?? new Context()
 
   //#region Predefined forced header
   if (

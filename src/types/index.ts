@@ -1,3 +1,5 @@
+import { Context } from '../table-transformer/Context.js'
+
 export * from './guards.js'
 
 /** Metadata of column header */
@@ -13,18 +15,13 @@ export type ColumnHeader = {
   isDeleted: boolean
 }
 
-export interface LaneContext {
-  getValue(key: string | Symbol): unknown
-  setValue(key: string | Symbol, value: unknown): boolean
-}
-
 /** Data row */
 export type TableRow = Array<unknown>
 
 export interface TableChunksSource extends AsyncIterable<TableRow[]> {
   // getPath: () => string[]
   getHeader(): ColumnHeader[]
-  getContext(): LaneContext
+  getContext(): Context
   // [Symbol.asyncIterator]: () => AsyncGenerator<TableRow[]>
 }
 
@@ -88,8 +85,8 @@ export interface TableTransfromConfig {
     transforms?: TableChunksTransformer[]
   }
 
-  /** Transform context */
-  context?: Map<string | Symbol, unknown>
+  /** Transform context Map */
+  context?: Context | undefined
 }
 
 export type HeaderMode = NonNullable<
