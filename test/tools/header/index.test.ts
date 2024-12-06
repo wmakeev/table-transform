@@ -31,16 +31,127 @@ test('tools:header:getChunkNormalizer', async t => {
       }
     ]
 
-    const normalizer = getChunkNormalizer(header)
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(header)
+
+    assert.ok(normalizedHeader === header)
 
     const chunk: TableRow[] = [
       [0, 1, 2, 3, 4, 5],
       [6, 7, 8, 9]
     ]
 
-    const result1 = normalizer(chunk)
+    const result1 = chunkNormalizer(chunk)
 
     assert.equal(result1, chunk)
+  })
+
+  await t.test('immutable=false | unordered', () => {
+    const header: ColumnHeader[] = [
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ]
+
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(header)
+
+    assert.deepEqual(normalizedHeader, [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ])
+
+    const chunk: TableRow[] = [
+      [0, 1, 2, 3, 4, 5],
+      [6, 7, 8, 9]
+    ]
+
+    const result1 = chunkNormalizer(chunk)
+
+    assert.deepEqual(result1, [
+      [1, 0, 2],
+      [7, 6, 8]
+    ])
+  })
+
+  await t.test('immutable=false | ordered | with deleted', () => {
+    const header: ColumnHeader[] = [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      },
+      {
+        index: 3,
+        isDeleted: true,
+        name: 'col4'
+      }
+    ]
+
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(header)
+
+    assert.deepEqual(normalizedHeader, [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ])
+
+    const chunk: TableRow[] = [
+      [0, 1, 2, 3, 4, 5],
+      [6, 7, 8, 9]
+    ]
+
+    const result1 = chunkNormalizer(chunk)
+
+    assert.deepEqual(result1, [
+      [0, 1, 2],
+      [6, 7, 8]
+    ])
   })
 
   await t.test('immutable=true | ordered', () => {
@@ -62,14 +173,20 @@ test('tools:header:getChunkNormalizer', async t => {
       }
     ]
 
-    const normalizer = getChunkNormalizer(header, true)
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(
+      header,
+      true
+    )
+
+    assert.ok(normalizedHeader !== header)
+    assert.deepEqual(normalizedHeader, header)
 
     const chunk: TableRow[] = [
       [0, 1, 2, 3, 4, 5],
       [6, 7, 8, 9]
     ]
 
-    const result1 = normalizer(chunk)
+    const result1 = chunkNormalizer(chunk)
 
     assert.notEqual(result1, chunk)
 
@@ -87,6 +204,11 @@ test('tools:header:getChunkNormalizer', async t => {
         name: 'col2'
       },
       {
+        index: 3,
+        isDeleted: true,
+        name: 'col4'
+      },
+      {
         index: 0,
         isDeleted: false,
         name: 'col1'
@@ -99,14 +221,32 @@ test('tools:header:getChunkNormalizer', async t => {
       }
     ]
 
-    const normalizer = getChunkNormalizer(header)
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(header)
+
+    assert.deepEqual(normalizedHeader, [
+      {
+        index: 0,
+        isDeleted: false,
+        name: 'col2'
+      },
+      {
+        index: 1,
+        isDeleted: false,
+        name: 'col1'
+      },
+      {
+        index: 2,
+        isDeleted: false,
+        name: 'col3'
+      }
+    ])
 
     const chunk: TableRow[] = [
       [0, 1, 2, 3, 4, 5],
       [6, 7, 8, 9]
     ]
 
-    const result1 = normalizer(chunk)
+    const result1 = chunkNormalizer(chunk)
 
     assert.notEqual(result1, chunk)
 

@@ -1,12 +1,14 @@
+import assert from 'assert'
 import {
   AsyncChannel,
   cloneChunk,
   HeaderChunkTuple,
   TableChunksTransformer
 } from '../index.js'
+import { channelScopeSymbol } from './index.js'
 
 export interface ForkToChannelParams {
-  channel: AsyncChannel<HeaderChunkTuple>
+  channelName: string
 }
 
 /**
@@ -15,10 +17,22 @@ export interface ForkToChannelParams {
 export const forkToChannel = (
   params: ForkToChannelParams
 ): TableChunksTransformer => {
-  const { channel } = params
+  const { channelName } = params
 
   return src => {
     const header = src.getHeader()
+    const context = src.getContext()
+
+    let channel = context.get(channelScopeSymbol, channelName) as
+      | AsyncChannel<HeaderChunkTuple>
+      | undefined
+
+    if (channel == null) {
+      channel = new AsyncChannel<HeaderChunkTuple>()
+      context.set(channelScopeSymbol, channelName, channel)
+    }
+
+    assert.ok(channel instanceof AsyncChannel, 'AsyncChannel instance expected')
 
     return {
       ...src,

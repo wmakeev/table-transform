@@ -26,6 +26,10 @@ export const takeWhile = (
     }
 
     async function* getTransformedSourceGenerator() {
+      const internalTransformContext = source
+        .getContext()
+        ._getTransformContext()
+
       const srcHeader = source.getHeader()
 
       const getErrArgs = (
@@ -52,7 +56,7 @@ export const takeWhile = (
         TRANSFORM_NAME,
         params,
         srcHeader,
-        context
+        internalTransformContext ?? context
       )
 
       let isBreaked = false

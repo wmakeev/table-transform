@@ -17,10 +17,10 @@ import {
 } from '../../../src/index.js'
 import { csvSourceFlatMapper } from '../../helpers/index.js'
 
-test('transforms:mergeFork #1', async () => {
+test('transforms:forkAndMerge #1', async () => {
   const transformConfig: TableTransfromConfig = {
     transforms: [
-      tf.mergeFork({
+      tf.forkAndMerge({
         outputColumns: ['code', 'name'],
         transformConfigs: [
           {
@@ -110,10 +110,10 @@ test('transforms:mergeFork #1', async () => {
   ])
 })
 
-test('transforms:mergeFork #2', async () => {
+test('transforms:forkAndMerge #2', async () => {
   const transformConfig: TableTransfromConfig = {
     transforms: [
-      tf.mergeFork({
+      tf.forkAndMerge({
         outputColumns: ['code', 'value', 'error_name', 'error_message'],
         transformConfigs: [
           {

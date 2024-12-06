@@ -7,20 +7,20 @@ import {
   TableTransfromConfig,
   cloneChunk,
   createTableTransformer,
+  pipeAsyncIterableToChannel,
   transforms as tf
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { normalize } from './normalize.js'
 
-// TODO Вероятно нужно подобрать более подходяее нименование
-const TRANSFORM_NAME = 'MergeFork'
+// TODO Можно ли оптимизировать копирование чанка в первый форк без клонирования?
 
-export interface MergeForkParams {
+const TRANSFORM_NAME = 'ForkAndMerge'
+
+export interface ForkAndMergeParams {
   outputColumns: string[]
   transformConfigs: TableTransfromConfig[]
 }
-
-// const TRANSFORM_NAME = 'MergeFork'
 
 async function flushAndCloseChannels(channels: AsyncChannel<any>[]) {
   await Promise.all(
@@ -66,22 +66,12 @@ async function forkProducer(
   await flushAndCloseChannels(forkedChans)
 }
 
-async function pipeGenToChanAsync(
-  sourceGen: AsyncGenerator<TableRow[]>,
-  targetChan: AsyncChannel<TableRow[]>
-) {
-  for await (const chunk of sourceGen) {
-    if (targetChan.isClosed()) break
-    await targetChan.put(chunk)
-  }
-
-  await targetChan.flush()
-}
-
 /**
- * MergeFork
+ * Fork and merge
  */
-export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
+export const forkAndMerge = (
+  params: ForkAndMergeParams
+): TableChunksTransformer => {
   const { outputColumns, transformConfigs } = params
 
   return source => {
@@ -127,7 +117,7 @@ export const mergeFork = (params: MergeForkParams): TableChunksTransformer => {
       // Merge consumer
       Promise.all(
         transformGens.map(transformGen =>
-          pipeGenToChanAsync(transformGen, mergeChan)
+          pipeAsyncIterableToChannel(transformGen, mergeChan)
         )
       ).then(() => {
         mergeChan.close()

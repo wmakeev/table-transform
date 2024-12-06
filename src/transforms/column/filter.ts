@@ -24,6 +24,10 @@ export const filter = (
     }
 
     async function* getTransformedSourceGenerator() {
+      const internalTransformContext = source
+        .getContext()
+        ._getTransformContext()
+
       const srcHeader = source.getHeader()
 
       const getErrArgs = (
@@ -49,7 +53,7 @@ export const filter = (
         TRANSFORM_NAME,
         params,
         srcHeader,
-        context
+        internalTransformContext ?? context
       )
 
       for await (const chunk of source) {

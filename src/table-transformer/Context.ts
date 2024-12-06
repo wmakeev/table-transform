@@ -1,3 +1,8 @@
+import {
+  transformContextScope,
+  TransformExpressionContext
+} from '../transforms/index.js'
+
 export type ContextScopeMap = Map<string | Symbol, unknown>
 
 export class Context {
@@ -48,5 +53,18 @@ export class Context {
     curScopeMap.set(key, value)
 
     return !hasValue
+  }
+
+  // TODO Временное решение. Нужно подумать как реализовать через общий провайдер выражений.
+  _setTransformContext(context: TransformExpressionContext) {
+    this.set(transformContextScope, 'context', context)
+    return this
+  }
+
+  _getTransformContext() {
+    return this.get(
+      transformContextScope,
+      'context'
+    ) as TransformExpressionContext
   }
 }

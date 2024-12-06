@@ -9,6 +9,8 @@ import {
 
 export type { TransformExpressionContext } from './getTransformExpression.js'
 
+export const transformContextScope = Symbol('transformContextScope')
+
 export class TransformState {
   public rowNum = 0
   public arrColIndex = 0

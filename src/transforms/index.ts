@@ -1,9 +1,11 @@
 export * from './assertNotEmpty.js'
 export * as column from './column/index.js'
 export * from './flatMapWith.js'
+export * from './fork.js'
+export * from './forkAndMerge.js'
 export * from './forkToChannel.js'
 export * as header from './header/index.js'
-export * from './mergeFork.js'
+export * from './mergeFromChannel.js'
 export * from './normalize.js'
 export * from './reduceWith.js'
 export * from './rowsBuffer.js'
@@ -13,6 +15,8 @@ export * from './takeWhile.js'
 export * from './tapHeader.js'
 export * from './tapRows.js'
 export * from './TransformState/index.js'
+
+export const channelScopeSymbol = Symbol('ChannelScope')
 
 export interface TransformExpressionParams {
   /**

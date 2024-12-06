@@ -19,7 +19,10 @@ export interface ChunkSourceFromChannelParams {
   context: Context
 }
 
-/** Read chunks from channel */
+/**
+ * Read chunks from channel
+ * @deprecated
+ */
 export const chunkSourceFromChannel: (
   params: ChunkSourceFromChannelParams
 ) => AsyncIterable<TableRow[]> = ({

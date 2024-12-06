@@ -1,11 +1,11 @@
 import assert from 'node:assert'
+import { TransformRowExpressionError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
 import {
   ColumnTransformExpressionParams,
   TransformExpressionContext,
   TransformState
 } from '../index.js'
-import { TransformRowExpressionError } from '../../errors/index.js'
 
 const TRANSFORM_NAME = 'Column:Transform'
 
@@ -20,13 +20,17 @@ export const transform = (
 
   return source => {
     async function* getTransformedSourceGenerator() {
+      const internalTransformContext = source
+        .getContext()
+        ._getTransformContext()
+
       const srcHeader = source.getHeader()
 
       const transformState: TransformState = new TransformState(
         TRANSFORM_NAME,
         params,
         srcHeader,
-        context
+        internalTransformContext ?? context
       )
 
       for await (const chunk of source) {

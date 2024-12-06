@@ -19,30 +19,39 @@ export function isHeaderNormalized(header: ColumnHeader[]): boolean {
 
 /**
  * @param immutable
- * @returns remove deleted columns and reorder
  */
 export function getChunkNormalizer(header: ColumnHeader[], immutable = false) {
-  const actualHeader = header.filter(h => !h.isDeleted)
-
   // Optimization if no columns is deleted or reordered
   if (!immutable && isHeaderNormalized(header)) {
-    return (rowsChunk: TableRow[]) => rowsChunk
+    return {
+      normalizedHeader: header,
+      chunkNormalizer: (rowsChunk: TableRow[]) => rowsChunk
+    }
   }
 
-  return function normalizeRowsChunk(rowsChunk: TableRow[]) {
-    const normalizedRowsChunk: TableRow[] = []
+  const actualHeader = header.filter(h => !h.isDeleted)
 
-    for (const row of rowsChunk) {
-      const resultRow: TableRow = []
+  return {
+    normalizedHeader: actualHeader.map((h, index) => ({
+      ...h,
+      index
+    })),
 
-      for (const h of actualHeader) {
-        resultRow.push(row[h.index])
+    chunkNormalizer: function normalizeRowsChunk(rowsChunk: TableRow[]) {
+      const normalizedRowsChunk: TableRow[] = []
+
+      for (const row of rowsChunk) {
+        const resultRow: TableRow = []
+
+        for (const h of actualHeader) {
+          resultRow.push(row[h.index])
+        }
+
+        normalizedRowsChunk.push(resultRow)
       }
 
-      normalizedRowsChunk.push(resultRow)
+      return normalizedRowsChunk
     }
-
-    return normalizedRowsChunk
   }
 }
 

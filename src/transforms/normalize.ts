@@ -1,5 +1,4 @@
 import {
-  createTableHeader,
   getChunkNormalizer,
   isHeaderNormalized,
   TableChunksTransformer
@@ -22,12 +21,10 @@ export const normalize = (params?: NormalizeParams): TableChunksTransformer => {
       return source
     }
 
-    const actualHeader = header.filter(h => !h.isDeleted)
-    const actualColumns = actualHeader.map(h => h.name)
-
-    const normalizedHeader = createTableHeader(actualColumns)
-
-    const chunkNormalizer = getChunkNormalizer(header, immutable)
+    const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(
+      header,
+      immutable
+    )
 
     return {
       ...source,

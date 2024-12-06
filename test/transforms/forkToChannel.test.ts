@@ -5,21 +5,22 @@ import {
 } from 'node:stream'
 import test from 'node:test'
 import {
-  AsyncChannel,
-  Context,
+  ChunkTransform,
   FlattenTransform,
-  HeaderChunkTuple,
-  chunkSourceFromChannel,
-  createTableHeader,
+  TableRow,
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
 
 test('transforms:channel #1', async () => {
-  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'test' })
+  const CHANNEL_NAME = 'TEST_CHAN'
 
   const tableTransformer = createTableTransformer({
     transforms: [
+      tf.mergeFromChannel({
+        channelName: CHANNEL_NAME
+      }),
+
       tf.column.transform({
         column: 'index',
         expression: `value() + 1`
@@ -31,19 +32,14 @@ test('transforms:channel #1', async () => {
       }),
 
       tf.forkToChannel({
-        channel
+        channelName: CHANNEL_NAME
       })
     ]
   })
 
-  channel.put([createTableHeader(['index']), [[0]]])
+  const sourceChunks: TableRow[][] = [[['index'], [[0]]]]
 
-  const context = new Context()
-
-  // Direct pass channel source to trnasformer
-  const transformedRowsStream = tableTransformer(
-    chunkSourceFromChannel({ channel, context })
-  )
+  const transformedRowsStream = tableTransformer(sourceChunks)
 
   const result = []
 
@@ -56,10 +52,14 @@ test('transforms:channel #1', async () => {
 })
 
 test('transforms:channel #2', async () => {
-  const channel = new AsyncChannel<HeaderChunkTuple>({ name: 'test' })
+  const CHANNEL_NAME = 'TEST_CHAN'
 
   const tableTransformer = createTableTransformer({
     transforms: [
+      tf.mergeFromChannel({
+        channelName: CHANNEL_NAME
+      }),
+
       tf.column.add({
         column: 'col1',
         defaultValue: 'col1'
@@ -86,18 +86,17 @@ test('transforms:channel #2', async () => {
       }),
 
       tf.forkToChannel({
-        channel
+        channelName: CHANNEL_NAME
       })
     ]
   })
 
-  channel.put([createTableHeader(['index']), [[0]]])
-
-  const context = new Context()
+  const source = [['index'], [[0]]]
 
   // Use compose to pass channel source to trnasformer
   const transformedRowsStream = compose(
-    chunkSourceFromChannel({ channel, context }),
+    source,
+    new ChunkTransform(),
     tableTransformer,
     new FlattenTransform()
   )

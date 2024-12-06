@@ -28,13 +28,17 @@ export const assert = (
 
   return source => {
     async function* getTransformedSourceGenerator() {
+      const internalTransformContext = source
+        .getContext()
+        ._getTransformContext()
+
       const srcHeader = source.getHeader()
 
       const transformState = new TransformState(
         TRANSFORM_NAME,
         params,
         srcHeader,
-        context
+        internalTransformContext ?? context
       )
 
       const getErrArgs = (
