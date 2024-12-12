@@ -5,6 +5,7 @@ const TRANSFORM_NAME = 'Column:Collect'
 
 export interface CollectColumnParams {
   column: string
+  resultColumn?: string
 }
 
 /**
@@ -13,9 +14,9 @@ export interface CollectColumnParams {
 export const collect = (
   params: CollectColumnParams
 ): TableChunksTransformer => {
-  const { column } = params
+  const { column, resultColumn = column } = params
 
-  const newHeader = createTableHeader([column])
+  const newHeader = createTableHeader([resultColumn])
 
   return source => {
     const header = source.getHeader()
