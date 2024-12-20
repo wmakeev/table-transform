@@ -7,6 +7,7 @@ import test from 'node:test'
 import {
   createTableTransformer,
   FlattenTransform,
+  TransformRowError,
   transforms
 } from '../../../src/index.js'
 
@@ -48,6 +49,39 @@ test('transforms:column:explode', async () => {
     ['a3', 'b3', 5    , 'c3'],
     ['a4', 'b4', 6    , 'c4']
   ])
+})
+
+test('transforms:column:explode (strict)', async () => {
+  const tableTransformer = createTableTransformer({
+    transforms: [
+      transforms.column.explode({
+        column: 'arr',
+        strictArrayColumn: true
+      })
+    ]
+  })
+
+  /* prettier-ignore */
+  const table = [
+    [
+      ['a' , 'b' , 'arr' , 'c' ],
+      ['a1', 'b1', [1, 2], 'c1'],
+      ['a3', 'b3', [5]   , 'c3'],
+    ],
+    [
+      ['a4', 'b4', []    , 'c4'],
+      ['a5', 'b5', 6     , 'c5'],
+    ]
+  ]
+
+  try {
+    await compose(() => tableTransformer(table)).toArray()
+  } catch (err) {
+    assert.ok(err instanceof TransformRowError)
+    assert.equal(err.rowIndex, 1)
+    assert.equal(err.columnIndex, 2)
+    err.report()
+  }
 })
 
 test('transforms:column:explode (empty)', async () => {

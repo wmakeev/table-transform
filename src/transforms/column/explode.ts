@@ -1,6 +1,8 @@
+import assert from 'node:assert'
 import {
   TransformColumnsNotFoundError,
-  TransformHeaderError
+  TransformHeaderError,
+  TransformRowError
 } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer, TableRow } from '../../index.js'
 
@@ -8,6 +10,7 @@ const TRANSFORM_NAME = 'Column:Explode'
 
 export interface ExplodeColumnParams {
   column: string
+  strictArrayColumn?: boolean
   arrIndex?: number
 }
 
@@ -17,7 +20,7 @@ export interface ExplodeColumnParams {
 export const explode = (
   params: ExplodeColumnParams
 ): TableChunksTransformer => {
-  const { column, arrIndex = 0 } = params
+  const { column, strictArrayColumn = false, arrIndex = 0 } = params
 
   return source => {
     const header = source.getHeader()
@@ -41,10 +44,12 @@ export const explode = (
     }
 
     async function* getTransformedSourceGenerator() {
+      assert.ok(explodeColumn)
+
       for await (const chunk of source) {
         const explodedRows: TableRow[] = []
 
-        for (const row of chunk) {
+        for (const [rowIndex, row] of chunk.entries()) {
           const explodingCellValue = row[explodeColumn!.index]
 
           if (Array.isArray(explodingCellValue)) {
@@ -53,8 +58,17 @@ export const explode = (
               newRow[explodeColumn!.index] = item
               explodedRows.push(newRow)
             }
-          } else {
+          } else if (strictArrayColumn === false) {
             explodedRows.push(row)
+          } else {
+            throw new TransformRowError(
+              `сolumn value expected to be array.`,
+              TRANSFORM_NAME,
+              header,
+              chunk,
+              rowIndex,
+              explodeColumn.index
+            )
           }
         }
 
