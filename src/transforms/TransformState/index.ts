@@ -1,4 +1,8 @@
-import { TransformHeaderError } from '../../errors/index.js'
+import assert from 'node:assert'
+import {
+  TransformHeaderError,
+  TransformStepParameterError
+} from '../../errors/index.js'
 import { ColumnHeader, TableRow } from '../../index.js'
 import { TransformExpressionParams } from '../index.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
@@ -75,11 +79,22 @@ export class TransformState {
 
     this.rowProxy = new Proxy(this, getRowProxyHandler(header, this))
 
-    this.transformExpression = getTransformExpression(
-      transformParams,
-      this,
-      context
-    )
+    try {
+      this.transformExpression = getTransformExpression(
+        transformParams,
+        this,
+        context
+      )
+    } catch (err) {
+      assert.ok(err instanceof Error)
+      throw new TransformStepParameterError(
+        err.message,
+        this.name,
+        'expression',
+        transformParams.expression,
+        { cause: err }
+      )
+    }
   }
 
   nextRow(row: TableRow) {
