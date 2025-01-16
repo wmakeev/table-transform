@@ -31,7 +31,7 @@ test('transforms:column:filter', async t => {
             value() == NULL and
             isEmptyArr(values()) and
             empty(value("C")) and
-            A != "3" and
+            'A' != "3" and
             not empty('B')
           `
           },

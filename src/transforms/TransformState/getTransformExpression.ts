@@ -1,8 +1,48 @@
-import {
-  compileExpression,
-  useDotAccessOperatorAndOptionalChaining
-} from '@wmakeev/filtrex'
+import { compileExpression } from '@wmakeev/filtrex'
 import { TransformExpressionParams, TransformState } from '../index.js'
+import {
+  TransformColumnsNotFoundError,
+  TransformError,
+  TransformSymbolNotFoundError
+} from '../../errors/index.js'
+
+function optionalPropertyAccessor(
+  name: string,
+  get: (name: string) => any,
+  obj: object | undefined,
+  type: 'single-quoted' | 'unescaped',
+  isNested: boolean
+) {
+  if (obj === null || obj === undefined) return obj
+
+  // Force quoted data field access
+  if (isNested === false && type !== 'single-quoted') {
+    try {
+      get(name)
+    } catch (err) {
+      if (err instanceof TransformColumnsNotFoundError) {
+        throw new TransformSymbolNotFoundError(err.stepName, err.header, name)
+      }
+    }
+
+    throw new TransformError(
+      `Field "${name}" access with unquoted name - try to use quoted notation "'${name}'"`
+    )
+  }
+
+  if (isNested) {
+    try {
+      return get(name)
+    } catch (err) {
+      if (err instanceof Error && err.name === 'ReferenceError') {
+        return undefined
+      }
+      throw err
+    }
+  } else {
+    return get(name)
+  }
+}
 
 export interface TransformExpressionContext {
   symbols?:
@@ -18,7 +58,7 @@ export const getTransformExpression = (
   context?: TransformExpressionContext
 ) => {
   const transformExpression = compileExpression(params.expression, {
-    customProp: useDotAccessOperatorAndOptionalChaining,
+    customProp: optionalPropertyAccessor,
 
     symbols: {
       ...(context?.symbols ?? {}),
@@ -61,11 +101,7 @@ export const getTransformExpression = (
       column: () => transformState.column,
 
       // TODO Name is not obvious
-      arrayIndex: () => transformState.arrColIndex,
-
-      empty: (val: unknown) => {
-        return val == null || val === ''
-      }
+      arrayIndex: () => transformState.arrColIndex
     }
   })
 
