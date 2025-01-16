@@ -26,7 +26,7 @@ export const filter = (
     async function* getTransformedSourceGenerator() {
       const internalTransformContext = source
         .getContext()
-        ._getTransformContext()
+        .getTransformExpressionContext()
 
       const srcHeader = source.getHeader()
 

@@ -181,7 +181,7 @@ test('transforms:column:transform (error)', async () => {
 test('transforms:column:transform (custom context)', async () => {
   const context = new Context()
 
-  context._setTransformContext({
+  context.setTransformExpressionContext({
     symbols: {
       foo: (val: any) => val
     }

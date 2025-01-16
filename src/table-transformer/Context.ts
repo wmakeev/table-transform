@@ -56,12 +56,12 @@ export class Context {
   }
 
   // TODO Временное решение. Нужно подумать как реализовать через общий провайдер выражений.
-  _setTransformContext(context: TransformExpressionContext) {
+  setTransformExpressionContext(context: TransformExpressionContext) {
     this.set(transformContextScope, 'context', context)
     return this
   }
 
-  _getTransformContext() {
+  getTransformExpressionContext() {
     return this.get(
       transformContextScope,
       'context'
