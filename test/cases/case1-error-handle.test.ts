@@ -294,72 +294,75 @@ test('Transform error handler', async t => {
     }
   )
 
-  await t.test('partially processed w/o error handler', async () => {
-    const tableTransformer = createTableTransformer({
-      outputHeader: {
-        forceColumns: [
-          'error',
-          'Наименование',
-          'Код',
-          'Бренд',
-          'Закупочная цена',
-          'Остаток'
-        ]
-      },
-      transforms: [
-        tf.column.transform({
-          column: 'Код',
-          expression: `if value() == "1211IX352WDRH" then 'foo' else value()`
-        })
-      ],
-      errorHandle: {
-        errorColumn: 'error',
+  await t.test(
+    'partially processed with error inside error handler',
+    async () => {
+      const tableTransformer = createTableTransformer({
+        outputHeader: {
+          forceColumns: [
+            'error',
+            'Наименование',
+            'Код',
+            'Бренд',
+            'Закупочная цена',
+            'Остаток'
+          ]
+        },
         transforms: [
-          tf.column.add({ column: 'foo' }),
           tf.column.transform({
-            column: 'foo',
-            expression: `bar of 'error'`
-          }),
-          tf.column.transform({
-            column: 'error',
-            expression: `'bar'`
+            column: 'Код',
+            expression: `if value() == "1211IX352WDRH" then 'foo' else value()`
           })
-        ]
+        ],
+        errorHandle: {
+          errorColumn: 'error',
+          transforms: [
+            tf.column.add({ column: 'foo' }),
+            tf.column.transform({
+              column: 'foo',
+              expression: `bar of 'error'`
+            }),
+            tf.column.transform({
+              column: 'error',
+              expression: `'bar'`
+            })
+          ]
+        }
+      })
+
+      const transformedRowsStream = createTransformedRowsStreamFromCsv(
+        'test/cases/case1.csv',
+        tableTransformer,
+        { batchSize: 100 }
+      )
+
+      const result = []
+
+      try {
+        for await (const it of transformedRowsStream) {
+          result.push(it as TableRow)
+        }
+
+        assert.fail('error expected')
+      } catch (err) {
+        assert.ok(err instanceof TransformRowExpressionError)
+        assert.equal(err.message, 'Column(s) not found: "bar"')
+        err.report()
       }
-    })
 
-    const transformedRowsStream = createTransformedRowsStreamFromCsv(
-      'test/cases/case1.csv',
-      tableTransformer,
-      { batchSize: 100 }
-    )
+      assert.equal(result.length, 900)
 
-    const result = []
-
-    try {
-      for await (const it of transformedRowsStream) {
-        result.push(it as TableRow)
-      }
-
-      assert.fail('error expected')
-    } catch (err) {
-      assert.ok(err instanceof TransformRowExpressionError)
-      assert.equal(err.message, 'Column(s) not found: "bar"')
-      err.report()
+      // #dhf042pf
+      assert.deepEqual(result[0], [
+        'error',
+        'Наименование',
+        'Код',
+        'Бренд',
+        'Закупочная цена',
+        'Остаток'
+      ])
     }
-
-    assert.equal(result.length, 900)
-
-    // #dhf042pf
-    assert.deepEqual(result[0], [
-      'error',
-      'Наименование',
-      'Код',
-      'Бренд',
-      'Закупочная цена',
-      'Остаток'
-    ])
-  })
+  )
 })
 
 // TODO Нужно протестировать разные варианты возникновения ошибок
