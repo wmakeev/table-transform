@@ -26,6 +26,8 @@ export const getRowProxyHandler = (
     },
 
     get(target, prop) {
+      if (prop === Symbol.toStringTag) return 'Object'
+
       const indexes = transformState.fieldIndexesByName.get(prop as string)
 
       if (indexes == null) {
