@@ -92,6 +92,20 @@ export class TransformColumnsError extends TransformHeaderError {
   }
 }
 
+export class TransformSymbolNotFoundError extends TransformHeaderError {
+  constructor(
+    stepName: string,
+    header: ColumnHeader[],
+    public symbolName: string,
+    options?: ErrorOptions
+  ) {
+    const message = `Symbol not found: "${symbolName}"`
+
+    super(message, stepName, header, options)
+    this.name = this.constructor.name
+  }
+}
+
 export class TransformColumnsNotFoundError extends TransformHeaderError {
   constructor(
     stepName: string,
