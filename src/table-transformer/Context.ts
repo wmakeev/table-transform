@@ -3,7 +3,7 @@ import {
   TransformExpressionContext
 } from '../transforms/index.js'
 
-export type ContextScopeMap = Map<string | Symbol, unknown>
+export type ContextScopeMap<T = unknown> = Map<string | Symbol, T>
 
 export class Context {
   #parentContext: Context | null = null
@@ -32,15 +32,15 @@ export class Context {
     return scopeMap != null
   }
 
-  get(scope: Symbol, key: string | Symbol): unknown {
+  get<T = unknown>(scope: Symbol, key: string | Symbol): T | undefined {
     const scopeMap = this.getScopeMapWithKey(scope, key)
 
     if (scopeMap == null) return undefined
 
-    return scopeMap.get(key)
+    return scopeMap.get(key) as T
   }
 
-  set(scope: Symbol, key: string | Symbol, value: unknown): boolean {
+  set<T>(scope: Symbol, key: string | Symbol, value: T): boolean {
     let curScopeMap = this.#currentContextScopeMap.get(scope)
 
     if (curScopeMap === undefined) {
