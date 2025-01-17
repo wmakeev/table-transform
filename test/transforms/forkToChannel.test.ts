@@ -116,3 +116,83 @@ test('transforms:channel #2', async () => {
     ['col1', 4]
   ])
 })
+
+test('transforms:channel (merge channel from fork)', async () => {
+  const CHANNEL_NAME = 'TEST_CHAN'
+
+  const tableTransformer = createTableTransformer({
+    transforms: [
+      tf.header.assert({
+        headers: ['index']
+      }),
+
+      tf.mergeFromChannel({
+        channelName: CHANNEL_NAME
+      }),
+
+      tf.column.tapValue({
+        column: 'index',
+        tapFunction: val => {
+          assert.ok(typeof val === 'number', 'index should to be number')
+        }
+      }),
+
+      tf.tapRows({
+        tapFunction: chunk => {
+          chunk
+        }
+      }),
+
+      tf.fork({
+        transformConfig: {
+          transforms: [
+            tf.column.transform({
+              column: 'index',
+              expression: `value() + 1`
+            }),
+
+            tf.forkToChannel({
+              channelName: CHANNEL_NAME
+            })
+          ]
+        }
+      }),
+
+      tf.takeWhile({
+        column: 'index',
+        expression: `value() < 5`
+      })
+    ]
+  })
+
+  const sourceChunks: TableRow[][] =
+    /* prettier-ignore */
+    [
+      [
+        ['index'],
+        [0]
+      ]
+    ]
+
+  const transformedRowsStream = tableTransformer(sourceChunks)
+
+  const result = []
+
+  for await (const row of transformedRowsStream) {
+    result.push(row)
+    // console.debug(JSON.stringify(row))
+  }
+
+  assert.deepEqual(
+    result,
+    /* prettier-ignore */
+    [
+      [['index']],
+      [[0]],
+      [[1]],
+      [[2]],
+      [[3]],
+      [[4]]
+    ]
+  )
+})
