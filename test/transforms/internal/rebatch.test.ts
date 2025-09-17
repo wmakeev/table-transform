@@ -7,7 +7,7 @@ import {
 import test from 'node:test'
 import {
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   TransformStepParameterError,
   createTableTransformer,
   transforms as tf
@@ -23,7 +23,7 @@ test('transforms:internal:rebatch (wrong parameters error)', async () => {
 })
 
 test('transforms:internal:rebatch', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.internal.rebatch({
         count: 4
@@ -56,7 +56,7 @@ test('transforms:internal:rebatch', async () => {
 })
 
 test('transforms:internal:rebatch (with count 1)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.internal.rebatch({
         count: 1

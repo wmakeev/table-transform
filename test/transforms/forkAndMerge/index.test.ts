@@ -11,14 +11,16 @@ import test from 'node:test'
 import {
   ChunkTransform,
   FlattenTransform,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 import { csvSourceFlatMapper } from '../../helpers/index.js'
 
 test('transforms:forkAndMerge #1', async () => {
-  const transformConfig: TableTransfromConfig = {
+  const transformConfig: TableTransformConfig = {
+    context: createTestContext(),
     transforms: [
       tf.forkAndMerge({
         outputColumns: ['code', 'name'],
@@ -111,7 +113,8 @@ test('transforms:forkAndMerge #1', async () => {
 })
 
 test('transforms:forkAndMerge #2', async () => {
-  const transformConfig: TableTransfromConfig = {
+  const transformConfig: TableTransformConfig = {
+    context: createTestContext(),
     transforms: [
       tf.forkAndMerge({
         outputColumns: ['code', 'value', 'error_name', 'error_message'],

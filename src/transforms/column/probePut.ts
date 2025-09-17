@@ -45,13 +45,13 @@ export const probePut = (
       ...source,
 
       async *[Symbol.asyncIterator]() {
-        let isProbeTaked = false
+        let isProbeTaken = false
         let probedValue = undefined
 
         let chunksCache: TableRow[][] | undefined = []
 
         for await (const chunk of source) {
-          if (isProbeTaked === false) {
+          if (isProbeTaken === false) {
             if (ctx.has(probeScopeSymbol, key) === false) {
               chunksCache?.push(chunk)
               continue
@@ -66,7 +66,7 @@ export const probePut = (
               }
             }
 
-            isProbeTaked = true
+            isProbeTaken = true
 
             chunksCache = undefined
           }

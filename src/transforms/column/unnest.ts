@@ -43,7 +43,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       h => !h.isDeleted && h.name === column
     )
 
-    // TODO Нужно ли работать с коллонками массивами в этом методе?
+    // TODO Нужно ли работать с колонками массивами в этом методе?
     if (unnestColumns.length > 1) {
       new TransformColumnsError(
         'Array column not supported',

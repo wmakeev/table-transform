@@ -9,9 +9,11 @@ import {
   FlattenTransform,
   transforms as tf
 } from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 
 test('Column:Derive', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.derive({
         column: 'sum',

@@ -15,7 +15,7 @@ export interface ChunkSourceFromChannelParams {
   outputColumns?: string[]
 
   // TODO Нужно думать над тем откуда брать контекст для канала при его создании
-  // Можно/нужно ли передавать контекст вместе с чанками и заголовками?
+  // Можно/нужно ли передавать контекст вместе с chunks и заголовками?
   context: Context
 }
 

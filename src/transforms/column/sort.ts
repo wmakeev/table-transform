@@ -6,7 +6,7 @@ const TRANSFORM_NAME = 'Column:Sort'
 export interface SortColumnParams {
   column: string
   order?: 'asc' | 'desc'
-  // TODO Нужно ли результат выплевывать одним чанком или бить на части?
+  // TODO Нужно ли результат выплевывать одним chunk или бить на части?
   // Бить на части - опять дублировать в памяти
 }
 

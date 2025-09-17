@@ -1,4 +1,5 @@
 import { parse } from 'csv-parse'
+import decode from 'decode-html'
 import assert from 'node:assert'
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
@@ -12,12 +13,21 @@ import {
   ChunkTransform,
   FlattenTransform,
   createTableTransformer,
-  mappers,
   transforms
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
+
+const decodeHtml = (val: unknown) => {
+  if (typeof val === 'string') {
+    return decode(val)
+  }
+
+  return val
+}
 
 test('complex transform #3', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.column.add({
         column: 'RowIndex'
@@ -60,7 +70,7 @@ test('complex transform #3', async () => {
 
       transforms.column.map({
         column: 'Value',
-        mapper: mappers.DECODE_HTML.mapper
+        mapper: decodeHtml
       }),
 
       transforms.column.transform({

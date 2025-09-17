@@ -3,15 +3,13 @@ import { TransformRowExpressionError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
 import {
   ColumnTransformExpressionParams,
-  TransformExpressionContext,
-  TransformState
+  TransformExpressionState
 } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Transform'
 
 export const transform = (
-  params: ColumnTransformExpressionParams,
-  context?: TransformExpressionContext
+  params: ColumnTransformExpressionParams
 ): TableChunksTransformer => {
   assert.ok(
     typeof params.column === 'string',
@@ -20,18 +18,17 @@ export const transform = (
 
   return source => {
     async function* getTransformedSourceGenerator() {
-      const internalTransformContext = source
-        .getContext()
-        .getTransformExpressionContext()
+      const internalTransformContext = source.getContext()
 
       const srcHeader = source.getHeader()
 
-      const transformState: TransformState = new TransformState(
-        TRANSFORM_NAME,
-        params,
-        srcHeader,
-        internalTransformContext ?? context
-      )
+      const transformState: TransformExpressionState =
+        new TransformExpressionState(
+          TRANSFORM_NAME,
+          params,
+          srcHeader,
+          internalTransformContext
+        )
 
       for await (const chunk of source) {
         chunk.forEach((row, rowIndex) => {

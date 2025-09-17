@@ -8,10 +8,11 @@ import test from 'node:test'
 import {
   FlattenTransform,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:compose', async () => {
   const getComposed = (value: string) => {
@@ -53,7 +54,8 @@ test('transforms:compose', async () => {
     })
   }
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
+    context: createTestContext(),
     outputHeader: { skip: true },
     transforms: [
       tf.take({

@@ -2,7 +2,7 @@ import {
   ColumnHeader,
   TableRowFlatMapper,
   TableChunksTransformer,
-  TableTransfromConfig,
+  TableTransformConfig,
   createRecordFromRow,
   createTableHeader,
   createTableTransformer,
@@ -13,7 +13,7 @@ import {
 export interface FlatMapWithParams {
   mapper: TableRowFlatMapper
 
-  // TODO Этот праметр можно убрать т.к. есть column.probeTake/Put
+  // TODO Этот параметр можно убрать т.к. есть column.probeTake/Put
 
   /**
    * Columns that will be added to the mapper result with constant values from
@@ -25,7 +25,7 @@ export interface FlatMapWithParams {
    * The inner transformation that the mapper result goes through with the added
    * columns from the original row specified in `passThroughColumns`.
    */
-  transformConfig?: TableTransfromConfig
+  transformConfig?: TableTransformConfig
 
   /**
    * Columns that should be selected (select transform applied) from inner

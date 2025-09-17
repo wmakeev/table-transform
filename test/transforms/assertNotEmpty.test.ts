@@ -12,9 +12,11 @@ import {
   transforms as tf
 } from '../../src/index.js'
 import { TransformAssertError } from '../../src/errors/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:assertNotEmpty', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.filter({
         column: 'col2',

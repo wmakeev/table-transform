@@ -35,7 +35,7 @@ const consumer = async (
 }
 
 /**
- * Bufferize income rows stream
+ * Buffering income rows stream
  */
 export const rowsBuffer = (params: BufferParams): TableChunksTransformer => {
   const { maxBufferSize } = params

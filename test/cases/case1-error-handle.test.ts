@@ -9,11 +9,13 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 import { createTransformedRowsStreamFromCsv } from '../helpers/index.js'
 
 test('Transform error handler', async t => {
   await t.test('place error name in created column', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       transforms: [
         tf.column.add({ column: 'error' }),
         tf.column.transform({
@@ -62,6 +64,7 @@ test('Transform error handler', async t => {
 
   await t.test('place error name in created column', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       transforms: [
         tf.column.transform({
           column: 'foo',
@@ -92,6 +95,7 @@ test('Transform error handler', async t => {
     'partially processed with error handler and forced columns',
     async () => {
       const tableTransformer = createTableTransformer({
+        context: createTestContext(),
         outputHeader: {
           forceColumns: ['foo', 'bar', 'error_message', 'error_foo']
         },
@@ -145,6 +149,7 @@ test('Transform error handler', async t => {
 
   await t.test('partially processed without error handler', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       transforms: [
         tf.column.transform({
           column: 'Код',
@@ -179,6 +184,7 @@ test('Transform error handler', async t => {
 
   await t.test('partially processed large csv with error handler', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       transforms: [
         tf.column.add({ column: 'error' }),
         tf.column.transform({
@@ -231,6 +237,7 @@ test('Transform error handler', async t => {
     'partially processed csv with error handler transform',
     async () => {
       const tableTransformer = createTableTransformer({
+        context: createTestContext(),
         transforms: [
           tf.column.add({ column: 'error_message' }),
           tf.column.transform({
@@ -298,6 +305,7 @@ test('Transform error handler', async t => {
     'partially processed with error inside error handler',
     async () => {
       const tableTransformer = createTableTransformer({
+        context: createTestContext(),
         outputHeader: {
           forceColumns: [
             'error',

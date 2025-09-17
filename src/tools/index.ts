@@ -68,7 +68,7 @@ export function forceArrayLength(arr: unknown[], length: number): void {
   }
 }
 
-// TODO Maybe usefull in future
+// TODO Maybe useful in future
 // export function getTransformPathName(transformPath: string[]) {
 //   return transformPath.join(' → ')
 // }

@@ -1,9 +1,9 @@
-import {
-  transformContextScope,
-  TransformExpressionContext
-} from '../transforms/index.js'
+import { ExpressionCompileProvider } from '../index.js'
+import { TransformExpressionContext } from '../transforms/index.js'
 
 export type ContextScopeMap<T = unknown> = Map<string | Symbol, T>
+
+export const transformContextScopeSymbol = Symbol('transformContextScope')
 
 export class Context {
   #parentContext: Context | null = null
@@ -56,15 +56,27 @@ export class Context {
   }
 
   // TODO Временное решение. Нужно подумать как реализовать через общий провайдер выражений.
-  setTransformExpressionContext(context: TransformExpressionContext) {
-    this.set(transformContextScope, 'context', context)
+  setExpressionContext(context: TransformExpressionContext) {
+    this.set(transformContextScopeSymbol, 'context', context)
     return this
   }
 
-  getTransformExpressionContext() {
+  getExpressionContext() {
     return this.get(
-      transformContextScope,
+      transformContextScopeSymbol,
       'context'
     ) as TransformExpressionContext
+  }
+
+  setExpressionCompileProvider(provider: ExpressionCompileProvider) {
+    this.set(transformContextScopeSymbol, 'ExpressionCompileProvider', provider)
+    return this
+  }
+
+  getExpressionCompileProvider(): ExpressionCompileProvider {
+    return this.get(
+      transformContextScopeSymbol,
+      'ExpressionCompileProvider'
+    ) as ExpressionCompileProvider
   }
 }

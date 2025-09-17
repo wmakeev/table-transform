@@ -4,7 +4,7 @@ import {
   TableChunksSource,
   TableChunksTransformer,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   cloneChunk,
   createTableTransformer,
   pipeAsyncIterableToChannel,
@@ -13,13 +13,13 @@ import {
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { normalize } from './normalize.js'
 
-// TODO Можно ли оптимизировать копирование чанка в первый форк без клонирования?
+// TODO Можно ли оптимизировать копирование chunk в первый fork без клонирования?
 
 const TRANSFORM_NAME = 'ForkAndMerge'
 
 export interface ForkAndMergeParams {
   outputColumns: string[]
-  transformConfigs: TableTransfromConfig[]
+  transformConfigs: TableTransformConfig[]
 }
 
 async function flushAndCloseChannels(channels: AsyncChannel<any>[]) {

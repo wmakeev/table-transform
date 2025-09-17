@@ -9,7 +9,7 @@ import {
   FlattenTransform,
   TableChunksReducer,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
@@ -43,7 +43,7 @@ test('transforms:reduceWith', async () => {
       }
     }
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.reduceWith({
         reducer: getFieldSumReducer('number')

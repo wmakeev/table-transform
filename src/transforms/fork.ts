@@ -6,11 +6,11 @@ import {
   TableChunksSource,
   TableChunksTransformer,
   TableRow,
-  TableTransfromConfig
+  TableTransformConfig
 } from '../index.js'
 
 export interface ForkParams {
-  transformConfig: TableTransfromConfig
+  transformConfig: TableTransformConfig
 }
 
 /**
@@ -47,9 +47,7 @@ export const fork = (params: ForkParams): TableChunksTransformer => {
     }
 
     const consumeFork = async () => {
-      for await (const _ of forkTransformer(forkSource)) {
-        _
-      }
+      for await (const _ of forkTransformer(forkSource)) _
     }
 
     return {

@@ -8,13 +8,13 @@ import test from 'node:test'
 import {
   FlattenTransform,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
 
 test('transforms:column:sort (asc)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.sort({
         column: 'order'
@@ -56,7 +56,7 @@ test('transforms:column:sort (asc)', async () => {
 })
 
 test('transforms:column:sort (desc)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.sort({
         column: 'order',

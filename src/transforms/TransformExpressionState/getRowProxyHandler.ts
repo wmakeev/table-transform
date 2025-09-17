@@ -1,10 +1,10 @@
 import { TransformColumnsNotFoundError } from '../../errors/index.js'
 import { ColumnHeader } from '../../index.js'
-import { TransformState } from './index.js'
+import { TransformExpressionState } from './index.js'
 
 export const getRowProxyHandler = (
   header: ColumnHeader[],
-  transformState: TransformState
+  transformState: TransformExpressionState
 ) => {
   /** Headers list */
   const fields = header.filter(h => !h.isDeleted).map(h => h.name)
@@ -15,7 +15,7 @@ export const getRowProxyHandler = (
   /** Uniq columns names */
   const uniqFields = [...fieldsSet.values()]
 
-  const rowProxyHandler: ProxyHandler<TransformState> = {
+  const rowProxyHandler: ProxyHandler<TransformExpressionState> = {
     has(_, key) {
       if (typeof key !== 'string') return false
       return fieldsSet.has(key)

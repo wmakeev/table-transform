@@ -16,7 +16,7 @@ export * from './take.js'
 export * from './takeWhile.js'
 export * from './tapHeader.js'
 export * from './tapRows.js'
-export * from './TransformState/index.js'
+export * from './TransformExpressionState/index.js'
 
 export const channelScopeSymbol = Symbol('ChannelScope')
 
@@ -24,7 +24,7 @@ export interface TransformExpressionParams {
   /**
    * Optional column name.
    *
-   * If column not specified, then `value()` experssion returns `null`.
+   * If column not specified, then `value()` expression returns `null`.
    */
   column?: string | undefined | null
 

@@ -4,7 +4,7 @@ import {
   TableChunksSource,
   TableChunksTransformer,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   splitChunksBy,
   transforms as tf
@@ -14,15 +14,15 @@ import { getNormalizedHeaderRow } from '../tools/header/index.js'
 
 export interface SplitInParams {
   /**
-   * The columns by which the incoming stream is splited
+   * The columns by which the incoming stream is splitted
    */
   keyColumns: string[]
 
   /**
-   * The config of transformation through which each of the splited parts of
+   * The config of transformation through which each of the splitted parts of
    * the stream is passed.
    */
-  transformConfig: TableTransfromConfig
+  transformConfig: TableTransformConfig
 }
 
 const TRANSFORM_NAME = 'SplitIn'
@@ -80,7 +80,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
     const srcHeader = source.getHeader()
 
     // Drop headers from splits
-    const transformConfig: TableTransfromConfig = {
+    const transformConfig: TableTransformConfig = {
       ...params.transformConfig,
 
       outputHeader: {
@@ -96,11 +96,11 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
     // Фактически сейчас без подобных костылей не получить заголовки по конфигурации.
     // Возможно это нормально? Ведь в этом модуле приходится несколько раз вызывать
     // трансформацию с одинаковым конфигом (все ли созданные трансформации можно
-    // вызывать повторно?), но выглядить это запутанно и очень сложно отлаживать.
+    // вызывать повторно?), но выглядит это запутанно и очень сложно отлаживать.
 
     const transforms_ = [...(transformConfig.transforms ?? [])]
 
-    // Ensure all forsed columns exist and select
+    // Ensure all forced columns exist and select
     if (transformConfig.outputHeader?.forceColumns != null) {
       transforms_.push(
         tf.column.select({
@@ -119,13 +119,13 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       tableSource = transform(tableSource)
     }
 
-    const transfomedHeader = tableSource.getHeader()
+    const transformedHeader = tableSource.getHeader()
     //#endregion
 
     async function* getTransformedSourceGenerator() {
       const normalizedHeaderColumns = getNormalizedHeaderRow(srcHeader)
 
-      // TODO Выделить в отдельный хелпер?
+      // TODO Выделить в отдельный helper?
       //#region Check columns in source
       const headerColumnsSet = new Set(normalizedHeaderColumns)
 
@@ -154,7 +154,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       )
 
       for await (const chan of channels) {
-        const tableChunksAsyncIterable: TableChunksSource = {
+        const tableChunksSource: TableChunksSource = {
           ...source,
           getHeader: () => srcHeader,
           [Symbol.asyncIterator]: chan[Symbol.asyncIterator].bind(chan)
@@ -163,7 +163,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
         const gen = createTableTransformer({
           context: new Context(source.getContext()),
           ...transformConfig
-        })(tableChunksAsyncIterable)
+        })(tableChunksSource)
 
         try {
           for await (const chunk of gen) {
@@ -179,7 +179,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => transfomedHeader,
+      getHeader: () => transformedHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

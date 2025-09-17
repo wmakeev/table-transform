@@ -41,7 +41,7 @@ export const addArray = (
 
     let _source = source
 
-    // Сolumns count is less than expected
+    // Columns count is less than expected
     if (existColumns.length < length) {
       const columnsCountToAdd = length - existColumns.length
 
@@ -54,7 +54,7 @@ export const addArray = (
       }
     }
 
-    // Columns сount exceeds expected
+    // Columns count exceeds expected
     else {
       for (let i = existColumns.length - 1; i >= length; i--) {
         _source = remove({

@@ -11,11 +11,13 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:channel #1', async () => {
   const CHANNEL_NAME = 'TEST_CHAN'
 
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.mergeFromChannel({
         channelName: CHANNEL_NAME
@@ -55,6 +57,7 @@ test('transforms:channel #2', async () => {
   const CHANNEL_NAME = 'TEST_CHAN'
 
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.mergeFromChannel({
         channelName: CHANNEL_NAME
@@ -121,6 +124,7 @@ test('transforms:channel (merge channel from fork)', async () => {
   const CHANNEL_NAME = 'TEST_CHAN'
 
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.header.assert({
         headers: ['index']

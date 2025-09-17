@@ -2,17 +2,17 @@ import assert from 'assert'
 import {
   Context,
   TableChunksSource,
-  TableRow,
   TableTransformer,
-  TableTransfromConfig,
-  transforms as tf
+  TableTransformConfig,
+  transforms as tf,
+  TableChunksIterable
 } from '../index.js'
 import { getInitialTableSource } from './getInitialTableSource.js'
 
 export * from './Context.js'
 
 export function createTableTransformer(
-  config: TableTransfromConfig
+  config: TableTransformConfig
 ): TableTransformer {
   const {
     transforms = [],
@@ -22,11 +22,9 @@ export function createTableTransformer(
     context
   } = config
 
-  return async function* (
-    source: Iterable<TableRow[]> | AsyncIterable<TableRow[]> | TableChunksSource
-  ) {
+  return async function* (source: TableChunksIterable | TableChunksSource) {
     let tableSource: TableChunksSource | null = null
-    let transfomedTableColumns: string[] | null = null
+    let transformedTableColumns: string[] | null = null
 
     try {
       tableSource =
@@ -41,7 +39,7 @@ export function createTableTransformer(
       //#region #jsgf360l
       const transforms_ = [...transforms]
 
-      // Ensure all forsed columns exist and select
+      // Ensure all forced columns exist and select
       if (outputHeader?.forceColumns != null) {
         transforms_.push(
           tf.column.select({
@@ -53,17 +51,24 @@ export function createTableTransformer(
 
       transforms_.push(tf.normalize({ immutable: false }))
 
+      let maxHeadersCount = 0
+
       // Chain transformations
       for (const transform of transforms_) {
         tableSource = transform(tableSource)
+        const curHeadersCount = tableSource.getHeader().length
+        if (curHeadersCount > maxHeadersCount) maxHeadersCount = curHeadersCount
       }
 
-      transfomedTableColumns = tableSource.getHeader().map(h => h.name)
+      // TODO Подумать как использовать maxHeadersCount для оптимизации, задавая
+      // размер массива с указанным значением заранее на входе.
+
+      transformedTableColumns = tableSource.getHeader().map(h => h.name)
       //#endregion
 
       if (outputHeader?.skip !== true) {
         // header is just normalized
-        yield [[...transfomedTableColumns]]
+        yield [[...transformedTableColumns]]
       }
 
       yield* tableSource
@@ -78,7 +83,7 @@ export function createTableTransformer(
       }
 
       const sourceResultColumns =
-        transfomedTableColumns ?? outputHeader?.forceColumns
+        transformedTableColumns ?? outputHeader?.forceColumns
 
       // TODO Подумать над тем как передавать разные типы ошибок
       const errorInfo = {

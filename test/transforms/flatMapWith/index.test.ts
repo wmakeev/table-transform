@@ -12,14 +12,15 @@ import {
   ChunkTransform,
   FlattenTransform,
   TableRowFlatMapper,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 import { csvSourceFlatMapper } from '../../helpers/index.js'
 
 test('transforms:flatMapWith (case1)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.rename({
         oldColumn: 'Path to file',
@@ -67,7 +68,7 @@ test('transforms:flatMapWith (case1)', async () => {
 })
 
 test('transforms:flatMapWith (case1) - passThroughColumns', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.rename({
         oldColumn: 'Path to file',
@@ -124,7 +125,8 @@ test('transforms:flatMapWith (case1) - passThroughColumns', async () => {
 })
 
 test('transforms:flatMapWith (case2)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
+    context: createTestContext(),
     transforms: [
       tf.flatMapWith({
         mapper: csvSourceFlatMapper,
@@ -231,7 +233,8 @@ test('transforms:flatMapWith (error handle)', async () => {
     }
   }
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
+    context: createTestContext(),
     transforms: [
       tf.flatMapWith({
         mapper: flatMapperWithErrors,

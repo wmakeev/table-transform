@@ -12,38 +12,37 @@ import {
   createTableTransformer,
   transforms
 } from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 
 test('transforms:column:filter', async t => {
   await t.test('complex filter', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext({
+        NULL: null,
+        isEmptyArr: (arr: Array<any>) => {
+          return Array.isArray(arr) && arr.length === 0
+        }
+      }),
+
       inputHeader: {
         mode: 'EXCEL_STYLE'
       },
+
       transforms: [
         transforms.column.filter({
           column: 'B',
           expression: 'value() != "1"'
         }),
 
-        transforms.column.filter(
-          {
-            expression: `
+        transforms.column.filter({
+          expression: `
             value() == NULL and
             isEmptyArr(values()) and
             empty(value("C")) and
             'A' != "3" and
             not empty('B')
           `
-          },
-          {
-            symbols: {
-              NULL: null,
-              isEmptyArr: (arr: Array<any>) => {
-                return Array.isArray(arr) && arr.length === 0
-              }
-            }
-          }
-        )
+        })
       ]
     })
 
@@ -79,6 +78,7 @@ test('transforms:column:filter', async t => {
     'transforms:column:filter (array with selected index)',
     async () => {
       const tableTransformer = createTableTransformer({
+        context: createTestContext(),
         transforms: [
           transforms.column.filter({
             column: 'A',
@@ -116,6 +116,7 @@ test('transforms:column:filter', async t => {
 
   await t.test('filter column error', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       inputHeader: {
         mode: 'EXCEL_STYLE'
       },
@@ -173,6 +174,7 @@ test('transforms:column:filter', async t => {
 
   await t.test('filter row error', async () => {
     const tableTransformer = createTableTransformer({
+      context: createTestContext(),
       inputHeader: {
         mode: 'EXCEL_STYLE'
       },

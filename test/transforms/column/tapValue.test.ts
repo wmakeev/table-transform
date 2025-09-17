@@ -8,7 +8,7 @@ import test from 'node:test'
 import {
   FlattenTransform,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
@@ -16,7 +16,7 @@ import {
 test('transforms:column:tapValue', async () => {
   const values: unknown[] = []
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.tapValue({
         column: 'val',

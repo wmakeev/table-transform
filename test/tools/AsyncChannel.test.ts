@@ -13,7 +13,7 @@ test('AsyncChannel #1', async () => {
       timeline.push(`consumer: chan > ${it}`)
     }
 
-    timeline.push('consumer: stoped.')
+    timeline.push('consumer: stopped.')
   }
 
   const producer = async (ch: AsyncChannel) => {
@@ -33,7 +33,7 @@ test('AsyncChannel #1', async () => {
     timeline.push('producer: close')
     chan.close()
 
-    timeline.push('producer: stoped.')
+    timeline.push('producer: stopped.')
   }
 
   const chan = new AsyncChannel()
@@ -58,8 +58,8 @@ test('AsyncChannel #1', async () => {
       'consumer: chan > 5',
       'producer: 5 > chan (true)',
       'producer: close',
-      'producer: stoped.',
-      'consumer: stoped.'
+      'producer: stopped.',
+      'consumer: stopped.'
     ]
   )
 })

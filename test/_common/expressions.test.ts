@@ -13,9 +13,12 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { FiltrexExpressionCompileProvider } from './FiltrexExpressionCompileProvider.js'
+import { createTestContext } from './TestContext.js'
 
 test('expressions (fields access)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.derive({
         column: 'out1',
@@ -76,6 +79,7 @@ test('expressions (fields access)', async () => {
 
 test('expressions (unquoted data field access error)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.derive({
         column: 'out1',
@@ -111,11 +115,57 @@ test('expressions (unquoted data field access error)', async () => {
 
 test('expressions (unknown symbol access error)', async () => {
   const tableTransformer = createTableTransformer({
-    context: new Context().setTransformExpressionContext({
-      symbols: {
-        bar: 42
-      }
+    context: createTestContext().setExpressionContext({
+      bar: 42
     }),
+    transforms: [
+      tf.column.transform({
+        column: 'col2',
+        expression: `bar`
+      }),
+      tf.column.assert({
+        message: 'test assert',
+        expression: `'col2' == 42`
+      }),
+      tf.column.transform({
+        column: 'col3',
+        expression: `foo`
+      })
+    ]
+  })
+
+  /* prettier-ignore */
+  const csv = [
+    ['col1' , 'col2', 'col3'],
+    ['one'  , {}    , {}    ],
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    csv.values(),
+    new ChunkTransform({ batchSize: 2 }),
+    tableTransformer,
+    new FlattenTransform()
+  )
+
+  try {
+    await transformedRowsStream.toArray()
+    assert.fail('error expected')
+  } catch (err) {
+    assert.ok(err instanceof TransformRowExpressionError)
+    assert.equal(err.message, 'Symbol not found: "foo"')
+    err.report()
+  }
+})
+
+test('expressions (unknown symbol access error)', async () => {
+  const context = new Context()
+    .setExpressionCompileProvider(new FiltrexExpressionCompileProvider())
+    .setExpressionContext({
+      bar: 42
+    })
+
+  const tableTransformer = createTableTransformer({
+    context,
     transforms: [
       tf.column.transform({
         column: 'col2',

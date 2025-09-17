@@ -16,9 +16,11 @@ import {
   createTableTransformer,
   transforms
 } from '../../../../src/index.js'
+import { createTestContext } from '../../../_common/TestContext.js'
 
 test('transforms:cell:sheetCell (case1)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     inputHeader: {
       mode: 'EXCEL_STYLE'
     },
@@ -181,6 +183,7 @@ test('transforms:cell:sheetCell (case1)', async () => {
 
 test('transforms:cell:sheetCell (case1 - shifted)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     inputHeader: {
       mode: 'EXCEL_STYLE'
     },

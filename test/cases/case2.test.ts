@@ -14,9 +14,11 @@ import {
   createTableTransformer,
   transforms
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('column transform (array) #2', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.column.transform({
         column: 'List',
@@ -62,6 +64,7 @@ test('column transform (array) #2', async () => {
 
 test('column transform (values)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.column.add({
         column: 'Value1'

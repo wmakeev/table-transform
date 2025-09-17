@@ -1,6 +1,8 @@
 import { Context } from '../table-transformer/Context.js'
 
 export * from './guards.js'
+export * from './ExpressionContext.js'
+export * from './ExpressionCompileProvider.js'
 
 /** Metadata of column header */
 export type ColumnHeader = {
@@ -18,11 +20,14 @@ export type ColumnHeader = {
 /** Data row */
 export type TableRow = Array<unknown>
 
+export type TableChunksIterable =
+  | Iterable<TableRow[]>
+  | AsyncIterable<TableRow[]>
+
 export interface TableChunksSource extends AsyncIterable<TableRow[]> {
   // getPath: () => string[]
   getHeader(): ColumnHeader[]
   getContext(): Context
-  // [Symbol.asyncIterator]: () => AsyncGenerator<TableRow[]>
 }
 
 /**
@@ -32,7 +37,7 @@ export type TableChunksTransformer = (
   tableChunksSource: TableChunksSource
 ) => TableChunksSource
 
-export interface TableTransfromConfig {
+export interface TableTransformConfig {
   /** Transformers */
   transforms?: TableChunksTransformer[] | undefined
 
@@ -85,12 +90,12 @@ export interface TableTransfromConfig {
     transforms?: TableChunksTransformer[]
   }
 
-  /** Transform context Map */
+  /** Transform context */
   context?: Context | undefined
 }
 
 export type HeaderMode = NonNullable<
-  TableTransfromConfig['inputHeader']
+  TableTransformConfig['inputHeader']
 >['mode']
 
 export type TableTransformer = (

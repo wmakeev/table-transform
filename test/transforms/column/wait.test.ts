@@ -7,13 +7,13 @@ import {
 import test from 'node:test'
 import {
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
 
 test('transforms:column:wait', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.add({
         column: 'timeout',

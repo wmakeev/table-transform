@@ -75,7 +75,7 @@ export function getExcelHeaderColumnNum(excelHeaderName: string) {
 }
 
 /**
- * @param address Excel style addres
+ * @param address Excel style address
  * @throws {Error}
  */
 export function getExcelAddressCoordinates(address: string): Coordinates {

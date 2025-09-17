@@ -1,20 +1,22 @@
 import assert from 'node:assert'
 import {
-  Readable,
   // @ts-expect-error no typings for compose
-  compose
+  compose,
+  Readable
 } from 'node:stream'
 import test from 'node:test'
+import { TransformRowAssertError } from '../../../src/errors/index.js'
 import {
   ChunkTransform,
   createTableTransformer,
   FlattenTransform,
   transforms
 } from '../../../src/index.js'
-import { TransformRowAssertError } from '../../../src/errors/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 
 test('transforms:column:assert', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     inputHeader: {
       mode: 'EXCEL_STYLE'
     },
@@ -54,6 +56,7 @@ test('transforms:column:assert', async () => {
 
 test('transforms:column:assert (array with selected index)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.column.assert({
         column: 'A',

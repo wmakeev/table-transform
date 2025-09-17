@@ -54,9 +54,11 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@typescript-eslint/typescript-estree": "^6.10.0",
+    "@wmakeev/filtrex": "^6.4.0",
     "auto-changelog": "^2.4.0",
     "csv-parse": "^5.5.6",
     "csv-stringify": "^6.5.1",
+    "decode-html": "^2.0.0",
     "envalid": "^8.0.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -66,9 +68,5 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "typescript-eslint-language-service": "^5.0.5"
-  },
-  "dependencies": {
-    "@wmakeev/filtrex": "^6.4.0",
-    "decode-html": "^2.0.0"
   }
 }

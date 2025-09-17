@@ -3,19 +3,14 @@ import {
   TransformStepError
 } from '../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../index.js'
-import {
-  TransformExpressionContext,
-  TransformExpressionParams,
-  TransformState
-} from './index.js'
+import { TransformExpressionParams, TransformExpressionState } from './index.js'
 
 const TRANSFORM_NAME = 'TakeWhile'
 
 // TODO Копипаста assert и прочих transform-like модулей. Можно ли обобщить?
 
 export const takeWhile = (
-  params: TransformExpressionParams,
-  context?: TransformExpressionContext
+  params: TransformExpressionParams
 ): TableChunksTransformer => {
   return source => {
     if (params.column == null && params.columnIndex != null) {
@@ -26,9 +21,7 @@ export const takeWhile = (
     }
 
     async function* getTransformedSourceGenerator() {
-      const internalTransformContext = source
-        .getContext()
-        .getTransformExpressionContext()
+      const internalTransformContext = source.getContext()
 
       const srcHeader = source.getHeader()
 
@@ -52,11 +45,11 @@ export const takeWhile = (
       }
 
       // FIXME Не обработанная ошибка если некорректное выражение "Error: Parse error on line 1:"
-      const transformState = new TransformState(
+      const transformState = new TransformExpressionState(
         TRANSFORM_NAME,
         params,
         srcHeader,
-        internalTransformContext ?? context
+        internalTransformContext
       )
 
       let isBreaked = false

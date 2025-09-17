@@ -4,16 +4,14 @@ import {
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
-  TransformExpressionContext,
   TransformExpressionParams,
-  TransformState
+  TransformExpressionState
 } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Filter'
 
 export const filter = (
-  params: TransformExpressionParams,
-  context?: TransformExpressionContext
+  params: TransformExpressionParams
 ): TableChunksTransformer => {
   return source => {
     if (params.column == null && params.columnIndex != null) {
@@ -24,9 +22,7 @@ export const filter = (
     }
 
     async function* getTransformedSourceGenerator() {
-      const internalTransformContext = source
-        .getContext()
-        .getTransformExpressionContext()
+      const internalTransformContext = source.getContext()
 
       const srcHeader = source.getHeader()
 
@@ -49,11 +45,11 @@ export const filter = (
         ] as const
       }
 
-      const transformState = new TransformState(
+      const transformState = new TransformExpressionState(
         TRANSFORM_NAME,
         params,
         srcHeader,
-        internalTransformContext ?? context
+        internalTransformContext
       )
 
       for await (const chunk of source) {

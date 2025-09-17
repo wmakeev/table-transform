@@ -1,5 +1,4 @@
 import { TableChunksTransformer, TransformColumnsError } from '../../index.js'
-import { TransformExpressionContext } from '../index.js'
 import { add } from './add.js'
 import { transform } from './transform.js'
 
@@ -13,10 +12,7 @@ export interface DeriveColumnParams {
 
 const TRANSFORM_NAME = 'Column:Derive'
 
-export const derive = (
-  params: DeriveColumnParams,
-  context?: TransformExpressionContext
-): TableChunksTransformer => {
+export const derive = (params: DeriveColumnParams): TableChunksTransformer => {
   const { column, expression } = params
 
   return source => {
@@ -32,6 +28,6 @@ export const derive = (
       )
     }
 
-    return transform({ column, expression }, context)(add({ column })(source))
+    return transform({ column, expression })(add({ column })(source))
   }
 }

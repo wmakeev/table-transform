@@ -9,7 +9,7 @@ import {
   HeaderMode,
   TableChunksSource,
   TableRow,
-  TableTransfromConfig
+  TableTransformConfig
 } from '../types/index.js'
 import { Context } from './Context.js'
 
@@ -26,7 +26,7 @@ const generateForcedHeader = (
 
 export async function getInitialTableSource(params: {
   chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
-  inputHeaderOptions?: TableTransfromConfig['inputHeader']
+  inputHeaderOptions?: TableTransformConfig['inputHeader']
   /** Transform context */
   context?: Context | undefined
 }): Promise<TableChunksSource> {

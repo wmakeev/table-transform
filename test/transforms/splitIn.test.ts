@@ -11,11 +11,13 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:splitIn #1', async () => {
   const interval = setInterval(() => {}, 10000)
 
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.splitIn({
         keyColumns: ['key1', 'key2'],
@@ -87,6 +89,7 @@ test('transforms:splitIn #1', async () => {
 
 test('transforms:splitIn #2', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     outputHeader: {
       forceColumns: ['key1', 'key2', 'col1', 'new']
     },
@@ -158,6 +161,7 @@ test('transforms:splitIn #2', async () => {
 
 test('transforms:splitIn #3', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.splitIn({
         keyColumns: ['key1', 'key2'],

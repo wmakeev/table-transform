@@ -8,14 +8,15 @@ import test from 'node:test'
 import { TransformRowExpressionError } from '../../../src/errors/index.js'
 import {
   ChunkTransform,
-  Context,
   FlattenTransform,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 
 test('transforms:column:transform (simple)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.transform({
         column: 'col2',
@@ -62,6 +63,7 @@ test('transforms:column:transform (simple)', async () => {
 
 test('transforms:column:transform (array)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.transform({
         column: 'col',
@@ -107,6 +109,7 @@ test('transforms:column:transform (array)', async () => {
 
 test('transforms:column:transform (array with selected index)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.transform({
         column: 'A',
@@ -146,6 +149,7 @@ test('transforms:column:transform (array with selected index)', async () => {
 
 test('transforms:column:transform (error)', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.transform({
         column: 'A',
@@ -179,16 +183,10 @@ test('transforms:column:transform (error)', async () => {
 })
 
 test('transforms:column:transform (custom context)', async () => {
-  const context = new Context()
-
-  context.setTransformExpressionContext({
-    symbols: {
-      foo: (val: any) => val
-    }
-  })
-
   const tableTransformer = createTableTransformer({
-    context,
+    context: createTestContext({
+      foo: (val: any) => val
+    }),
 
     transforms: [
       tf.column.transform({

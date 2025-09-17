@@ -11,9 +11,11 @@ import {
   createTableTransformer,
   transforms
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:takeWhile', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.takeWhile({
         column: 'col2',

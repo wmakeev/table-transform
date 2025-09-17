@@ -15,7 +15,7 @@ export type SheetCellParams =
        * Transform mode
        *
        * - `ASSERT` - throws error if cell not found
-       * - `CONSTANT` - use cell value as column value (usefull with offset)
+       * - `CONSTANT` - use cell value as column value (useful with offset)
        * - `HEADER` - interpret found cell as column header
        */
       type: 'CONSTANT' | 'HEADER'
@@ -33,7 +33,7 @@ export type SheetCellParams =
       testValue?: unknown
 
       /**
-       * Collumn to place constant or column value
+       * Column to place constant or column value
        */
       targetColumn: string
 

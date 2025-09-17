@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { Readable } from 'node:stream'
 import test from 'node:test'
 import { createTableTransformer, transforms } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 import { createTransformedRowsStreamFromCsv } from '../helpers/index.js'
 
 test('No-opt transform #1', async () => {
@@ -79,6 +80,7 @@ test('No-opt transform #3', async () => {
 
 test('Column transform (basic) #1', async () => {
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       transforms.column.transform({
         column: 'Наименование',

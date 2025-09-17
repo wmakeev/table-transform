@@ -37,13 +37,13 @@ test('splitChunksBy', async () => {
     }
   }
 
-  const splitedChunks: AsyncGenerator<
+  const splittedChunks: AsyncGenerator<
     [isGroupFistChunk: boolean, chunk: TableRow[]]
   > = splitChunksBy(tableChunksAsyncIterable, ['foo'])
 
   const groups = []
 
-  for await (const it of splitedChunks) {
+  for await (const it of splittedChunks) {
     groups.push(it)
   }
 

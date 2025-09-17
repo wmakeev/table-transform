@@ -3,19 +3,13 @@ import {
   TransformHeaderError,
   TransformStepParameterError
 } from '../../errors/index.js'
-import { ColumnHeader, TableRow } from '../../index.js'
+import { ColumnHeader, Context, TableRow } from '../../index.js'
 import { TransformExpressionParams } from '../index.js'
+import { compileTransformExpression } from './compileTransformExpression.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
-import {
-  TransformExpressionContext,
-  getTransformExpression
-} from './getTransformExpression.js'
+export type { ExpressionContext as TransformExpressionContext } from '../../types/ExpressionContext.js'
 
-export type { TransformExpressionContext } from './getTransformExpression.js'
-
-export const transformContextScope = Symbol('transformContextScope')
-
-export class TransformState {
+export class TransformExpressionState {
   public rowNum = 0
   public arrColIndex = 0
   public curRow!: TableRow
@@ -26,23 +20,23 @@ export class TransformState {
   public column: string | null
 
   /**
-   * Indexes of source columns with transfomed column header name
+   * Indexes of source columns with transformed column header name
    */
   public fieldColsIndexes = [] as number[]
 
   /**
-   * Indexes of source columns by current header cloumns names
+   * Indexes of source columns by current header columns names
    */
   public fieldIndexesByName = new Map<string, number[]>()
 
   private rowProxy
-  private transformExpression
+  private transformExpressionFunc
 
   constructor(
     public name: string,
     transformParams: TransformExpressionParams,
     header: ColumnHeader[],
-    context?: TransformExpressionContext
+    context: Context
   ) {
     const { column } = transformParams
 
@@ -80,9 +74,9 @@ export class TransformState {
     this.rowProxy = new Proxy(this, getRowProxyHandler(header, this))
 
     try {
-      this.transformExpression = getTransformExpression(
-        transformParams,
+      this.transformExpressionFunc = compileTransformExpression(
         this,
+        transformParams,
         context
       )
     } catch (err) {
@@ -107,7 +101,7 @@ export class TransformState {
   }
 
   evaluateExpression(): unknown | Error {
-    const result = this.transformExpression(this.rowProxy)
+    const result = this.transformExpressionFunc(this.rowProxy)
     return result
   }
 }

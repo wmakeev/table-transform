@@ -7,13 +7,13 @@ import {
 import test from 'node:test'
 import {
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../../src/index.js'
 
 test('transforms:column:collect', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.collect({
         column: 'value'
@@ -46,7 +46,7 @@ test('transforms:column:collect', async () => {
 })
 
 test('transforms:column:collect (resultColumn)', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.collect({
         column: 'value',

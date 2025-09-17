@@ -7,7 +7,7 @@ import {
 import test from 'node:test'
 import {
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
@@ -16,7 +16,7 @@ import { getFieldSumReducer } from '../helpers/index.js'
 test('transforms:rowsBuffer - maxBufferSize=0', async () => {
   const chunksTimeline: TableRow[][] = []
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.tapRows({
         tapFunction(chunk) {
@@ -73,7 +73,7 @@ test('transforms:rowsBuffer - maxBufferSize=0', async () => {
 test('transforms:rowsBuffer - maxBufferSize=3', async () => {
   const chunksTimeline: TableRow[][] = []
 
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.tapRows({
         tapFunction(chunk) {

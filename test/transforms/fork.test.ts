@@ -12,11 +12,13 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
+import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:fork #1', async () => {
   const forkedChunks: TableRow[][] = []
 
   const tableTransformer = createTableTransformer({
+    context: createTestContext(),
     transforms: [
       tf.column.derive({
         column: 'col3',

@@ -77,7 +77,7 @@ test('transform:column:select', async t => {
     }
   })
 
-  await t.test('multicolumn', async () => {
+  await t.test('multi-column', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
         tf.column.select({

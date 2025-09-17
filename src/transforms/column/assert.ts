@@ -5,9 +5,8 @@ import {
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
-  TransformExpressionContext,
   TransformExpressionParams,
-  TransformState
+  TransformExpressionState
 } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Assert'
@@ -16,8 +15,7 @@ export const assert = (
   params: TransformExpressionParams & {
     // TODO Rename to "description"
     message?: string
-  },
-  context?: TransformExpressionContext
+  }
 ): TableChunksTransformer => {
   if (params.column == null && params.columnIndex != null) {
     throw new TransformStepError(
@@ -28,17 +26,15 @@ export const assert = (
 
   return source => {
     async function* getTransformedSourceGenerator() {
-      const internalTransformContext = source
-        .getContext()
-        .getTransformExpressionContext()
+      const internalTransformContext = source.getContext()
 
       const srcHeader = source.getHeader()
 
-      const transformState = new TransformState(
+      const transformState = new TransformExpressionState(
         TRANSFORM_NAME,
         params,
         srcHeader,
-        internalTransformContext ?? context
+        internalTransformContext
       )
 
       const getErrArgs = (

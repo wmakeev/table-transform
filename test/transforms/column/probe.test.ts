@@ -8,7 +8,7 @@ import test from 'node:test'
 import {
   FlattenTransform,
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   createTableHeader,
   createTableTransformer,
   transforms as tf
@@ -16,7 +16,7 @@ import {
 import { getFieldSumReducer } from '../../helpers/index.js'
 
 test('transforms:column:probe*', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.probeTake({
         key: 'test_probe',
@@ -70,7 +70,7 @@ test('transforms:column:probe*', async () => {
 })
 
 test('transforms:column:probe*Many', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.probeTakeMany({
         columns: ['col1', 'col2', 'col3', 'col4']
@@ -121,7 +121,7 @@ test('transforms:column:probe*Many', async () => {
 })
 
 test('transforms:column:probe* - ahead generator', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.probeTake({
         column: 'probe_value'

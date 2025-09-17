@@ -62,7 +62,7 @@ export const explode = (
             explodedRows.push(row)
           } else {
             throw new TransformRowError(
-              `сolumn value expected to be array.`,
+              `column value expected to be array.`,
               TRANSFORM_NAME,
               header,
               chunk,

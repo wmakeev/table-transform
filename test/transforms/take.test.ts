@@ -7,7 +7,7 @@ import {
 import test from 'node:test'
 import {
   TableRow,
-  TableTransfromConfig,
+  TableTransformConfig,
   TransformStepParameterError,
   createTableTransformer,
   transforms as tf
@@ -24,7 +24,7 @@ test('transforms:take #0', async () => {
 })
 
 test('transforms:take #1', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.take({
         count: 2
@@ -62,7 +62,7 @@ test('transforms:take #1', async () => {
 })
 
 test('transforms:take #2', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.take({
         count: 3
@@ -101,7 +101,7 @@ test('transforms:take #2', async () => {
 })
 
 test('transforms:take #3', async () => {
-  const tableTransformConfig: TableTransfromConfig = {
+  const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.take({
         count: 4
