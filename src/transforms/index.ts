@@ -17,6 +17,7 @@ export * from './takeWhile.js'
 export * from './tapHeader.js'
 export * from './tapRows.js'
 export * from './TransformExpressionState/index.js'
+export * from './wait.js'
 
 export const channelScopeSymbol = Symbol('ChannelScope')
 

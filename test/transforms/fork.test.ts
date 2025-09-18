@@ -33,7 +33,7 @@ test('transforms:fork #1', async () => {
               expression: `value() + 1`
             }),
 
-            tf.column.wait({
+            tf.wait({
               timeoutColumn: 'col3'
             }),
 
@@ -46,7 +46,7 @@ test('transforms:fork #1', async () => {
         }
       }),
 
-      tf.column.wait({
+      tf.wait({
         timeoutColumn: 'col2'
       })
     ]

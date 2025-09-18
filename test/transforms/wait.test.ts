@@ -10,7 +10,7 @@ import {
   TableTransformConfig,
   createTableTransformer,
   transforms as tf
-} from '../../../src/index.js'
+} from '../../src/index.js'
 
 test('transforms:column:wait', async () => {
   const tableTransformConfig: TableTransformConfig = {
@@ -20,7 +20,7 @@ test('transforms:column:wait', async () => {
         defaultValue: 300
       }),
 
-      tf.column.wait({
+      tf.wait({
         timeoutColumn: 'timeout'
       })
     ]

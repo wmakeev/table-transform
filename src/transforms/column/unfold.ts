@@ -11,17 +11,17 @@ import {
 } from '../../index.js'
 import { add as addColumn } from './index.js'
 
-const TRANSFORM_NAME = 'Column:Unnest'
+const TRANSFORM_NAME = 'Column:Unfold'
 
-export interface UnnestParams {
+export interface UnfoldParams {
   column: string
   fields: string[]
 }
 
 /**
- * Unnest object fields to columns
+ * Set object fields to columns
  */
-export const unnest = (params: UnnestParams): TableChunksTransformer => {
+export const unfold = (params: UnfoldParams): TableChunksTransformer => {
   const { column, fields } = params
 
   if (typeof column !== 'string' || column === '') {
@@ -39,12 +39,12 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
   return source => {
     const tableHeader = source.getTableHeader()
 
-    const unnestColumns: TableHeader = tableHeader.filter(
+    const columns: TableHeader = tableHeader.filter(
       h => !h.isDeleted && h.name === column
     )
 
     // TODO Нужно ли работать с колонками массивами в этом методе?
-    if (unnestColumns.length > 1) {
+    if (columns.length > 1) {
       new TransformColumnsError(
         'Array column not supported',
         TRANSFORM_NAME,
@@ -53,13 +53,13 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       )
     }
 
-    assert.ok(unnestColumns[0])
+    assert.ok(columns[0])
 
-    const unnestColumn = unnestColumns[0]
+    const firstColumn = columns[0]
 
     if (fields.includes(column)) {
       new TransformColumnsError(
-        "Unnested fields can't contain unnest column name",
+        "Unfolding fields can't contain unfold column name",
         TRANSFORM_NAME,
         tableHeader,
         [column]
@@ -72,14 +72,14 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
 
     if (intersectedField.length > 0) {
       new TransformColumnsError(
-        'Unnested fields intersect with exist columns with same name',
+        'Unfolding fields intersect with exist columns with same name',
         TRANSFORM_NAME,
         tableHeader,
         intersectedField
       )
     }
 
-    if (unnestColumns.length === 0) {
+    if (columns.length === 0) {
       new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [column])
     }
 
@@ -100,16 +100,16 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
     async function* getTransformedSourceGenerator() {
       for await (const chunk of _source) {
         for (const row of chunk) {
-          const unnestObj = row[unnestColumn.index]
+          const unfoldObj = row[firstColumn.index]
 
-          if (!isObjectGuard(unnestObj)) continue
+          if (!isObjectGuard(unfoldObj)) continue
 
           for (const field of fields) {
             const index = headerColumnIndexByName.get(field)
             assert.ok(index !== undefined)
 
-            if (Object.hasOwn(unnestObj, field)) {
-              row[index] = (unnestObj as Record<string, unknown>)[field] ?? null
+            if (Object.hasOwn(unfoldObj, field)) {
+              row[index] = (unfoldObj as Record<string, unknown>)[field] ?? null
             }
           }
         }

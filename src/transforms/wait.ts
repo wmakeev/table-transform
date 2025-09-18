@@ -3,13 +3,13 @@ import {
   TableChunksTransformer,
   TransformColumnsNotFoundError,
   TransformRowError
-} from '../../index.js'
+} from '../index.js'
 
 export interface WaitColumnParams {
   timeoutColumn: string
 }
 
-const TRANSFORM_NAME = 'Column:Wait'
+const TRANSFORM_NAME = 'Wait'
 
 /**
  * Wait

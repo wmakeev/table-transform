@@ -10,7 +10,7 @@ import {
   transforms as tf
 } from '../../../src/index.js'
 
-test('transforms:column:unnest', async () => {
+test('transforms:column:unfold', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
       tf.column.select({
@@ -19,7 +19,7 @@ test('transforms:column:unnest', async () => {
       tf.column.remove({
         column: 'b'
       }),
-      tf.column.unnest({
+      tf.column.unfold({
         column: 'obj',
         fields: ['foo', 'bar', 'toString']
       }),
