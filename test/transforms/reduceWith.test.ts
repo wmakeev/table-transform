@@ -18,7 +18,7 @@ test('transforms:reduceWith', async () => {
   const getFieldSumReducer: (column: string) => TableChunksReducer =
     column => src => {
       const sumColHeader = src
-        .getHeader()
+        .getTableHeader()
         .find(h => h.isDeleted === false && h.name === column)
 
       if (sumColHeader === undefined) {

@@ -28,7 +28,7 @@ export const assert = (
     async function* getTransformedSourceGenerator() {
       const internalTransformContext = source.getContext()
 
-      const srcHeader = source.getHeader()
+      const srcHeader = source.getTableHeader()
 
       const transformState = new TransformExpressionState(
         TRANSFORM_NAME,
@@ -153,7 +153,7 @@ export const assert = (
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

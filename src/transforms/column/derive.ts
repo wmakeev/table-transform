@@ -17,13 +17,13 @@ export const derive = (params: DeriveColumnParams): TableChunksTransformer => {
 
   return source => {
     if (
-      source.getHeader().find(h => !h.isDeleted && h.name === column) !==
+      source.getTableHeader().find(h => !h.isDeleted && h.name === column) !==
       undefined
     ) {
       throw new TransformColumnsError(
         `Can't derive already exist column`,
         TRANSFORM_NAME,
-        source.getHeader(),
+        source.getTableHeader(),
         [column]
       )
     }

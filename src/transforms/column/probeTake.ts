@@ -1,6 +1,6 @@
 import {
-  ColumnHeader,
   TableChunksTransformer,
+  TableHeader,
   TransformColumnsNotFoundError
 } from '../../index.js'
 import { probeScopeSymbol } from './index.js'
@@ -22,16 +22,18 @@ export const probeTake = (
   const { column, key = column, arrIndex = 0 } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const probeColumns: ColumnHeader[] = source
-      .getHeader()
+    const probeColumns: TableHeader = source
+      .getTableHeader()
       .filter(h => !h.isDeleted && h.name === column)
 
     const columnHeader = probeColumns[arrIndex]
 
     if (columnHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     const ctx = source.getContext()

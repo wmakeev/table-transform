@@ -1,9 +1,9 @@
 import { TransformColumnsNotFoundError } from '../../errors/index.js'
-import { ColumnHeader } from '../../index.js'
+import { TableHeader } from '../../index.js'
 import { TransformExpressionState } from './index.js'
 
 export const getRowProxyHandler = (
-  header: ColumnHeader[],
+  header: TableHeader,
   transformState: TransformExpressionState
 ) => {
   /** Headers list */

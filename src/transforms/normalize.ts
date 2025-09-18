@@ -15,20 +15,20 @@ export const normalize = (params?: NormalizeParams): TableChunksTransformer => {
   const { immutable = false } = params ?? {}
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    if (!immutable && isHeaderNormalized(header)) {
+    if (!immutable && isHeaderNormalized(tableHeader)) {
       return source
     }
 
     const { normalizedHeader, chunkNormalizer } = getChunkNormalizer(
-      header,
+      tableHeader,
       immutable
     )
 
     return {
       ...source,
-      getHeader: () => normalizedHeader,
+      getTableHeader: () => normalizedHeader,
       async *[Symbol.asyncIterator]() {
         for await (const chunk of source) {
           yield chunkNormalizer(chunk)

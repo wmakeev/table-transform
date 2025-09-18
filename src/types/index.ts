@@ -17,6 +17,9 @@ export type ColumnHeader = {
   isDeleted: boolean
 }
 
+/** List of columns headers */
+export type TableHeader = ColumnHeader[]
+
 /** Data row */
 export type TableRow = Array<unknown>
 
@@ -26,7 +29,7 @@ export type TableChunksIterable =
 
 export interface TableChunksSource extends AsyncIterable<TableRow[]> {
   // getPath: () => string[]
-  getHeader(): ColumnHeader[]
+  getTableHeader(): TableHeader
   getContext(): Context
 }
 
@@ -102,10 +105,10 @@ export type TableTransformer = (
   source: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
 ) => AsyncGenerator<TableRow[]>
 
-export type HeaderChunkTuple = [header: ColumnHeader[], chunk: TableRow[]]
+export type HeaderChunkTuple = [header: TableHeader, chunk: TableRow[]]
 
 export type TableRowFlatMapper = (
-  header: ColumnHeader[],
+  header: TableHeader,
   row: TableRow
 ) => AsyncGenerator<TableRow[]>
 

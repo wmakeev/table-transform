@@ -24,7 +24,7 @@ export const filter = (
     async function* getTransformedSourceGenerator() {
       const internalTransformContext = source.getContext()
 
-      const srcHeader = source.getHeader()
+      const srcHeader = source.getTableHeader()
 
       const getErrArgs = (
         message: string,
@@ -141,7 +141,7 @@ export const filter = (
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

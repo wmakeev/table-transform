@@ -4,7 +4,7 @@ import {
   TransformHeaderError,
   TransformRowError
 } from '../../errors/index.js'
-import { ColumnHeader, TableChunksTransformer, TableRow } from '../../index.js'
+import { TableChunksTransformer, TableHeader, TableRow } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Unroll'
 
@@ -21,14 +21,14 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
   const { column, strictArrayColumn = false, arrIndex = 0 } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const explodeColumns: ColumnHeader[] = header.filter(
+    const explodeColumns: TableHeader = tableHeader.filter(
       h => !h.isDeleted && h.name === column
     )
 
     if (explodeColumns[0] === undefined) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [column])
     }
 
     const explodeColumn = explodeColumns[arrIndex]
@@ -37,7 +37,7 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
       throw new TransformHeaderError(
         `Column "${column}" with index ${arrIndex} not found`,
         TRANSFORM_NAME,
-        header
+        tableHeader
       )
     }
 
@@ -62,7 +62,7 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
             throw new TransformRowError(
               `column value expected to be array.`,
               TRANSFORM_NAME,
-              header,
+              tableHeader,
               chunk,
               rowIndex,
               explodeColumn.index
@@ -76,7 +76,7 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

@@ -25,11 +25,11 @@ export const take = (params: TakeRowsParams): TableChunksTransformer => {
   }
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
     return {
       ...source,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
 
       [Symbol.asyncIterator]: async function* () {
         let takenRowsCount = 0

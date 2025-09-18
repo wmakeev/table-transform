@@ -1,8 +1,8 @@
 import { TransformColumnsNotFoundError } from '../../errors/index.js'
 import {
-  ColumnHeader,
   createTableHeader,
-  TableChunksTransformer
+  TableChunksTransformer,
+  TableHeader
 } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Rollup'
@@ -20,13 +20,13 @@ export const rollup = (params: RollupColumnParams): TableChunksTransformer => {
   const newHeader = createTableHeader(columns)
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
     const notFoundColumns = []
-    const rollingUpColumnsHeaders: ColumnHeader[] = []
+    const rollingUpColumnsHeaders: TableHeader = []
 
     for (const column of columns) {
-      const colHeader = header.find(h => !h.isDeleted && h.name === column)
+      const colHeader = tableHeader.find(h => !h.isDeleted && h.name === column)
       if (colHeader === undefined) notFoundColumns.push(column)
       else rollingUpColumnsHeaders.push(colHeader)
     }
@@ -34,14 +34,14 @@ export const rollup = (params: RollupColumnParams): TableChunksTransformer => {
     if (notFoundColumns.length) {
       throw new TransformColumnsNotFoundError(
         TRANSFORM_NAME,
-        header,
+        tableHeader,
         notFoundColumns
       )
     }
 
     return {
       ...source,
-      getHeader: () => newHeader,
+      getTableHeader: () => newHeader,
 
       async *[Symbol.asyncIterator]() {
         const rolledValues = Array.from(

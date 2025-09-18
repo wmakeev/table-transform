@@ -37,17 +37,21 @@ export const sort = (params: SortColumnParams): TableChunksTransformer => {
   const { column, order = 'asc' } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const sortColumnHeader = header.find(h => !h.isDeleted && h.name === column)
+    const sortColumnHeader = tableHeader.find(
+      h => !h.isDeleted && h.name === column
+    )
 
     if (sortColumnHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
 
       async *[Symbol.asyncIterator]() {
         const chunkCache: TableRow[][] = []

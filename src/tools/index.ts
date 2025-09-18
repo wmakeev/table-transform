@@ -1,4 +1,4 @@
-import { ColumnHeader, TableRow } from '../types/index.js'
+import { TableHeader, TableRow } from '../types/index.js'
 
 export * from './AsyncChannel/index.js'
 export * from './csvSourceFlatMapper.js'
@@ -21,7 +21,7 @@ export function getPromiseWithResolvers<T = unknown>() {
   return { promise, resolve: resolve!, reject: reject! }
 }
 
-export function getColumnIndexesByName(header: ColumnHeader[]) {
+export function getColumnIndexesByName(header: TableHeader) {
   const columnIndexesByName = header
     .filter(h => !h.isDeleted)
     .reduce((res, h) => {
@@ -40,7 +40,7 @@ export function getColumnIndexesByName(header: ColumnHeader[]) {
 }
 
 export function createRecordFromRow(
-  header: ColumnHeader[],
+  header: TableHeader,
   row: TableRow | undefined
 ): Record<string, unknown | unknown[]> {
   if (row == null) return {}

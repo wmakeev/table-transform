@@ -130,7 +130,7 @@ test('transforms:column:probe* - ahead generator', async () => {
       src => {
         return {
           ...src,
-          getHeader: () => createTableHeader(['first']),
+          getTableHeader: () => createTableHeader(['first']),
           async *[Symbol.asyncIterator]() {
             // Generate values before probe taken
             yield [[10], [20]]

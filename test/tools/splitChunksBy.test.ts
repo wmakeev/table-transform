@@ -29,7 +29,7 @@ test('splitChunksBy', async () => {
     getContext() {
       return new Context()
     },
-    getHeader() {
+    getTableHeader() {
       return createTableHeader(['foo'])
     },
     async *[Symbol.asyncIterator]() {

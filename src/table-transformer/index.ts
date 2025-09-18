@@ -28,7 +28,7 @@ export function createTableTransformer(
 
     try {
       tableSource =
-        'getHeader' in source
+        'getTableHeader' in source
           ? source
           : await getInitialTableSource({
               inputHeaderOptions: inputHeader,
@@ -56,14 +56,14 @@ export function createTableTransformer(
       // Chain transformations
       for (const transform of transforms_) {
         tableSource = transform(tableSource)
-        const curHeadersCount = tableSource.getHeader().length
+        const curHeadersCount = tableSource.getTableHeader().length
         if (curHeadersCount > maxHeadersCount) maxHeadersCount = curHeadersCount
       }
 
       // TODO Подумать как использовать maxHeadersCount для оптимизации, задавая
       // размер массива с указанным значением заранее на входе.
 
-      transformedTableColumns = tableSource.getHeader().map(h => h.name)
+      transformedTableColumns = tableSource.getTableHeader().map(h => h.name)
       //#endregion
 
       if (outputHeader?.skip !== true) {

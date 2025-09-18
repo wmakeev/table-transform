@@ -2,7 +2,7 @@ import {
   TransformColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
-import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Remove'
 
@@ -30,9 +30,9 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
 
     let headerIndex = 0
 
-    const srcHeader = source.getHeader()
+    const srcHeader = source.getTableHeader()
 
-    const transformedHeader: ColumnHeader[] = srcHeader.flatMap(h => {
+    const transformedHeader: TableHeader = srcHeader.flatMap(h => {
       if (!h.isDeleted && h.name === column) {
         if (
           colIndex != null
@@ -61,7 +61,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => transformedHeader,
+      getTableHeader: () => transformedHeader,
       [Symbol.asyncIterator]: source[Symbol.asyncIterator]
     }
   }

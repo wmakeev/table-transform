@@ -5,9 +5,9 @@ import {
   generateHeaderColumnNames
 } from '../tools/index.js'
 import {
-  ColumnHeader,
   HeaderMode,
   TableChunksSource,
+  TableHeader,
   TableRow,
   TableTransformConfig
 } from '../types/index.js'
@@ -16,12 +16,12 @@ import { Context } from './Context.js'
 const generateForcedHeader = (
   headerMode: HeaderMode,
   count: number
-): ColumnHeader[] => {
+): TableHeader => {
   const columnsNames = generateHeaderColumnNames(headerMode, count)
 
-  const header = createTableHeader(columnsNames)
+  const tableHeader = createTableHeader(columnsNames)
 
-  return header
+  return tableHeader
 }
 
 export async function getInitialTableSource(params: {
@@ -45,14 +45,14 @@ export async function getInitialTableSource(params: {
       )
     }
 
-    const header = generateForcedHeader(
+    const tableHeader = generateForcedHeader(
       inputHeaderOptions.mode,
       inputHeaderOptions.forceColumnsCount
     )
 
     return {
       getContext: () => context,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
       async *[Symbol.asyncIterator]() {
         const forcedLen = inputHeaderOptions.forceColumnsCount!
 
@@ -139,10 +139,10 @@ export async function getInitialTableSource(params: {
   // Get chunk without header
 
   /** Header of incoming data */
-  const header = createTableHeader(headerRow)
+  const tableHeader = createTableHeader(headerRow)
 
   /** Length of source data header (columns count) */
-  const headerLen = header.length
+  const headerLen = tableHeader.length
 
   const getSourceGenerator = async function* () {
     try {
@@ -179,7 +179,7 @@ export async function getInitialTableSource(params: {
 
   return {
     getContext: () => context,
-    getHeader: () => header,
+    getTableHeader: () => tableHeader,
     [Symbol.asyncIterator]: getSourceGenerator
   }
 }

@@ -77,7 +77,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
   const { keyColumns } = params
 
   return source => {
-    const srcHeader = source.getHeader()
+    const srcHeader = source.getTableHeader()
 
     // Drop headers from splits
     const transformConfig: TableTransformConfig = {
@@ -119,7 +119,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       tableSource = transform(tableSource)
     }
 
-    const transformedHeader = tableSource.getHeader()
+    const transformedHeader = tableSource.getTableHeader()
     //#endregion
 
     async function* getTransformedSourceGenerator() {
@@ -156,7 +156,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       for await (const chan of channels) {
         const tableChunksSource: TableChunksSource = {
           ...source,
-          getHeader: () => srcHeader,
+          getTableHeader: () => srcHeader,
           [Symbol.asyncIterator]: chan[Symbol.asyncIterator].bind(chan)
         }
 
@@ -179,7 +179,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => transformedHeader,
+      getTableHeader: () => transformedHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

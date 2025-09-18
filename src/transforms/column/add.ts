@@ -1,8 +1,8 @@
 import { TransformBugError } from '../../errors/index.js'
 import {
-  ColumnHeader,
   TableChunksSource,
-  TableChunksTransformer
+  TableChunksTransformer,
+  TableHeader
 } from '../../index.js'
 
 export interface AddColumnParams {
@@ -24,12 +24,13 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
   const defaultValue = params.defaultValue ?? null
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
     // Skip column adding?
     if (
       params.forceArrayColumn !== true &&
-      header.findIndex(h => !h.isDeleted && h.name === params.column) !== -1
+      tableHeader.findIndex(h => !h.isDeleted && h.name === params.column) !==
+        -1
     ) {
       return source
     }
@@ -39,20 +40,20 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
     // то добавление колонки (без значения по умолчанию) будет прозрачной
     // операцией только на заголовках без необходимости итерации по массиву.
 
-    const firstDeletedHeader = header.find(h => h.isDeleted)
+    const firstDeletedHeader = tableHeader.find(h => h.isDeleted)
 
     // Add a cell at the end of a row or reuse a deleted cell
-    const transformedHeader: ColumnHeader[] =
+    const transformedHeader: TableHeader =
       firstDeletedHeader === undefined
         ? [
-            ...header,
+            ...tableHeader,
             {
-              index: header.length,
+              index: tableHeader.length,
               name: params.column,
               isDeleted: false
             }
           ]
-        : header.map(h =>
+        : tableHeader.map(h =>
             h === firstDeletedHeader
               ? {
                   index: firstDeletedHeader.index,
@@ -82,7 +83,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
 
     const resultChunk: TableChunksSource = {
       ...source,
-      getHeader: () => transformedHeader,
+      getTableHeader: () => transformedHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
 

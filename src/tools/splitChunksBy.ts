@@ -14,7 +14,7 @@ export async function* splitChunksBy(
   const keyColumnsSet = new Set(keyColumns)
 
   const keyColumnsHeaders = source
-    .getHeader()
+    .getTableHeader()
     .filter(h => !h.isDeleted && keyColumnsSet.has(h.name))
 
   const keyColumnsIndexes = keyColumnsHeaders.map(h => h.index)

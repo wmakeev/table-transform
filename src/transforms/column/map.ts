@@ -1,4 +1,4 @@
-import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 interface MapColumnParams {
   column: string
@@ -14,8 +14,8 @@ export const map = (params: MapColumnParams): TableChunksTransformer => {
 
   return source => {
     async function* getTransformedSourceGenerator() {
-      const mappingColumns: ColumnHeader[] = source
-        .getHeader()
+      const mappingColumns: TableHeader = source
+        .getTableHeader()
         .filter(h => !h.isDeleted && h.name === column)
 
       for await (const chunk of source) {
@@ -35,7 +35,7 @@ export const map = (params: MapColumnParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

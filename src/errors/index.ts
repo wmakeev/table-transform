@@ -1,5 +1,5 @@
 import { createRecordFromRow } from '../tools/index.js'
-import { ColumnHeader, TableRow } from '../types/index.js'
+import { TableHeader, TableRow } from '../types/index.js'
 
 export interface ErrorWithReporter {
   report: () => void
@@ -57,7 +57,7 @@ export class TransformHeaderError
   constructor(
     message: string,
     stepName: string,
-    public header: ColumnHeader[],
+    public header: TableHeader,
     options?: ErrorOptions
   ) {
     super(message, stepName, options)
@@ -81,7 +81,7 @@ export class TransformColumnsError extends TransformHeaderError {
   constructor(
     message: string,
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     public columns: string[],
     options?: ErrorOptions
   ) {
@@ -95,7 +95,7 @@ export class TransformColumnsError extends TransformHeaderError {
 export class TransformSymbolNotFoundError extends TransformHeaderError {
   constructor(
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     public symbolName: string,
     options?: ErrorOptions
   ) {
@@ -109,7 +109,7 @@ export class TransformSymbolNotFoundError extends TransformHeaderError {
 export class TransformColumnsNotFoundError extends TransformHeaderError {
   constructor(
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     public columns: string[],
     options?: ErrorOptions
   ) {
@@ -142,7 +142,7 @@ export class TransformChunkError extends TransformHeaderError {
   constructor(
     message: string,
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     public chunk: TableRow[],
     options?: ErrorOptions
   ) {
@@ -167,7 +167,7 @@ export class TransformRowError extends TransformChunkError {
   constructor(
     message: string,
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     chunk: TableRow[],
     public rowIndex: number,
     public columnIndex: number | null,
@@ -222,7 +222,7 @@ export class TransformRowExpressionError extends TransformRowError {
   constructor(
     message: string,
     stepName: string,
-    header: ColumnHeader[],
+    header: TableHeader,
     chunk: TableRow[],
     rowIndex: number,
     columnIndex: number | null,

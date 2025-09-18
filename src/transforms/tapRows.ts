@@ -1,7 +1,7 @@
-import { ColumnHeader, TableChunksTransformer, TableRow } from '../index.js'
+import { TableChunksTransformer, TableHeader, TableRow } from '../index.js'
 
 export interface TapRowsParams {
-  tapFunction: (chunk: TableRow[], header: ColumnHeader[]) => void
+  tapFunction: (chunk: TableRow[], header: TableHeader) => void
 }
 
 // const TRANSFORM_NAME = 'TapRows'
@@ -13,14 +13,14 @@ export const tapRows = (params: TapRowsParams): TableChunksTransformer => {
   const { tapFunction } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
     return {
       ...source,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
       [Symbol.asyncIterator]: async function* () {
         for await (const chunk of source) {
-          tapFunction(chunk, header)
+          tapFunction(chunk, tableHeader)
           yield chunk
         }
       }

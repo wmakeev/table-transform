@@ -148,7 +148,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
   return source => {
     async function* getTransformedSourceGenerator() {
-      const srcHeader = source.getHeader()
+      const srcHeader = source.getTableHeader()
 
       let rowBuffer: TableRow[] = []
 
@@ -352,7 +352,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

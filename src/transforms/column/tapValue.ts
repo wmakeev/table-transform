@@ -22,17 +22,21 @@ export const tapValue = (
   const { column, tapFunction } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const tapColumnHeader = header.find(h => !h.isDeleted && h.name === column)
+    const tapColumnHeader = tableHeader.find(
+      h => !h.isDeleted && h.name === column
+    )
 
     if (tapColumnHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     return {
       ...source,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
 
       [Symbol.asyncIterator]: async function* () {
         for await (const chunk of source) {

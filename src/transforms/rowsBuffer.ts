@@ -50,11 +50,11 @@ export const rowsBuffer = (params: BufferParams): TableChunksTransformer => {
   }
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
     return {
       ...source,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
 
       [Symbol.asyncIterator]: async function* () {
         const rowsChan = new AsyncChannel<TableRow>({

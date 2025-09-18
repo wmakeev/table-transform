@@ -1,13 +1,13 @@
 import {
-  ColumnHeader,
-  TableRowFlatMapper,
+  Context,
   TableChunksTransformer,
+  TableHeader,
+  TableRowFlatMapper,
   TableTransformConfig,
   createRecordFromRow,
   createTableHeader,
   createTableTransformer,
-  transforms as tf,
-  Context
+  transforms as tf
 } from '../index.js'
 
 export interface FlatMapWithParams {
@@ -47,9 +47,9 @@ export const flatMapWith = (
   const passThroughColumns = [...new Set(params.passThroughColumns)]
 
   return source => {
-    const srcHeader = source.getHeader()
+    const srcHeader = source.getTableHeader()
 
-    const resultHeader: ColumnHeader[] = createTableHeader(outputColumns)
+    const resultHeader: TableHeader = createTableHeader(outputColumns)
 
     async function* getTransformedSourceGenerator() {
       for await (const chunk of source) {
@@ -87,7 +87,7 @@ export const flatMapWith = (
 
     return {
       ...source,
-      getHeader: () => resultHeader,
+      getTableHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

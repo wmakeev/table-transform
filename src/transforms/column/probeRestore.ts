@@ -12,13 +12,15 @@ export const probeRestore = (
   const { column, key = column } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    if (header.find(h => !h.isDeleted && h.name === column) !== undefined) {
+    if (
+      tableHeader.find(h => !h.isDeleted && h.name === column) !== undefined
+    ) {
       throw new TransformColumnsError(
         `Can't restore probe to already exist column`,
         TRANSFORM_NAME,
-        source.getHeader(),
+        source.getTableHeader(),
         [column]
       )
     }

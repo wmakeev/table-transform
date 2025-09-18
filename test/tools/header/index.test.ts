@@ -9,11 +9,11 @@ import {
   getExcelOffset,
   getExcelRangeBound
 } from '../../../src/tools/header/index.js'
-import { ColumnHeader, TableRow } from '../../../src/types/index.js'
+import { TableHeader, TableRow } from '../../../src/types/index.js'
 
 test('tools:header:getChunkNormalizer', async t => {
   await t.test('immutable=false | ordered', () => {
-    const header: ColumnHeader[] = [
+    const header: TableHeader = [
       {
         index: 0,
         isDeleted: false,
@@ -46,7 +46,7 @@ test('tools:header:getChunkNormalizer', async t => {
   })
 
   await t.test('immutable=false | unordered', () => {
-    const header: ColumnHeader[] = [
+    const header: TableHeader = [
       {
         index: 1,
         isDeleted: false,
@@ -98,7 +98,7 @@ test('tools:header:getChunkNormalizer', async t => {
   })
 
   await t.test('immutable=false | ordered | with deleted', () => {
-    const header: ColumnHeader[] = [
+    const header: TableHeader = [
       {
         index: 0,
         isDeleted: false,
@@ -155,7 +155,7 @@ test('tools:header:getChunkNormalizer', async t => {
   })
 
   await t.test('immutable=true | ordered', () => {
-    const header: ColumnHeader[] = [
+    const header: TableHeader = [
       {
         index: 0,
         isDeleted: false,
@@ -197,7 +197,7 @@ test('tools:header:getChunkNormalizer', async t => {
   })
 
   await t.test('immutable=true | unordered', () => {
-    const header: ColumnHeader[] = [
+    const header: TableHeader = [
       {
         index: 1,
         isDeleted: false,
@@ -258,32 +258,32 @@ test('tools:header:getChunkNormalizer', async t => {
 })
 
 test('tools:header:generateColumnNumHeader', () => {
-  const header = generateColumnNumHeader(1000)
+  const tableHeader = generateColumnNumHeader(1000)
 
-  assert.ok(header)
-  assert.ok(header.length === 1000)
+  assert.ok(tableHeader)
+  assert.ok(tableHeader.length === 1000)
 
-  assert.equal(header[0], 'Col1')
-  assert.equal(header[10], 'Col11')
-  assert.equal(header[999], 'Col1000')
+  assert.equal(tableHeader[0], 'Col1')
+  assert.equal(tableHeader[10], 'Col11')
+  assert.equal(tableHeader[999], 'Col1000')
 })
 
 test('tools:header:generateExcelStyleHeader', () => {
-  const header = generateExcelStyleHeader(1000)
+  const tableHeader = generateExcelStyleHeader(1000)
 
-  assert.ok(header)
-  assert.ok(header.length === 1000)
+  assert.ok(tableHeader)
+  assert.ok(tableHeader.length === 1000)
 
-  assert.equal(header[0], 'A')
-  assert.equal(header[10], 'K')
-  assert.equal(header[25], 'Z')
-  assert.equal(header[26], 'AA')
-  assert.equal(header[27], 'AB')
-  assert.equal(header[55], 'BD')
-  assert.equal(header[258], 'IY')
-  assert.equal(header[701], 'ZZ')
-  assert.equal(header[702], 'AAA')
-  assert.equal(header[865], 'AGH')
+  assert.equal(tableHeader[0], 'A')
+  assert.equal(tableHeader[10], 'K')
+  assert.equal(tableHeader[25], 'Z')
+  assert.equal(tableHeader[26], 'AA')
+  assert.equal(tableHeader[27], 'AB')
+  assert.equal(tableHeader[55], 'BD')
+  assert.equal(tableHeader[258], 'IY')
+  assert.equal(tableHeader[701], 'ZZ')
+  assert.equal(tableHeader[702], 'AAA')
+  assert.equal(tableHeader[865], 'AGH')
 })
 
 test('tools:header:getExcelHeaderColumnNum', () => {

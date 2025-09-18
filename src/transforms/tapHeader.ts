@@ -1,7 +1,7 @@
-import { ColumnHeader, TableChunksTransformer } from '../index.js'
+import { TableChunksTransformer, TableHeader } from '../index.js'
 
 export interface TapHeaderParams {
-  tapFunction: (header: ColumnHeader[]) => void
+  tapFunction: (header: TableHeader) => void
 }
 
 // const TRANSFORM_NAME = 'TapHeader'
@@ -13,7 +13,7 @@ export const tapHeader = (params: TapHeaderParams): TableChunksTransformer => {
   const { tapFunction } = params
 
   return source => {
-    tapFunction(source.getHeader())
+    tapFunction(source.getTableHeader())
     return source
   }
 }

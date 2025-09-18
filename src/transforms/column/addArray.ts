@@ -27,9 +27,11 @@ export const addArray = (
   }
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const existColumns = header.filter(h => !h.isDeleted && h.name === column)
+    const existColumns = tableHeader.filter(
+      h => !h.isDeleted && h.name === column
+    )
 
     // Array column just exist
     if (

@@ -20,7 +20,7 @@ export const fork = (params: ForkParams): TableChunksTransformer => {
   const { transformConfig } = params
 
   return src => {
-    const header = src.getHeader()
+    const tableHeader = src.getTableHeader()
 
     const forkTransformer = createTableTransformer({
       context: new Context(src.getContext()),
@@ -30,14 +30,14 @@ export const fork = (params: ForkParams): TableChunksTransformer => {
     const {
       normalizedHeader: forkHeader,
       chunkNormalizer: forkChunkNormalizer
-    } = getChunkNormalizer(header, true)
+    } = getChunkNormalizer(tableHeader, true)
 
     const forkChan = new AsyncChannel<TableRow[]>()
 
     const forkContext = new Context(src.getContext())
 
     const forkSource: TableChunksSource = {
-      getHeader: () => forkHeader,
+      getTableHeader: () => forkHeader,
       getContext: () => forkContext,
       async *[Symbol.asyncIterator]() {
         for await (const chunk of forkChan) {

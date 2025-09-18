@@ -5,9 +5,9 @@ import {
   TransformStepError
 } from '../../errors/index.js'
 import {
-  ColumnHeader,
   isObjectGuard,
-  TableChunksTransformer
+  TableChunksTransformer,
+  TableHeader
 } from '../../index.js'
 import { add as addColumn } from './index.js'
 
@@ -37,9 +37,9 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
   }
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const unnestColumns: ColumnHeader[] = header.filter(
+    const unnestColumns: TableHeader = tableHeader.filter(
       h => !h.isDeleted && h.name === column
     )
 
@@ -48,7 +48,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       new TransformColumnsError(
         'Array column not supported',
         TRANSFORM_NAME,
-        header,
+        tableHeader,
         [column]
       )
     }
@@ -61,12 +61,12 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       new TransformColumnsError(
         "Unnested fields can't contain unnest column name",
         TRANSFORM_NAME,
-        header,
+        tableHeader,
         [column]
       )
     }
 
-    const headerColumns = header.filter(h => !h.isDeleted).map(h => h.name)
+    const headerColumns = tableHeader.filter(h => !h.isDeleted).map(h => h.name)
 
     const intersectedField = fields.filter(f => headerColumns.includes(f))
 
@@ -74,13 +74,13 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       new TransformColumnsError(
         'Unnested fields intersect with exist columns with same name',
         TRANSFORM_NAME,
-        header,
+        tableHeader,
         intersectedField
       )
     }
 
     if (unnestColumns.length === 0) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [column])
     }
 
     let _source = source
@@ -91,7 +91,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
       })(_source)
     }
 
-    const resultHeader = _source.getHeader()
+    const resultHeader = _source.getTableHeader()
 
     const headerColumnIndexByName = new Map(
       resultHeader.map(h => [h.name, h.index])
@@ -120,7 +120,7 @@ export const unnest = (params: UnnestParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => resultHeader,
+      getTableHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

@@ -3,7 +3,7 @@ import {
   TransformHeaderError,
   TransformStepParameterError
 } from '../../errors/index.js'
-import { ColumnHeader, Context, TableRow } from '../../index.js'
+import { Context, TableHeader, TableRow } from '../../index.js'
 import { TransformExpressionParams } from '../index.js'
 import { compileTransformExpression } from './compileTransformExpression.js'
 import { getRowProxyHandler } from './getRowProxyHandler.js'
@@ -35,7 +35,7 @@ export class TransformExpressionState {
   constructor(
     public name: string,
     transformParams: TransformExpressionParams,
-    header: ColumnHeader[],
+    header: TableHeader,
     context: Context
   ) {
     const { column } = transformParams

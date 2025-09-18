@@ -18,19 +18,21 @@ export const wait = (params: WaitColumnParams): TableChunksTransformer => {
   const { timeoutColumn } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const colHeader = header.find(h => !h.isDeleted && h.name === timeoutColumn)
+    const colHeader = tableHeader.find(
+      h => !h.isDeleted && h.name === timeoutColumn
+    )
 
     if (colHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         timeoutColumn
       ])
     }
 
     return {
       ...source,
-      getHeader: () => header,
+      getTableHeader: () => tableHeader,
       [Symbol.asyncIterator]: async function* () {
         for await (const chunk of source) {
           for (const [rowIndex, row] of chunk.entries()) {
@@ -40,7 +42,7 @@ export const wait = (params: WaitColumnParams): TableChunksTransformer => {
               throw new TransformRowError(
                 `Timeout expected to be a number, got ${typeof timeout}`,
                 TRANSFORM_NAME,
-                header,
+                tableHeader,
                 chunk,
                 rowIndex,
                 colHeader.index

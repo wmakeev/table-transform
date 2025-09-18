@@ -23,12 +23,14 @@ export const probePut = (
   const { column, key = column } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const colHeader = header.find(h => !h.isDeleted && h.name === column)
+    const colHeader = tableHeader.find(h => !h.isDeleted && h.name === column)
 
     if (colHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     const ctx = source.getContext()

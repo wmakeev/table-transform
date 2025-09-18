@@ -1,6 +1,6 @@
 import assert from 'node:assert'
 import { TransformBugError } from '../../errors/index.js'
-import { ColumnHeader, HeaderMode, TableRow } from '../../index.js'
+import { ColumnHeader, HeaderMode, TableHeader, TableRow } from '../../index.js'
 import { generateExcelStyleHeader } from './excel.js'
 
 export * from './excel.js'
@@ -8,7 +8,7 @@ export * from './excel.js'
 /**
  * @returns `true` if no columns is deleted or reordered
  */
-export function isHeaderNormalized(header: ColumnHeader[]): boolean {
+export function isHeaderNormalized(header: TableHeader): boolean {
   for (let i = 0; i < header.length; i++) {
     const col = header[i]
     if (col!.isDeleted || col!.index !== i) return false
@@ -20,7 +20,7 @@ export function isHeaderNormalized(header: ColumnHeader[]): boolean {
 /**
  * @param immutable
  */
-export function getChunkNormalizer(header: ColumnHeader[], immutable = false) {
+export function getChunkNormalizer(header: TableHeader, immutable = false) {
   // Optimization if no columns is deleted or reordered
   if (!immutable && isHeaderNormalized(header)) {
     return {
@@ -56,7 +56,7 @@ export function getChunkNormalizer(header: ColumnHeader[], immutable = false) {
 }
 
 export const createTableHeader = (columnsNames: TableRow) => {
-  const header: ColumnHeader[] = columnsNames.map((h, index) => {
+  const header: TableHeader = columnsNames.map((h, index) => {
     const colMeta: ColumnHeader = {
       index: index,
       name: String(h),
@@ -75,7 +75,7 @@ export const createTableHeader = (columnsNames: TableRow) => {
  * @param header Header
  * @returns Normalized columns
  */
-export const getNormalizedHeaderRow = (header: ColumnHeader[]): string[] => {
+export const getNormalizedHeaderRow = (header: TableHeader): string[] => {
   return header.filter(h => !h.isDeleted).map(h => h.name)
 }
 

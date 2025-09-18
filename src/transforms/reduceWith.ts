@@ -30,7 +30,7 @@ export const reduceWith = (
 
     return {
       ...source,
-      getHeader: () => outHeader,
+      getTableHeader: () => outHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

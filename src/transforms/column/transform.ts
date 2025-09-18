@@ -20,7 +20,7 @@ export const transform = (
     async function* getTransformedSourceGenerator() {
       const internalTransformContext = source.getContext()
 
-      const srcHeader = source.getHeader()
+      const srcHeader = source.getTableHeader()
 
       const transformState: TransformExpressionState =
         new TransformExpressionState(
@@ -72,7 +72,7 @@ export const transform = (
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

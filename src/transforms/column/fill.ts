@@ -1,5 +1,5 @@
 import { TransformColumnsNotFoundError } from '../../errors/index.js'
-import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Fill'
 
@@ -16,14 +16,16 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
   const { column, value, arrIndex } = params
 
   return source => {
-    const header = source.getHeader()
+    const tableHeader = source.getTableHeader()
 
-    const fillColumns: ColumnHeader[] = header.filter(
+    const fillColumns: TableHeader = tableHeader.filter(
       h => !h.isDeleted && h.name === column
     )
 
     if (fillColumns.length === 0) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, header, [column])
+      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     async function* getTransformedSourceGenerator() {
@@ -41,7 +43,7 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => source.getHeader(),
+      getTableHeader: () => source.getTableHeader(),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

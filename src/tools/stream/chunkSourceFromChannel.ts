@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import {
-  ColumnHeader,
   createTableTransformer,
   HeaderChunkTuple,
   TableChunksSource,
+  TableHeader,
   TableRow,
   transforms as tf
 } from '../../index.js'
@@ -34,8 +34,8 @@ export const chunkSourceFromChannel: (
     /** @type {string[] | undefined} */
     let pickedColumnsNames: string[] | undefined = outputColumns ?? undefined
 
-    /** @type {ColumnHeader[] | null} */
-    let pickedHeader: ColumnHeader[] | null = null
+    /** @type {TableHeader | null} */
+    let pickedHeader: TableHeader | null = null
 
     for await (const [header, chunk] of channel) {
       const actualHeader = header.filter(h => !h.isDeleted)
@@ -56,7 +56,7 @@ export const chunkSourceFromChannel: (
         getContext() {
           return context
         },
-        getHeader() {
+        getTableHeader() {
           return header
         },
         async *[Symbol.asyncIterator]() {

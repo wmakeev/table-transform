@@ -1,5 +1,5 @@
 import { TransformColumnsNotFoundError } from '../../errors/index.js'
-import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Rename'
 
@@ -15,9 +15,9 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
   return source => {
     let isColumnFound = false
 
-    const srcHeader = source.getHeader()
+    const srcHeader = source.getTableHeader()
 
-    const transformedHeader: ColumnHeader[] = srcHeader.map(h => {
+    const transformedHeader: TableHeader = srcHeader.map(h => {
       if (!h.isDeleted && h.name === params.oldColumn) {
         isColumnFound = true
 
@@ -38,7 +38,7 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader: () => transformedHeader,
+      getTableHeader: () => transformedHeader,
       [Symbol.asyncIterator]: () => source[Symbol.asyncIterator]()
     }
   }

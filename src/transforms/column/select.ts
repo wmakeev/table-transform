@@ -4,7 +4,7 @@ import {
   TransformColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
-import { ColumnHeader, TableChunksTransformer } from '../../index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
 import { add, remove } from './index.js'
 
 const TRANSFORM_NAME = 'Column:Select'
@@ -32,7 +32,9 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     let _source = source
 
     //#region Ensure all selected headers exist
-    const headersSet = new Set(_source.getHeader().filter(h => !h.isDeleted))
+    const headersSet = new Set(
+      _source.getTableHeader().filter(h => !h.isDeleted)
+    )
 
     const notFoundColumnsSet = new Set<string>()
 
@@ -55,17 +57,17 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     if (notFoundColumnsSet.size !== 0) {
       throw new TransformColumnsNotFoundError(
         TRANSFORM_NAME,
-        source.getHeader(),
+        source.getTableHeader(),
         [...notFoundColumnsSet.values()]
       )
     }
     //#endregion
 
-    const header = _source.getHeader()
+    const tableHeader = _source.getTableHeader()
 
-    const columnHeaderSet = new Set(header)
+    const columnHeaderSet = new Set(tableHeader)
 
-    const selected: ColumnHeader[] = []
+    const selected: TableHeader = []
 
     for (const col of selectedColumns) {
       const colHeader = [...columnHeaderSet.values()].find(
@@ -92,7 +94,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
       })(_source)
     }
 
-    const unorderedHeader = _source.getHeader()
+    const unorderedHeader = _source.getTableHeader()
 
     const resultHeader = [
       ...selected.map(h1 => unorderedHeader.find(h2 => h2.index === h1.index)),
@@ -104,7 +106,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
 
     return {
       ...source,
-      getHeader() {
+      getTableHeader() {
         return resultHeader
       },
       [Symbol.asyncIterator]: _source[Symbol.asyncIterator]

@@ -16,7 +16,7 @@ export const assert = (params: AssertHeaderParams): TableChunksTransformer => {
   return source => {
     const { headers } = params
 
-    const actualHeader = source.getHeader().filter(h => !h.isDeleted)
+    const actualHeader = source.getTableHeader().filter(h => !h.isDeleted)
 
     const notFound = []
 
@@ -28,7 +28,7 @@ export const assert = (params: AssertHeaderParams): TableChunksTransformer => {
     if (notFound.length > 0) {
       throw new TransformColumnsNotFoundError(
         TRANSFORM_NAME,
-        source.getHeader(),
+        source.getTableHeader(),
         notFound
       )
     }

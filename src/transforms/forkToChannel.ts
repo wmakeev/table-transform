@@ -20,7 +20,7 @@ export const forkToChannel = (
   const { channelName } = params
 
   return src => {
-    const header = src.getHeader()
+    const tableHeader = src.getTableHeader()
     const context = src.getContext()
 
     let channel = context.get(channelScopeSymbol, channelName) as
@@ -46,7 +46,7 @@ export const forkToChannel = (
           }
 
           if (!channel.isClosed()) {
-            prevPutPromise = channel.put([header, cloneChunk(chunk)])
+            prevPutPromise = channel.put([tableHeader, cloneChunk(chunk)])
           }
 
           yield chunk

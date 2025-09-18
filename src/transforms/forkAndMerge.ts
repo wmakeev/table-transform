@@ -1,8 +1,8 @@
 import {
-  ColumnHeader,
   Context,
   TableChunksSource,
   TableChunksTransformer,
+  TableHeader,
   TableRow,
   TableTransformConfig,
   cloneChunk,
@@ -37,7 +37,7 @@ async function forkProducer(
 ) {
   const normalizedSource = normalize({ immutable: false })(source)
 
-  const srcHeader = normalizedSource.getHeader()
+  const srcHeader = normalizedSource.getTableHeader()
 
   const colNames = srcHeader.map(h => h.name)
 
@@ -75,7 +75,7 @@ export const forkAndMerge = (
   const { outputColumns, transformConfigs } = params
 
   return source => {
-    const resultHeader: ColumnHeader[] = outputColumns.map((name, index) => ({
+    const resultHeader: TableHeader = outputColumns.map((name, index) => ({
       index,
       name: String(name),
       isDeleted: false
@@ -133,7 +133,7 @@ export const forkAndMerge = (
 
     return {
       ...source,
-      getHeader: () => resultHeader,
+      getTableHeader: () => resultHeader,
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }

@@ -35,7 +35,7 @@ async function* sourceChanTransformer(
     })
 
     const chunkSource: TableChunksSource = {
-      getHeader: () => header,
+      getTableHeader: () => header,
       getContext: () => emptyContext,
       async *[Symbol.asyncIterator]() {
         yield chunk
@@ -60,7 +60,7 @@ export const mergeFromChannel = (
     const normalizedSource = normalize()(source)
 
     const outputColumns = normalizedSource
-      .getHeader()
+      .getTableHeader()
       .filter(h => !h.isDeleted)
       .map(h => h.name)
 

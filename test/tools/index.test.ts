@@ -1,14 +1,14 @@
+import assert from 'node:assert'
 import test from 'node:test'
 import {
-  ColumnHeader,
-  TableRow,
+  createRecordFromRow,
   forceArrayLength,
-  createRecordFromRow
+  TableHeader,
+  TableRow
 } from '../../src/index.js'
-import assert from 'node:assert'
 
 test('Tools:getRowRecord', () => {
-  const header: ColumnHeader[] = [
+  const header: TableHeader = [
     {
       name: 'Foo',
       index: 0,
