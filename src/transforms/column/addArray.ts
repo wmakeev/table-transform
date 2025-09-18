@@ -49,7 +49,7 @@ export const addArray = (
         _source = add({
           column,
           defaultValue,
-          force: true
+          forceArrayColumn: true
         })(_source)
       }
     }

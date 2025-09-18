@@ -38,7 +38,7 @@ test('add header transform #1', async () => {
       tf.column.add({
         column: 'C',
         defaultValue: 'C2',
-        force: true
+        forceArrayColumn: true
       })
     ]
   })

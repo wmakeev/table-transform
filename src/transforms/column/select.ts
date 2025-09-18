@@ -41,7 +41,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
 
       if (existHeader === undefined) {
         if (addMissingColumns) {
-          _source = add({ column: col, force: true })(_source)
+          _source = add({ column: col, forceArrayColumn: true })(_source)
         } else {
           // TODO В случае выборки колонок массивов может быть не понятно, если
           // не указать что не найдена какая-либо n-ная колонка.

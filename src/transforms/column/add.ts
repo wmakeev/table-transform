@@ -10,12 +10,11 @@ export interface AddColumnParams {
 
   defaultValue?: unknown
 
-  // TODO force неоднозначен. Можно понимать как принудительную инициализацию колонки.
   /**
    * If the adding column(s) already exists, then add a new one with the same
    * name.
    */
-  force?: boolean
+  forceArrayColumn?: boolean
 }
 
 /**
@@ -29,7 +28,7 @@ export const add = (params: AddColumnParams): TableChunksTransformer => {
 
     // Skip column adding?
     if (
-      params.force !== true &&
+      params.forceArrayColumn !== true &&
       header.findIndex(h => !h.isDeleted && h.name === params.column) !== -1
     ) {
       return source
