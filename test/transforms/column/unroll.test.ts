@@ -11,10 +11,10 @@ import {
   transforms
 } from '../../../src/index.js'
 
-test('transforms:column:explode', async () => {
+test('transforms:column:unroll', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
-      transforms.column.explode({
+      transforms.column.unroll({
         column: 'arr'
       })
     ]
@@ -51,10 +51,10 @@ test('transforms:column:explode', async () => {
   ])
 })
 
-test('transforms:column:explode (strict)', async () => {
+test('transforms:column:unroll (strict)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
-      transforms.column.explode({
+      transforms.column.unroll({
         column: 'arr',
         strictArrayColumn: true
       })
@@ -84,10 +84,10 @@ test('transforms:column:explode (strict)', async () => {
   }
 })
 
-test('transforms:column:explode (empty)', async () => {
+test('transforms:column:unroll (empty)', async () => {
   const tableTransformer = createTableTransformer({
     transforms: [
-      transforms.column.explode({
+      transforms.column.unroll({
         column: 'a'
       })
     ]

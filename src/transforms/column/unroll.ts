@@ -6,20 +6,18 @@ import {
 } from '../../errors/index.js'
 import { ColumnHeader, TableChunksTransformer, TableRow } from '../../index.js'
 
-const TRANSFORM_NAME = 'Column:Explode'
+const TRANSFORM_NAME = 'Column:Unroll'
 
-export interface ExplodeColumnParams {
+export interface UnrollColumnParams {
   column: string
   strictArrayColumn?: boolean
   arrIndex?: number
 }
 
 /**
- * Explode row
+ * Unroll row
  */
-export const explode = (
-  params: ExplodeColumnParams
-): TableChunksTransformer => {
+export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
   const { column, strictArrayColumn = false, arrIndex = 0 } = params
 
   return source => {
