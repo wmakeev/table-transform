@@ -22,7 +22,7 @@ test('column transform (array) #2', async () => {
     transforms: [
       transforms.column.transform({
         column: 'List',
-        expression: `row() & ":" & arrayIndex() & if empty(value()) then "" else " - " & value()`
+        expression: `row() & ":" & arrColIndex() & if empty(value()) then "" else " - " & value()`
       }),
 
       transforms.column.transform({

@@ -1,6 +1,6 @@
 import {
   TableChunksTransformer,
-  TransformColumnsNotFoundError
+  TransformStepColumnsNotFoundError
 } from '../../index.js'
 
 export interface AssertHeaderParams {
@@ -26,7 +26,7 @@ export const assert = (params: AssertHeaderParams): TableChunksTransformer => {
     }
 
     if (notFound.length > 0) {
-      throw new TransformColumnsNotFoundError(
+      throw new TransformStepColumnsNotFoundError(
         TRANSFORM_NAME,
         source.getTableHeader(),
         notFound

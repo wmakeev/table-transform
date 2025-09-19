@@ -43,14 +43,21 @@ export class TransformStepParameterError extends TransformStepError {
   }
 }
 
-export class TransformAssertError extends TransformStepError {
+export class TransformStepAssertError extends TransformStepError {
   constructor(message: string, stepName: string, options?: ErrorOptions) {
     super(message, stepName, options)
     this.name = this.constructor.name
   }
 }
 
-export class TransformHeaderError
+export class TransformStepTypeError extends TransformStepError {
+  constructor(message: string, stepName: string, options?: ErrorOptions) {
+    super(message, stepName, options)
+    this.name = this.constructor.name
+  }
+}
+
+export class TransformStepHeaderError
   extends TransformStepError
   implements ErrorWithReporter
 {
@@ -77,7 +84,7 @@ export class TransformHeaderError
   }
 }
 
-export class TransformColumnsError extends TransformHeaderError {
+export class TransformStepColumnsError extends TransformStepHeaderError {
   constructor(
     message: string,
     stepName: string,
@@ -92,21 +99,54 @@ export class TransformColumnsError extends TransformHeaderError {
   }
 }
 
-export class TransformSymbolNotFoundError extends TransformHeaderError {
+export class TransformStepExprSymbolNotFoundError extends TransformStepHeaderError {
   constructor(
     stepName: string,
     header: TableHeader,
     public symbolName: string,
     options?: ErrorOptions
   ) {
-    const message = `Symbol not found: "${symbolName}"`
+    const message = `Global symbol not found: "${symbolName}"`
 
     super(message, stepName, header, options)
     this.name = this.constructor.name
   }
 }
 
-export class TransformColumnsNotFoundError extends TransformHeaderError {
+export class TransformStepColumnIndexOverBoundsError extends TransformStepHeaderError {
+  constructor(
+    stepName: string,
+    header: TableHeader,
+    public columnIndex: number,
+    options?: ErrorOptions
+  ) {
+    const message = `Column index ${columnIndex} is over bounds`
+
+    super(message, stepName, header, options)
+    this.name = this.constructor.name
+  }
+}
+
+export class TransformStepColumnNotFoundError extends TransformStepHeaderError {
+  constructor(
+    stepName: string,
+    header: TableHeader,
+    public column: string,
+    public columnIndex?: number,
+    options?: ErrorOptions
+  ) {
+    const message =
+      `Column not found: "${column}"` +
+      (columnIndex != null && columnIndex !== 0
+        ? ` at index ${columnIndex}`
+        : '')
+
+    super(message, stepName, header, options)
+    this.name = this.constructor.name
+  }
+}
+
+export class TransformStepColumnsNotFoundError extends TransformStepHeaderError {
   constructor(
     stepName: string,
     header: TableHeader,
@@ -121,7 +161,7 @@ export class TransformColumnsNotFoundError extends TransformHeaderError {
   }
 }
 
-function rowReport(this: TransformChunkError, rowCaption: string) {
+function rowReport(this: TransformStepChunkError, rowCaption: string) {
   console.group(`[${this.stepName}] ${this.name}: ${this.message}`)
   console.info(`${rowCaption}:`)
   console.table(
@@ -136,7 +176,7 @@ function rowReport(this: TransformChunkError, rowCaption: string) {
   console.groupEnd()
 }
 
-export class TransformChunkError extends TransformHeaderError {
+export class TransformStepChunkError extends TransformStepHeaderError {
   public row: TableRow | undefined
 
   constructor(
@@ -160,7 +200,7 @@ export class TransformChunkError extends TransformHeaderError {
   }
 }
 
-export class TransformRowError extends TransformChunkError {
+export class TransformStepRowError extends TransformStepChunkError {
   column: string | undefined
   rowNum?: number | undefined = undefined
 
@@ -218,7 +258,7 @@ export class TransformRowError extends TransformChunkError {
   }
 }
 
-export class TransformRowExpressionError extends TransformRowError {
+export class TransformStepRowExpressionError extends TransformStepRowError {
   constructor(
     message: string,
     stepName: string,
@@ -238,4 +278,4 @@ export class TransformRowExpressionError extends TransformRowError {
   }
 }
 
-export class TransformRowAssertError extends TransformRowExpressionError {}
+export class TransformStepRowAssertError extends TransformStepRowExpressionError {}

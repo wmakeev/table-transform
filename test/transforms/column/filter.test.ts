@@ -5,7 +5,7 @@ import {
   compose
 } from 'node:stream'
 import test from 'node:test'
-import { TransformRowExpressionError } from '../../../src/errors/index.js'
+import { TransformStepRowExpressionError } from '../../../src/errors/index.js'
 import {
   ChunkTransform,
   FlattenTransform,
@@ -17,12 +17,7 @@ import { createTestContext } from '../../_common/TestContext.js'
 test('transforms:column:filter', async t => {
   await t.test('complex filter', async () => {
     const tableTransformer = createTableTransformer({
-      context: createTestContext({
-        NULL: null,
-        isEmptyArr: (arr: Array<any>) => {
-          return Array.isArray(arr) && arr.length === 0
-        }
-      }),
+      context: createTestContext(),
 
       inputHeader: {
         mode: 'EXCEL_STYLE'
@@ -36,8 +31,6 @@ test('transforms:column:filter', async t => {
 
         transforms.column.filter({
           expression: `
-            value() == NULL and
-            isEmptyArr(values()) and
             empty(value("C")) and
             'A' != "3" and
             not empty('B')
@@ -146,7 +139,7 @@ test('transforms:column:filter', async t => {
     try {
       await transformedRowsStream.toArray()
     } catch (err) {
-      assert.ok(err instanceof TransformRowExpressionError)
+      assert.ok(err instanceof TransformStepRowExpressionError)
 
       assert.deepEqual(err.chunk, [
         ['1', '2', '3'],
@@ -203,7 +196,7 @@ test('transforms:column:filter', async t => {
     try {
       await transformedRowsStream.toArray()
     } catch (err) {
-      assert.ok(err instanceof TransformRowExpressionError)
+      assert.ok(err instanceof TransformStepRowExpressionError)
 
       assert.deepEqual(err.chunk, [
         ['1', '2', '3'],

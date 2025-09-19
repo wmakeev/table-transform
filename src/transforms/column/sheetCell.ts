@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import {
-  TransformChunkError,
-  TransformRowError,
+  TransformStepChunkError,
+  TransformStepRowError,
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
@@ -219,7 +219,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           } catch (err) {
             assert.ok(err instanceof Error)
 
-            throw new TransformRowError(
+            throw new TransformStepRowError(
               err.message,
               TRANSFORM_NAME,
               srcHeader,
@@ -336,7 +336,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         foundCell == null &&
         ('isOptional' in params ? params.isOptional !== true : true)
       ) {
-        throw new TransformChunkError(
+        throw new TransformStepChunkError(
           `Cell "${testValue}" in "${range}" range not found`,
           TRANSFORM_NAME,
           srcHeader,

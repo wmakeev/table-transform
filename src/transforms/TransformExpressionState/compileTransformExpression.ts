@@ -5,41 +5,83 @@ import {
 } from '../index.js'
 
 export const compileTransformExpression = (
-  transformState: TransformExpressionState,
+  state: TransformExpressionState,
   params: TransformExpressionParams,
-  context: Context
+  context: Context,
+  errors: {
+    createIncorrectColumnNameTypeError: (
+      message: string,
+      columnName: unknown
+    ) => Error
+    createColumnNotFoundError: (column: string, index?: number) => Error
+    createColumnIndexOverBoundsError: (columnIndex: number) => Error
+    createDefaultColumNotSetError: () => Error
+  }
 ) => {
-  const value = (columnName: unknown) => {
-    if (columnName != null && typeof columnName !== 'string') {
-      throw new Error('values() argument expected to be string')
+  const value = (column?: unknown) => {
+    // Get current value - value()
+    if (column == null) {
+      if (state.curColDefaultSrcIndex === null) {
+        throw errors.createDefaultColumNotSetError()
+      }
+
+      return state.arrColIndex === 0
+        ? state.curRow[state.curColDefaultSrcIndex]
+        : state.curRow[state.curColSrcIndexes![state.arrColIndex]!]
     }
 
-    const actualColumnName = columnName ?? params.column
+    // Get value by column index - value(2)
+    if (typeof column === 'number') {
+      const colHeader = state.actualTableHeader[column]
+      if (colHeader === undefined) {
+        throw errors.createColumnIndexOverBoundsError(column)
+      }
+      return state.curRow[colHeader.index]
+    }
 
-    if (actualColumnName == null) return null
+    if (typeof column !== 'string') {
+      throw errors.createIncorrectColumnNameTypeError(
+        'value() argument expected to be string or number',
+        column
+      )
+    }
 
-    const index =
-      transformState.fieldIndexesByName.get(actualColumnName)?.[
-        transformState.arrColIndex
-      ]
+    // Get value by column name - value('foo')
 
-    return index === undefined ? '' : (transformState.curRow[index] ?? '')
+    const index = state.srcIndexesByColName.get(column)?.[0]
+
+    if (index === undefined) {
+      throw errors.createColumnNotFoundError(column, state.arrColIndex)
+    }
+
+    return state.curRow[index]
   }
 
-  const values = (columnName: unknown) => {
-    if (columnName != null && typeof columnName !== 'string') {
-      throw new Error('values() argument expected to be string')
+  const values = (columnName?: unknown) => {
+    // Get current values - values()
+    if (columnName == null) {
+      if (state.curColSrcIndexes === null) {
+        throw errors.createDefaultColumNotSetError()
+      }
+
+      return state.curColSrcIndexes.map(i => state.curRow[i])
     }
 
-    const actualColumnName = columnName ?? params.column
+    if (typeof columnName !== 'string') {
+      throw errors.createIncorrectColumnNameTypeError(
+        'values() argument expected to be string',
+        columnName
+      )
+    }
 
-    if (actualColumnName == null) return []
+    const indexes = state.srcIndexesByColName.get(columnName)
 
-    const indexes = transformState.fieldIndexesByName.get(actualColumnName)
+    if (indexes === undefined) {
+      throw errors.createColumnNotFoundError(columnName)
+    }
 
-    if (indexes === undefined) return ''
-
-    return indexes.map(i => transformState.curRow[i] ?? '')
+    // Get current values - values('foo')
+    return indexes.map(i => state.curRow[i])
   }
 
   const expressionCompileProvider = context.getExpressionCompileProvider()
@@ -57,10 +99,12 @@ export const compileTransformExpression = (
       ...expressionContext,
       value,
       values,
-      row: () => transformState.rowNum,
-      column: () => transformState.column,
-      // TODO Name is not obvious
-      arrayIndex: () => transformState.arrColIndex
+      row: () => state.rowNum,
+      column: () => state.curColName,
+      columns: () => state.rowColumns,
+      columnIndex: (name?: string, fromIndex?: number) =>
+        state.rowColumns.indexOf(name ?? state.curColName ?? '', fromIndex),
+      arrColIndex: () => state.arrColIndex
     }
   )
 

@@ -1,8 +1,8 @@
 import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
 import {
   TableChunksTransformer,
-  TransformColumnsNotFoundError,
-  TransformRowError
+  TransformStepColumnsNotFoundError,
+  TransformStepRowError
 } from '../index.js'
 
 export interface WaitColumnParams {
@@ -25,7 +25,7 @@ export const wait = (params: WaitColumnParams): TableChunksTransformer => {
     )
 
     if (colHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         timeoutColumn
       ])
     }
@@ -39,7 +39,7 @@ export const wait = (params: WaitColumnParams): TableChunksTransformer => {
             const timeout = row[colHeader.index]
 
             if (typeof timeout !== 'number') {
-              throw new TransformRowError(
+              throw new TransformStepRowError(
                 `Timeout expected to be a number, got ${typeof timeout}`,
                 TRANSFORM_NAME,
                 tableHeader,

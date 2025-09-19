@@ -1,4 +1,4 @@
-import { TransformColumnsNotFoundError } from '../../errors/index.js'
+import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Fill'
@@ -23,7 +23,7 @@ export const fill = (params: FillColumnParams): TableChunksTransformer => {
     )
 
     if (fillColumns.length === 0) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         column
       ])
     }

@@ -1,4 +1,4 @@
-import { TransformColumnsNotFoundError } from '../../errors/index.js'
+import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Sort'
@@ -44,7 +44,7 @@ export const sort = (params: SortColumnParams): TableChunksTransformer => {
     )
 
     if (sortColumnHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         column
       ])
     }

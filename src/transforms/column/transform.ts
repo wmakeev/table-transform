@@ -1,5 +1,5 @@
 import assert from 'node:assert'
-import { TransformRowExpressionError } from '../../errors/index.js'
+import { TransformStepRowExpressionError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
 import {
   ColumnTransformExpressionParams,
@@ -37,7 +37,7 @@ export const transform = (
           for (const [
             arrColIndex,
             headerColIndex
-          ] of transformState.fieldColsIndexes.entries()) {
+          ] of transformState.curColSrcIndexes!.entries()) {
             if (
               params.columnIndex != null &&
               arrColIndex !== params.columnIndex
@@ -50,7 +50,7 @@ export const transform = (
             const result = transformState.evaluateExpression()
 
             if (result instanceof Error) {
-              throw new TransformRowExpressionError(
+              throw new TransformStepRowExpressionError(
                 result.message,
                 TRANSFORM_NAME,
                 srcHeader,

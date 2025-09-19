@@ -1,5 +1,5 @@
 import {
-  TransformRowExpressionError,
+  TransformStepRowExpressionError,
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
@@ -61,17 +61,17 @@ export const filter = (
           let isPass = true
 
           // No column specified
-          if (transformState.fieldColsIndexes.length === 0) {
+          if (transformState.curColSrcIndexes == null) {
             const result = transformState.evaluateExpression()
 
             if (result instanceof Error) {
-              throw new TransformRowExpressionError(
+              throw new TransformStepRowExpressionError(
                 ...getErrArgs(result.message, chunk, rowIndex, null, result)
               )
             }
 
             if (typeof result !== 'boolean') {
-              throw new TransformRowExpressionError(
+              throw new TransformStepRowExpressionError(
                 ...getErrArgs(
                   'Filter expression should return boolean result',
                   chunk,
@@ -89,7 +89,7 @@ export const filter = (
             for (const [
               arrColIndex,
               headerColIndex
-            ] of transformState.fieldColsIndexes.entries()) {
+            ] of transformState.curColSrcIndexes.entries()) {
               if (
                 params.columnIndex != null &&
                 arrColIndex !== params.columnIndex
@@ -102,7 +102,7 @@ export const filter = (
               const result = transformState.evaluateExpression()
 
               if (result instanceof Error) {
-                throw new TransformRowExpressionError(
+                throw new TransformStepRowExpressionError(
                   ...getErrArgs(
                     result.message,
                     chunk,
@@ -114,7 +114,7 @@ export const filter = (
               }
 
               if (typeof result !== 'boolean') {
-                throw new TransformRowExpressionError(
+                throw new TransformStepRowExpressionError(
                   ...getErrArgs(
                     'Filter expression should return boolean result',
                     chunk,

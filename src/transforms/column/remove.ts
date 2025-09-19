@@ -1,5 +1,5 @@
 import {
-  TransformColumnsNotFoundError,
+  TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
@@ -54,7 +54,7 @@ export const remove = (params: RemoveColumnParams): TableChunksTransformer => {
     })
 
     if (deletedColsSrcIndexes.length === 0) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
         column
       ])
     }

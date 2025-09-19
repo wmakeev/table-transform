@@ -1,4 +1,4 @@
-import { TransformColumnsNotFoundError } from '../../errors/index.js'
+import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableHeader } from '../../index.js'
 import { TransformExpressionState } from './index.js'
 
@@ -28,12 +28,14 @@ export const getRowProxyHandler = (
     get(target, prop) {
       if (prop === Symbol.toStringTag) return 'Object'
 
-      const indexes = transformState.fieldIndexesByName.get(prop as string)
+      const indexes = transformState.srcIndexesByColName.get(prop as string)
 
       if (indexes == null) {
-        throw new TransformColumnsNotFoundError(transformState.name, header, [
-          String(prop)
-        ])
+        throw new TransformStepColumnsNotFoundError(
+          transformState.stepName,
+          header,
+          [String(prop)]
+        )
       }
 
       if (indexes.length === 1) {

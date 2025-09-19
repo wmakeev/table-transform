@@ -1,9 +1,9 @@
 import {
   ExpressionCompileProvider,
   ExpressionContext,
-  TransformColumnsNotFoundError,
+  TransformStepColumnsNotFoundError,
   TransformError,
-  TransformSymbolNotFoundError
+  TransformStepExprSymbolNotFoundError
 } from '../../src/index.js'
 import { compileExpression } from '@wmakeev/filtrex'
 
@@ -21,8 +21,12 @@ function optionalPropertyAccessor(
     try {
       get(name)
     } catch (err) {
-      if (err instanceof TransformColumnsNotFoundError) {
-        throw new TransformSymbolNotFoundError(err.stepName, err.header, name)
+      if (err instanceof TransformStepColumnsNotFoundError) {
+        throw new TransformStepExprSymbolNotFoundError(
+          err.stepName,
+          err.header,
+          name
+        )
       }
     }
 

@@ -1,4 +1,4 @@
-import { TransformAssertError } from '../errors/index.js'
+import { TransformStepAssertError } from '../errors/index.js'
 import { TableChunksTransformer } from '../index.js'
 
 const TRANSFORM_NAME = 'AssertNotEmpty'
@@ -20,7 +20,10 @@ export const assertNotEmpty = (): TableChunksTransformer => {
         }
 
         if (isEmpty) {
-          throw new TransformAssertError('Data stream is empty', TRANSFORM_NAME)
+          throw new TransformStepAssertError(
+            'Data stream is empty',
+            TRANSFORM_NAME
+          )
         }
       }
     }

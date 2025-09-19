@@ -7,7 +7,7 @@ import test from 'node:test'
 import {
   createTableTransformer,
   FlattenTransform,
-  TransformRowError,
+  TransformStepRowError,
   transforms
 } from '../../../src/index.js'
 
@@ -77,7 +77,7 @@ test('transforms:column:unroll (strict)', async () => {
   try {
     await compose(() => tableTransformer(table)).toArray()
   } catch (err) {
-    assert.ok(err instanceof TransformRowError)
+    assert.ok(err instanceof TransformStepRowError)
     assert.equal(err.rowIndex, 1)
     assert.equal(err.columnIndex, 2)
     err.report()

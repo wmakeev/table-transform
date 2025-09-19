@@ -5,7 +5,7 @@ import {
   Readable
 } from 'node:stream'
 import test from 'node:test'
-import { TransformRowAssertError } from '../../../src/errors/index.js'
+import { TransformStepRowAssertError } from '../../../src/errors/index.js'
 import {
   ChunkTransform,
   createTableTransformer,
@@ -47,7 +47,7 @@ test('transforms:column:assert', async () => {
     await transformedRowsStream.toArray()
     assert.fail('should fail')
   } catch (err) {
-    assert.ok(err instanceof TransformRowAssertError)
+    assert.ok(err instanceof TransformStepRowAssertError)
     assert.equal(err.message, 'expected B to be equal "foo"')
     assert.equal(err.rowNum, 3)
     err.report()

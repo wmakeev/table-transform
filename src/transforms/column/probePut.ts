@@ -1,7 +1,7 @@
 import {
   TableChunksTransformer,
   TableRow,
-  TransformColumnsNotFoundError,
+  TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../index.js'
 import { probeScopeSymbol } from './index.js'
@@ -28,7 +28,7 @@ export const probePut = (
     const colHeader = tableHeader.find(h => !h.isDeleted && h.name === column)
 
     if (colHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         column
       ])
     }

@@ -1,8 +1,8 @@
 import assert from 'node:assert'
 import {
-  TransformColumnsNotFoundError,
-  TransformHeaderError,
-  TransformRowError
+  TransformStepColumnsNotFoundError,
+  TransformStepHeaderError,
+  TransformStepRowError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader, TableRow } from '../../index.js'
 
@@ -28,13 +28,15 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
     )
 
     if (explodeColumns[0] === undefined) {
-      new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [column])
+      new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
     }
 
     const explodeColumn = explodeColumns[arrIndex]
 
     if (explodeColumn === undefined) {
-      throw new TransformHeaderError(
+      throw new TransformStepHeaderError(
         `Column "${column}" with index ${arrIndex} not found`,
         TRANSFORM_NAME,
         tableHeader
@@ -59,7 +61,7 @@ export const unroll = (params: UnrollColumnParams): TableChunksTransformer => {
           } else if (strictArrayColumn === false) {
             explodedRows.push(row)
           } else {
-            throw new TransformRowError(
+            throw new TransformStepRowError(
               `column value expected to be array.`,
               TRANSFORM_NAME,
               tableHeader,

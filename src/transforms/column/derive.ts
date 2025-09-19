@@ -1,4 +1,7 @@
-import { TableChunksTransformer, TransformColumnsError } from '../../index.js'
+import {
+  TableChunksTransformer,
+  TransformStepColumnsError
+} from '../../index.js'
 import { add } from './add.js'
 import { transform } from './transform.js'
 
@@ -20,7 +23,7 @@ export const derive = (params: DeriveColumnParams): TableChunksTransformer => {
       source.getTableHeader().find(h => !h.isDeleted && h.name === column) !==
       undefined
     ) {
-      throw new TransformColumnsError(
+      throw new TransformStepColumnsError(
         `Can't derive already exist column`,
         TRANSFORM_NAME,
         source.getTableHeader(),

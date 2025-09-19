@@ -1,7 +1,7 @@
 import {
   TableChunksTransformer,
   TableRow,
-  TransformColumnsNotFoundError
+  TransformStepColumnsNotFoundError
 } from '../../index.js'
 
 export interface TapColumnValueParams {
@@ -29,7 +29,7 @@ export const tapValue = (
     )
 
     if (tapColumnHeader === undefined) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         column
       ])
     }

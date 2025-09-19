@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  TransformColumnsNotFoundError,
-  TransformRowExpressionError
+  TransformStepColumnsNotFoundError,
+  TransformStepRowExpressionError
 } from '../../src/errors/index.js'
 import {
   TableRow,
@@ -53,7 +53,7 @@ test('Transform error handler', async t => {
 
     assert.equal(col1, null)
     assert.equal(col2, null)
-    assert.equal((col3 as any).name, 'TransformRowExpressionError')
+    assert.equal((col3 as any).name, 'TransformStepRowExpressionError')
 
     // 3
     nextResult = await gen.next()
@@ -173,8 +173,8 @@ test('Transform error handler', async t => {
 
       assert.fail('error expected')
     } catch (err) {
-      assert.ok(err instanceof TransformRowExpressionError)
-      assert.ok(err.cause instanceof TransformColumnsNotFoundError)
+      assert.ok(err instanceof TransformStepRowExpressionError)
+      assert.ok(err.cause instanceof TransformStepColumnsNotFoundError)
       assert.deepEqual(err.cause.columns, ['foo'])
       err.report()
     }
@@ -353,7 +353,7 @@ test('Transform error handler', async t => {
 
         assert.fail('error expected')
       } catch (err) {
-        assert.ok(err instanceof TransformRowExpressionError)
+        assert.ok(err instanceof TransformStepRowExpressionError)
         assert.equal(err.message, 'Column(s) not found: "bar"')
         err.report()
       }

@@ -1,4 +1,7 @@
-import { TableChunksTransformer, TransformColumnsError } from '../../index.js'
+import {
+  TableChunksTransformer,
+  TransformStepColumnsError
+} from '../../index.js'
 import { add, probePut, ProbePutColumnParams } from './index.js'
 
 const TRANSFORM_NAME = 'Column:ProbeRestore'
@@ -17,7 +20,7 @@ export const probeRestore = (
     if (
       tableHeader.find(h => !h.isDeleted && h.name === column) !== undefined
     ) {
-      throw new TransformColumnsError(
+      throw new TransformStepColumnsError(
         `Can't restore probe to already exist column`,
         TRANSFORM_NAME,
         source.getTableHeader(),

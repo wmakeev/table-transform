@@ -1,6 +1,6 @@
 import {
-  TransformRowAssertError,
-  TransformRowExpressionError,
+  TransformStepRowAssertError,
+  TransformStepRowExpressionError,
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
@@ -61,17 +61,17 @@ export const assert = (
           transformState.nextRow(row)
 
           // No column specified
-          if (transformState.fieldColsIndexes.length === 0) {
+          if (transformState.curColSrcIndexes == null) {
             const result = transformState.evaluateExpression()
 
             if (result instanceof Error) {
-              throw new TransformRowExpressionError(
+              throw new TransformStepRowExpressionError(
                 ...getErrArgs(result.message, chunk, rowIndex, null, result)
               )
             }
 
             if (typeof result !== 'boolean') {
-              throw new TransformRowExpressionError(
+              throw new TransformStepRowExpressionError(
                 ...getErrArgs(
                   'Assert expression should return boolean result',
                   chunk,
@@ -82,7 +82,7 @@ export const assert = (
             }
 
             if (!result) {
-              throw new TransformRowAssertError(
+              throw new TransformStepRowAssertError(
                 ...getErrArgs(
                   params.message ?? 'Assertion is not pass',
                   chunk,
@@ -98,7 +98,7 @@ export const assert = (
             for (const [
               arrColIndex,
               headerColIndex
-            ] of transformState.fieldColsIndexes.entries()) {
+            ] of transformState.curColSrcIndexes.entries()) {
               if (
                 params.columnIndex != null &&
                 arrColIndex !== params.columnIndex
@@ -111,7 +111,7 @@ export const assert = (
               const result = transformState.evaluateExpression()
 
               if (result instanceof Error) {
-                throw new TransformRowExpressionError(
+                throw new TransformStepRowExpressionError(
                   ...getErrArgs(
                     result.message,
                     chunk,
@@ -123,7 +123,7 @@ export const assert = (
               }
 
               if (typeof result !== 'boolean') {
-                throw new TransformRowExpressionError(
+                throw new TransformStepRowExpressionError(
                   ...getErrArgs(
                     'Assert expression should return boolean result',
                     chunk,
@@ -134,7 +134,7 @@ export const assert = (
               }
 
               if (!result) {
-                throw new TransformRowAssertError(
+                throw new TransformStepRowAssertError(
                   ...getErrArgs(
                     params.message ?? 'Assertion is not pass',
                     chunk,

@@ -1,4 +1,4 @@
-import { TransformColumnsNotFoundError } from '../../errors/index.js'
+import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
 
 const TRANSFORM_NAME = 'Column:Rename'
@@ -31,7 +31,7 @@ export const rename = (params: RenameColumnParams): TableChunksTransformer => {
     })
 
     if (!isColumnFound) {
-      throw new TransformColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, srcHeader, [
         params.oldColumn
       ])
     }

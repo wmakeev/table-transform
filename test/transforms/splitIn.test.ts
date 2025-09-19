@@ -257,7 +257,7 @@ test('transforms:splitIn #3', async () => {
     ['one', '1', 'r02', 'foo_2', null],
     ['one', '1', 'r03', 'foo_3', null],
     ['one', '1', 'r04', 'foo_4', null],
-    [null, null, null, null, 'TransformRowExpressionError'],
+    [null, null, null, null, 'TransformStepRowExpressionError'],
     ['three', '3', 'r13', 'foo_1', null],
     ['three', '3', 'r14', 'foo_2', null],
     ['three', '3', 'r15', 'foo_3', null],

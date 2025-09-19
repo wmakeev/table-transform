@@ -11,7 +11,7 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../../src/index.js'
-import { TransformAssertError } from '../../src/errors/index.js'
+import { TransformStepAssertError } from '../../src/errors/index.js'
 import { createTestContext } from '../_common/TestContext.js'
 
 test('transforms:assertNotEmpty', async () => {
@@ -45,7 +45,7 @@ test('transforms:assertNotEmpty', async () => {
     await transformedRowsStream.toArray()
     assert.fail('should fail')
   } catch (err) {
-    assert.ok(err instanceof TransformAssertError)
+    assert.ok(err instanceof TransformStepAssertError)
     assert.equal(err.stepName, 'AssertNotEmpty')
   }
 })

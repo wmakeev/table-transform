@@ -1,4 +1,4 @@
-import { TransformColumnsNotFoundError } from '../../errors/index.js'
+import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import {
   createTableHeader,
   TableChunksTransformer,
@@ -32,7 +32,7 @@ export const rollup = (params: RollupColumnParams): TableChunksTransformer => {
     }
 
     if (notFoundColumns.length) {
-      throw new TransformColumnsNotFoundError(
+      throw new TransformStepColumnsNotFoundError(
         TRANSFORM_NAME,
         tableHeader,
         notFoundColumns

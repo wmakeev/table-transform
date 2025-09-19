@@ -7,7 +7,7 @@ import test from 'node:test'
 import {
   ChunkTransform,
   createTableTransformer,
-  TransformColumnsNotFoundError,
+  TransformStepColumnsNotFoundError,
   transforms as tf
 } from '../../../src/index.js'
 import assert from 'node:assert'
@@ -40,7 +40,7 @@ test('transforms:header:assert', async () => {
     await transformedRowsStream.toArray()
     assert.fail('should fail')
   } catch (err) {
-    assert.ok(err instanceof TransformColumnsNotFoundError)
+    assert.ok(err instanceof TransformStepColumnsNotFoundError)
     assert.equal(err.message, 'Column(s) not found: "x"')
     err.report()
   }

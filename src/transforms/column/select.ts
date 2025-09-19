@@ -1,7 +1,7 @@
 import assert from 'assert'
 import {
   TransformBugError,
-  TransformColumnsNotFoundError,
+  TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
@@ -55,7 +55,7 @@ export const select = (params: SelectColumnsParams): TableChunksTransformer => {
     }
 
     if (notFoundColumnsSet.size !== 0) {
-      throw new TransformColumnsNotFoundError(
+      throw new TransformStepColumnsNotFoundError(
         TRANSFORM_NAME,
         source.getTableHeader(),
         [...notFoundColumnsSet.values()]
