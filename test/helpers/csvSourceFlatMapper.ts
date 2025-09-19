@@ -6,8 +6,8 @@ import {
   // @ts-expect-error no typings for compose
   compose
 } from 'node:stream'
-import { ChunkTransform, createRecordFromRow } from '../index.js'
-import { TableRowFlatMapper } from '../types/index.js'
+import { ChunkTransform, createRecordFromRow } from '../../src/index.js'
+import { TableRowFlatMapper } from '../../src/types/index.js'
 
 export const csvSourceFlatMapper: TableRowFlatMapper = async function* (
   header,
