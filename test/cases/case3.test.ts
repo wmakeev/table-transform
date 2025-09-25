@@ -43,13 +43,13 @@ test('complex transform #3', async () => {
       }),
 
       transforms.column.rename({
-        oldColumn: 'Some',
-        newColumn: 'Some renamed'
+        column: 'Some',
+        newName: 'Some renamed'
       }),
 
       transforms.column.rename({
-        oldColumn: 'List',
-        newColumn: 'list_arr'
+        column: 'List',
+        newName: 'list_arr'
       }),
 
       transforms.column.fill({

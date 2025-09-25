@@ -23,8 +23,8 @@ test('transforms:flatMapWith (case1)', async () => {
   const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.rename({
-        oldColumn: 'Path to file',
-        newColumn: 'file_path'
+        column: 'Path to file',
+        newName: 'file_path'
       }),
 
       tf.flatMapWith({
@@ -71,8 +71,8 @@ test('transforms:flatMapWith (case1) - passThroughColumns', async () => {
   const tableTransformConfig: TableTransformConfig = {
     transforms: [
       tf.column.rename({
-        oldColumn: 'Path to file',
-        newColumn: 'file_path'
+        column: 'Path to file',
+        newName: 'file_path'
       }),
 
       tf.flatMapWith({
@@ -82,8 +82,8 @@ test('transforms:flatMapWith (case1) - passThroughColumns', async () => {
         transformConfig: {
           transforms: [
             tf.column.rename({
-              oldColumn: 'Name',
-              newColumn: 'case_name'
+              column: 'Name',
+              newName: 'case_name'
             })
           ]
         }
@@ -258,8 +258,8 @@ test('transforms:flatMapWith (error handle)', async () => {
               }
             }),
 
-            tf.column.rename({ oldColumn: 'col1', newColumn: 'code' }),
-            tf.column.rename({ oldColumn: 'col2', newColumn: 'value' })
+            tf.column.rename({ column: 'col1', newName: 'code' }),
+            tf.column.rename({ column: 'col2', newName: 'value' })
           ],
           errorHandle: {
             errorColumn: 'error',
