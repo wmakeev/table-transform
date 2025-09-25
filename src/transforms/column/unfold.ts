@@ -4,11 +4,7 @@ import {
   TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
-import {
-  isObjectGuard,
-  TableChunksTransformer,
-  TableHeader
-} from '../../index.js'
+import { TableChunksTransformer, TableHeader, TableRow } from '../../index.js'
 import { add as addColumn } from './index.js'
 
 const TRANSFORM_NAME = 'Column:Unfold'
@@ -16,6 +12,39 @@ const TRANSFORM_NAME = 'Column:Unfold'
 export interface UnfoldParams {
   column: string
   fields: string[]
+}
+
+type UnfoldObj = Record<string, unknown> | Array<unknown>
+
+type FiledUnfolder = (
+  unfoldItem: UnfoldObj,
+  field: string,
+  fieldIndex: number,
+  row: TableRow,
+  rowColIndex: number
+) => void
+
+const unfoldObjField: FiledUnfolder = (
+  unfoldItem,
+  field,
+  _,
+  row,
+  rowColIndex
+) => {
+  if (Object.hasOwn(unfoldItem, field)) {
+    row[rowColIndex] =
+      (unfoldItem as Record<string, unknown>)[field] ?? undefined
+  }
+}
+
+const unfoldArrItem: FiledUnfolder = (
+  unfoldItem,
+  _,
+  fieldIndex: number,
+  row: TableRow,
+  rowColIndex: number
+) => {
+  row[rowColIndex] = (unfoldItem as unknown[])[fieldIndex] ?? undefined
 }
 
 /**
@@ -104,15 +133,24 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
         for (const row of chunk) {
           const unfoldObj = row[firstColumn.index]
 
-          if (!isObjectGuard(unfoldObj)) continue
+          let unfolder: FiledUnfolder
 
-          for (const field of fields) {
-            const index = headerColumnIndexByName.get(field)
-            assert.ok(index !== undefined)
+          if (unfoldObj == null) {
+            continue
+          } else if (Array.isArray(unfoldObj)) {
+            unfolder = unfoldArrItem
+          } else if (typeof unfoldObj === 'object') {
+            unfolder = unfoldObjField
+          } else {
+            continue
+          }
 
-            if (Object.hasOwn(unfoldObj, field)) {
-              row[index] = (unfoldObj as Record<string, unknown>)[field] ?? null
-            }
+          for (let i = 0, len = fields.length; i < len; i++) {
+            const field = fields[i]!
+            const colIndex = headerColumnIndexByName.get(field)
+            assert.ok(colIndex !== undefined)
+
+            unfolder(unfoldObj as UnfoldObj, field, i, row, colIndex)
           }
         }
 

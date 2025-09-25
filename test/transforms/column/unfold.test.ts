@@ -21,10 +21,10 @@ test('transforms:column:unfold', async () => {
       }),
       tf.column.unfold({
         column: 'obj',
-        fields: ['foo', 'bar', 'toString']
+        fields: ['foo', 'baz', 'toString']
       }),
       tf.column.select({
-        columns: ['foo', 'bar', 'toString']
+        columns: ['foo', 'baz', 'toString']
       })
     ]
   })
@@ -40,6 +40,7 @@ test('transforms:column:unfold', async () => {
     [
       ['a4', 'b4', {}                      , 'c4'],
       ['a5', 'b5', 42                      , 'c5'],
+      ['a6', 'b6', undefined               , 'c6'],
     ]
   ]
 
@@ -48,14 +49,14 @@ test('transforms:column:unfold', async () => {
     new FlattenTransform()
   ).toArray()
 
-  /* prettier-ignore */
   assert.deepEqual(transformedRows, [
-    ['foo', 'bar', 'toString'],
-    [1    , 2    , null      ],
-    [null , null , null      ],
-    [null , null , null      ],
-    [null , null , null      ],
-    [null , null , null      ]
+    ['foo', 'baz', 'toString'],
+    [1, 3, null],
+    [3, 4, undefined],
+    [null, null, null],
+    [null, null, null],
+    [null, null, null],
+    [null, null, null]
   ])
 })
 
