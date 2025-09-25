@@ -72,9 +72,15 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
       h => !h.isDeleted && h.name === column
     )
 
+    if (columns.length === 0) {
+      throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
+        column
+      ])
+    }
+
     // TODO Нужно ли работать с колонками массивами в этом методе?
     if (columns.length > 1) {
-      new TransformStepColumnsError(
+      throw new TransformStepColumnsError(
         'Array column not supported',
         TRANSFORM_NAME,
         tableHeader,
@@ -82,12 +88,10 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
       )
     }
 
-    assert.ok(columns[0])
-
-    const firstColumn = columns[0]
+    const firstColumn = columns[0]!
 
     if (fields.includes(column)) {
-      new TransformStepColumnsError(
+      throw new TransformStepColumnsError(
         "Unfolding fields can't contain unfold column name",
         TRANSFORM_NAME,
         tableHeader,
@@ -100,18 +104,12 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
     const intersectedField = fields.filter(f => headerColumns.includes(f))
 
     if (intersectedField.length > 0) {
-      new TransformStepColumnsError(
+      throw new TransformStepColumnsError(
         'Unfolding fields intersect with exist columns with same name',
         TRANSFORM_NAME,
         tableHeader,
         intersectedField
       )
-    }
-
-    if (columns.length === 0) {
-      new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
-        column
-      ])
     }
 
     let _source = source
