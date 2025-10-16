@@ -12,6 +12,7 @@ const TRANSFORM_NAME = 'Column:Unfold'
 export interface UnfoldParams {
   column: string
   fields: string[]
+  allowExistColumnsOverlap?: boolean
 }
 
 type UnfoldObj = Record<string, unknown> | Array<unknown>
@@ -51,7 +52,7 @@ const unfoldArrItem: FiledUnfolder = (
  * Set object fields to columns
  */
 export const unfold = (params: UnfoldParams): TableChunksTransformer => {
-  const { column, fields } = params
+  const { column, fields, allowExistColumnsOverlap = false } = params
 
   if (typeof column !== 'string' || column === '') {
     new TransformStepError('Incorrect column parameter', TRANSFORM_NAME)
@@ -103,7 +104,7 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
 
     const intersectedField = fields.filter(f => headerColumns.includes(f))
 
-    if (intersectedField.length > 0) {
+    if (intersectedField.length > 0 && allowExistColumnsOverlap === false) {
       throw new TransformStepColumnsError(
         'Unfolding fields intersect with exist columns with same name',
         TRANSFORM_NAME,
