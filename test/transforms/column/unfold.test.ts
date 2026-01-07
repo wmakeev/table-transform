@@ -7,8 +7,7 @@ import test, { suite } from 'node:test'
 import {
   createTableTransformer,
   FlattenTransform,
-  transforms as tf,
-  TransformStepColumnsError
+  transforms as tf
 } from '../../../src/index.js'
 
 suite('transforms:column:unfold', () => {
@@ -24,6 +23,9 @@ suite('transforms:column:unfold', () => {
         tf.column.unfold({
           column: 'obj',
           fields: ['foo', 'baz', 'toString']
+        }),
+        tf.header.assert({
+          headers: ['obj']
         }),
         tf.column.select({
           columns: ['foo', 'baz', 'toString']
@@ -53,60 +55,23 @@ suite('transforms:column:unfold', () => {
 
     assert.deepEqual(transformedRows, [
       ['foo', 'baz', 'toString'],
-      [1, 3, null],
+      [1, 3, undefined],
       [3, 4, undefined],
-      [null, null, null],
-      [null, null, null],
-      [null, null, null],
-      [null, null, null]
+      [undefined, undefined, undefined],
+      [undefined, undefined, undefined],
+      [undefined, undefined, undefined],
+      [undefined, undefined, undefined]
     ])
   })
 
-  test('overlap not allowed', async () => {
+  test('overlap and remove', async () => {
     const tableTransformer = createTableTransformer({
       transforms: [
         tf.column.unfold({
           column: 'a',
           fields: ['c', 'd'],
-          allowExistColumnsOverlap: false
-        }),
-
-        tf.column.remove({ column: 'a' })
-      ]
-    })
-
-    const table = [
-      [
-        ['a', 'b', 'c'],
-        [[1, 2], 'b1', 'c1']
-      ]
-    ]
-
-    try {
-      await compose(
-        () => tableTransformer(table),
-        new FlattenTransform()
-      ).toArray()
-      assert.fail('should fail')
-    } catch (err) {
-      assert.ok(err instanceof TransformStepColumnsError)
-      assert.equal(
-        err.message,
-        'Unfolding fields intersect with exist columns with same name: "c"'
-      )
-    }
-  })
-
-  test('overlap allowed', async () => {
-    const tableTransformer = createTableTransformer({
-      transforms: [
-        tf.column.unfold({
-          column: 'a',
-          fields: ['c', 'd'],
-          allowExistColumnsOverlap: true
-        }),
-
-        tf.column.remove({ column: 'a' })
+          removeColumn: true
+        })
       ]
     })
 
@@ -115,7 +80,8 @@ suite('transforms:column:unfold', () => {
         ['a', 'b', 'c'],
         [[1, 2], 'b1', 'c1'],
         ['a2', 'b2', 'c2'],
-        [{ c: 3, d: 4 }, 'b3', 'c3']
+        [{ c: '', d: 4 }, 'b3', 'c3'],
+        [{ c: null }, 'b4', 'c4']
       ]
     ]
 
@@ -127,8 +93,9 @@ suite('transforms:column:unfold', () => {
     assert.deepEqual(transformedRows, [
       ['b', 'c', 'd'],
       ['b1', 1, 2],
-      ['b2', 'c2', null],
-      ['b3', 3, 4]
+      ['b2', undefined, undefined],
+      ['b3', '', 4],
+      ['b4', null, undefined]
     ])
   })
 

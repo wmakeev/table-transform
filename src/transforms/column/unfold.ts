@@ -1,58 +1,36 @@
-import assert from 'assert'
 import {
   TransformStepColumnsError,
   TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../errors/index.js'
-import { TableChunksTransformer, TableHeader, TableRow } from '../../index.js'
-import { add as addColumn } from './index.js'
+import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { add as addColumn, remove as removeColumn } from './index.js'
 
 const TRANSFORM_NAME = 'Column:Unfold'
 
 export interface UnfoldParams {
+  /**
+   * Колонка которая содержит данные для разворачивания в отдельные колонки
+   */
   column: string
+
+  /**
+   * Наименования клонок в которые будут развернуты значения из соотв. полей
+   * значения в колонке `column`.
+   */
   fields: string[]
-  allowExistColumnsOverlap?: boolean
-}
 
-type UnfoldObj = Record<string, unknown> | Array<unknown>
-
-type FiledUnfolder = (
-  unfoldItem: UnfoldObj,
-  field: string,
-  fieldIndex: number,
-  row: TableRow,
-  rowColIndex: number
-) => void
-
-const unfoldObjField: FiledUnfolder = (
-  unfoldItem,
-  field,
-  _,
-  row,
-  rowColIndex
-) => {
-  if (Object.hasOwn(unfoldItem, field)) {
-    row[rowColIndex] =
-      (unfoldItem as Record<string, unknown>)[field] ?? undefined
-  }
-}
-
-const unfoldArrItem: FiledUnfolder = (
-  unfoldItem,
-  _,
-  fieldIndex: number,
-  row: TableRow,
-  rowColIndex: number
-) => {
-  row[rowColIndex] = (unfoldItem as unknown[])[fieldIndex] ?? undefined
+  /**
+   * Удалить колонку `column` после раскрытия
+   */
+  removeColumn?: boolean
 }
 
 /**
  * Set object fields to columns
  */
 export const unfold = (params: UnfoldParams): TableChunksTransformer => {
-  const { column, fields, allowExistColumnsOverlap = false } = params
+  const { column, fields, removeColumn: removeSrcColumn = false } = params
 
   if (typeof column !== 'string' || column === '') {
     new TransformStepError('Incorrect column parameter', TRANSFORM_NAME)
@@ -69,18 +47,18 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
   return source => {
     const tableHeader = source.getTableHeader()
 
-    const columns: TableHeader = tableHeader.filter(
+    const tableHeaders: TableHeader = tableHeader.filter(
       h => !h.isDeleted && h.name === column
     )
 
-    if (columns.length === 0) {
+    if (tableHeaders.length === 0) {
       throw new TransformStepColumnsNotFoundError(TRANSFORM_NAME, tableHeader, [
         column
       ])
     }
 
     // TODO Нужно ли работать с колонками массивами в этом методе?
-    if (columns.length > 1) {
+    if (tableHeaders.length > 1) {
       throw new TransformStepColumnsError(
         'Array column not supported',
         TRANSFORM_NAME,
@@ -89,29 +67,7 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
       )
     }
 
-    const firstColumn = columns[0]!
-
-    if (fields.includes(column)) {
-      throw new TransformStepColumnsError(
-        "Unfolding fields can't contain unfold column name",
-        TRANSFORM_NAME,
-        tableHeader,
-        [column]
-      )
-    }
-
-    const headerColumns = tableHeader.filter(h => !h.isDeleted).map(h => h.name)
-
-    const intersectedField = fields.filter(f => headerColumns.includes(f))
-
-    if (intersectedField.length > 0 && allowExistColumnsOverlap === false) {
-      throw new TransformStepColumnsError(
-        'Unfolding fields intersect with exist columns with same name',
-        TRANSFORM_NAME,
-        tableHeader,
-        intersectedField
-      )
-    }
+    const header = tableHeaders[0]!
 
     let _source = source
 
@@ -123,33 +79,44 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
 
     const resultHeader = _source.getTableHeader()
 
-    const headerColumnIndexByName = new Map(
-      resultHeader.map(h => [h.name, h.index])
+    const fieldsHeadersIndexes = fields.map(
+      field =>
+        resultHeader.find(h => h.isDeleted === false && h.name === field)!.index
     )
 
     async function* getTransformedSourceGenerator() {
       for await (const chunk of _source) {
         for (const row of chunk) {
-          const unfoldObj = row[firstColumn.index]
+          const unfoldItem = row[header.index]
 
-          let unfolder: FiledUnfolder
+          // Развернуть массив
+          if (Array.isArray(unfoldItem)) {
+            for (let i = 0, len = fields.length; i < len; i++) {
+              row[fieldsHeadersIndexes[i]!] = (unfoldItem as unknown[])[i]
+            }
 
-          if (unfoldObj == null) {
-            continue
-          } else if (Array.isArray(unfoldObj)) {
-            unfolder = unfoldArrItem
-          } else if (typeof unfoldObj === 'object') {
-            unfolder = unfoldObjField
-          } else {
             continue
           }
 
-          for (let i = 0, len = fields.length; i < len; i++) {
-            const field = fields[i]!
-            const colIndex = headerColumnIndexByName.get(field)
-            assert.ok(colIndex !== undefined)
+          // Развернуть объект
+          if (unfoldItem !== null && typeof unfoldItem === 'object') {
+            for (let i = 0, len = fields.length; i < len; i++) {
+              const field = fields[i]!
+              if (Object.hasOwn(unfoldItem, field)) {
+                row[fieldsHeadersIndexes[i]!] = (
+                  unfoldItem as Record<string, unknown>
+                )[field]
+              } else {
+                row[fieldsHeadersIndexes[i]!] = undefined
+              }
+            }
 
-            unfolder(unfoldObj as UnfoldObj, field, i, row, colIndex)
+            continue
+          }
+
+          // Заполнить пустые значения
+          for (let i = 0, len = fields.length; i < len; i++) {
+            row[fieldsHeadersIndexes[i]!] = undefined
           }
         }
 
@@ -158,8 +125,7 @@ export const unfold = (params: UnfoldParams): TableChunksTransformer => {
     }
 
     return {
-      ...source,
-      getTableHeader: () => resultHeader,
+      ...(removeSrcColumn ? removeColumn({ column })(_source) : _source),
       [Symbol.asyncIterator]: getTransformedSourceGenerator
     }
   }
