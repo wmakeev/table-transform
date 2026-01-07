@@ -12,6 +12,10 @@ export interface RemoveColumnParams {
   isInternalIndex?: boolean
 }
 
+// TODO #hyssd6e Нужно очищать колонку перед/после удаления
+// Но параметр isInternalIndex не универсальный и его не передать в clear.
+// Требуется общий селектор колонок иначе преумножаются сложные параметры.
+
 /**
  * Remove column
  */

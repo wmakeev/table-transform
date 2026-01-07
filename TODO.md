@@ -26,7 +26,7 @@
 
 - [ ] Добавить `tf.row.foldToRecord({ resultColumn: 'item' })` - сворачивает строку в объект
 
-- [ ] В `column` / `columns` передавать селектор колонки
+- [ ] #hyssd6e В `column` / `columns` передавать селектор колонки
 
   ```js
   tf.column.transform({
