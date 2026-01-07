@@ -46,7 +46,7 @@ export type SheetCellParams =
        * The offset to be shifted to target cell after the cell with `cellName`
        * is found in `range`.
        *
-       * Excel RC style offset like: `R1`, `C2`, `R1C1`
+       * Excel RC style offset like: `R[1]`, `C[2]`, `R[1]C[1]`
        */
       offset?: string | undefined
 
@@ -137,7 +137,12 @@ const operations: Record<
  * Dynamic column
  */
 export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
-  const { type, testOperation = 'EQUAL', testValue, range } = params
+  const {
+    type,
+    testValue,
+    testOperation = testValue == null ? 'NOOP' : 'EQUAL',
+    range
+  } = params
 
   const { x1, y1, x2, y2 } = getExcelRangeBound(range)
   const { x: xOffset, y: yOffset } = getExcelOffset(
