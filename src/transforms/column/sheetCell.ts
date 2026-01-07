@@ -27,7 +27,7 @@ export type SheetCellParams =
        */
       range: string
 
-      testOperation?: Exclude<SheetCellOperations, 'NOOP' | 'EMPTY'> | undefined
+      testOperation?: Exclude<SheetCellOperations, 'ANY' | 'EMPTY'> | undefined
 
       /** Cell value to compare */
       testValue?: unknown
@@ -58,7 +58,7 @@ export type SheetCellParams =
   | {
       type: 'CONSTANT' | 'HEADER'
       range: string
-      testOperation: Extract<SheetCellOperations, 'NOOP' | 'EMPTY'>
+      testOperation: Extract<SheetCellOperations, 'ANY' | 'EMPTY'>
       testValue: undefined
       targetColumn: string
       targetColumnIndex?: number
@@ -74,7 +74,7 @@ export type SheetCellParams =
   | {
       type: 'ASSERT'
       range: string
-      testOperation?: Exclude<SheetCellOperations, 'NOOP' | 'EMPTY'> | undefined
+      testOperation?: Exclude<SheetCellOperations, 'ANY' | 'EMPTY'> | undefined
       testValue: unknown
     }
 
@@ -90,7 +90,7 @@ export type SheetCellOperations =
   | 'INCLUDES'
   | 'TEMPLATE'
   | 'EMPTY'
-  | 'NOOP'
+  | 'ANY'
 
 const operations: Record<
   SheetCellOperations,
@@ -128,7 +128,7 @@ const operations: Record<
     return str1 == null || str1 === ''
   },
 
-  NOOP: () => true
+  ANY: () => true
 }
 
 // TODO Вероятно надо переписать проверку буфера. Инкапсулировать логику в класс.
@@ -140,7 +140,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
   const {
     type,
     testValue,
-    testOperation = testValue == null ? 'NOOP' : 'EQUAL',
+    testOperation = testValue == null ? 'ANY' : 'EQUAL',
     range
   } = params
 

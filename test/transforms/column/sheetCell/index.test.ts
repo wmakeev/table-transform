@@ -89,7 +89,7 @@ suite('transforms:cell:sheetCell', () => {
         }),
         //#endregion
 
-        //#region NOOP - G1:I3
+        //#region ANY - G1:I3
         transforms.column.addArray({
           column: 'Col5',
           length: 2
@@ -101,7 +101,7 @@ suite('transforms:cell:sheetCell', () => {
           targetColumn: 'Col5',
           targetColumnIndex: 1
           // Параметры будут выведены по умолчанию
-          // testOperation: 'NOOP',
+          // testOperation: 'ANY',
           // testValue: undefined,
         }),
         //#endregion
@@ -262,7 +262,7 @@ suite('transforms:cell:sheetCell', () => {
         }),
         //#endregion
 
-        //#region NOOP - G1:I3
+        //#region ANY - G1:I3
         transforms.column.addArray({
           column: 'Col5',
           length: 2
@@ -272,7 +272,7 @@ suite('transforms:cell:sheetCell', () => {
           type: 'HEADER',
           range: 'G11:I13',
           // Параметры будут выведены по умолчанию
-          // testOperation: 'NOOP',
+          // testOperation: 'ANY',
           // testValue: undefined,
           targetColumn: 'Col5',
           targetColumnIndex: 1
