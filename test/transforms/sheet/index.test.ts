@@ -15,8 +15,8 @@ import {
   FlattenTransform,
   createTableTransformer,
   transforms
-} from '../../../../src/index.js'
-import { createTestContext } from '../../../_common/TestContext.js'
+} from '../../../src/index.js'
+import { createTestContext } from '../../_common/TestContext.js'
 
 suite('transforms:cell:sheetCell', () => {
   test('case1', async () => {
@@ -40,8 +40,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1',
           testValue: 'Column1',
           targetColumn: 'Col1'
@@ -53,8 +52,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col2'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'B2:D11',
           testValue: 'Column2',
           targetColumn: 'Col2'
@@ -66,8 +64,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col3'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'C1:E4',
           testValue: 'Column3:',
           offset: 'R[1]C[1]',
@@ -80,8 +77,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col4'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'E4:G7',
           testValue: 'Const4:',
           offset: 'R[-3]C[2]',
@@ -95,25 +91,22 @@ suite('transforms:cell:sheetCell', () => {
           length: 2
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'G1:I3',
           targetColumn: 'Col5',
-          targetColumnIndex: 1
+          targetArrColumnIndex: 1
           // Параметры будут выведены по умолчанию
           // testOperation: 'ANY',
           // testValue: undefined,
         }),
         //#endregion
 
-        transforms.column.sheetCell({
-          type: 'ASSERT',
+        transforms.sheet.assert({
           range: 'H7:J9',
           testValue: 'Assert1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'ASSERT',
+        transforms.sheet.assert({
           range: 'B1',
           testOperation: 'EMPTY'
         }),
@@ -123,8 +116,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col6'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'H7:J9',
           testValue: 'foo',
           targetColumn: 'Col6',
@@ -149,10 +141,7 @@ suite('transforms:cell:sheetCell', () => {
 
     const transformedRowsStream: Readable = compose(
       createReadStream(
-        path.join(
-          process.cwd(),
-          'test/transforms/column/sheetCell/sheetCell1_in.csv'
-        ),
+        path.join(process.cwd(), 'test/transforms/sheet/sheetCell1_in.csv'),
         {
           highWaterMark: 16 * 1024,
           encoding: 'utf8'
@@ -176,16 +165,13 @@ suite('transforms:cell:sheetCell', () => {
     // await writeFile(
     //   path.join(
     //     process.cwd(),
-    //     'test/transforms/column/sheetCell/sheetCell1_out.csv'
+    //     'test/transforms/sheet/sheetCell1_out.csv'
     //   ),
     //   actualCsv
     // )
 
     const expectedCsv = await readFile(
-      path.join(
-        process.cwd(),
-        'test/transforms/column/sheetCell/sheetCell1_out.csv'
-      ),
+      path.join(process.cwd(), 'test/transforms/sheet/sheetCell1_out.csv'),
       'utf-8'
     )
 
@@ -213,8 +199,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A11',
           testValue: 'Column1',
           targetColumn: 'Col1'
@@ -226,8 +211,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col2'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'B12:D21',
           testValue: 'Column2',
           targetColumn: 'Col2'
@@ -239,8 +223,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col3'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'C11:E14',
           testValue: 'Column3:',
           offset: 'R[1]C[1]',
@@ -253,8 +236,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col4'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'E14:G17',
           testValue: 'Const4:',
           offset: 'R[-3]C[2]',
@@ -268,25 +250,22 @@ suite('transforms:cell:sheetCell', () => {
           length: 2
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'G11:I13',
           // Параметры будут выведены по умолчанию
           // testOperation: 'ANY',
           // testValue: undefined,
           targetColumn: 'Col5',
-          targetColumnIndex: 1
+          targetArrColumnIndex: 1
         }),
         //#endregion
 
-        transforms.column.sheetCell({
-          type: 'ASSERT',
+        transforms.sheet.assert({
           range: 'H17:J19',
           testValue: 'Assert1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'ASSERT',
+        transforms.sheet.assert({
           range: 'B11',
           testOperation: 'EMPTY'
         }),
@@ -296,8 +275,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col6'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'H17:J19',
           testValue: 'foo',
           targetColumn: 'Col6',
@@ -324,7 +302,7 @@ suite('transforms:cell:sheetCell', () => {
       createReadStream(
         path.join(
           process.cwd(),
-          'test/transforms/column/sheetCell/sheetCell1_shifted_in.csv'
+          'test/transforms/sheet/sheetCell1_shifted_in.csv'
         ),
         {
           highWaterMark: 16 * 1024,
@@ -349,7 +327,7 @@ suite('transforms:cell:sheetCell', () => {
     // await writeFile(
     //   path.join(
     //     process.cwd(),
-    //     'test/transforms/column/sheetCell/sheetCell1_shifted_out.csv'
+    //     'test/transforms/sheet/sheetCell1_shifted_out.csv'
     //   ),
     //   actualCsv
     // )
@@ -357,7 +335,7 @@ suite('transforms:cell:sheetCell', () => {
     const expectedCsv = await readFile(
       path.join(
         process.cwd(),
-        'test/transforms/column/sheetCell/sheetCell1_shifted_out.csv'
+        'test/transforms/sheet/sheetCell1_shifted_out.csv'
       ),
       'utf-8'
     )
@@ -375,8 +353,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1',
           testValue: 'foo',
           targetColumn: 'Col1'
@@ -386,10 +363,7 @@ suite('transforms:cell:sheetCell', () => {
 
     const transformedRowsStream: Readable = compose(
       createReadStream(
-        path.join(
-          process.cwd(),
-          'test/transforms/column/sheetCell/sheetCell1_in.csv'
-        ),
+        path.join(process.cwd(), 'test/transforms/sheet/sheetCell1_in.csv'),
         {
           highWaterMark: 16 * 1024,
           encoding: 'utf8'
@@ -424,8 +398,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'ASSERT',
+        transforms.sheet.assert({
           range: 'A2:B4',
           testValue: 'foo'
         })
@@ -434,10 +407,7 @@ suite('transforms:cell:sheetCell', () => {
 
     const transformedRowsStream: Readable = compose(
       createReadStream(
-        path.join(
-          process.cwd(),
-          'test/transforms/column/sheetCell/sheetCell1_in.csv'
-        ),
+        path.join(process.cwd(), 'test/transforms/sheet/sheetCell1_in.csv'),
         {
           highWaterMark: 16 * 1024,
           encoding: 'utf8'
@@ -488,39 +458,34 @@ suite('transforms:cell:sheetCell', () => {
           column: 'col5'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:K1',
           testValue: 'One',
           testOperation: 'EQUAL',
           targetColumn: 'col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:K1',
           testValue: 'Tow',
           testOperation: 'STARTS_WITH',
           targetColumn: 'col2'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:K1',
           testValue: 'Три',
           targetColumn: 'col3'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:K1',
           testValue: 'Четыре',
           testOperation: 'STARTS_WITH',
           targetColumn: 'col4'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:K1',
           testValue: ' 5',
           testOperation: 'INCLUDES',
@@ -535,10 +500,7 @@ suite('transforms:cell:sheetCell', () => {
 
     const transformedRowsStream: Readable = compose(
       createReadStream(
-        path.join(
-          process.cwd(),
-          'test/transforms/column/sheetCell/sheetCell2.csv'
-        ),
+        path.join(process.cwd(), 'test/transforms/sheet/sheetCell2.csv'),
         'utf8'
       ),
 
@@ -575,8 +537,7 @@ suite('transforms:cell:sheetCell', () => {
           column: 'col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A1:B25',
           testValue: ' 23',
           testOperation: 'EQUAL',
@@ -635,8 +596,7 @@ suite('transforms:cell:sheetCell', () => {
         transforms.column.add({
           column: 'col1'
         }),
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'B3:B25',
           testValue: '25',
           testOperation: 'EQUAL',
@@ -646,8 +606,7 @@ suite('transforms:cell:sheetCell', () => {
         transforms.column.add({
           column: 'col2'
         }),
-        transforms.column.sheetCell({
-          type: 'HEADER',
+        transforms.sheet.column({
           range: 'A2:B25',
           testValue: 'foo',
           testOperation: 'EQUAL',
@@ -714,8 +673,7 @@ suite('transforms:cell:sheetCell', () => {
             column: 'col1'
           }),
 
-          transforms.column.sheetCell({
-            type: 'HEADER',
+          transforms.sheet.column({
             range,
             testValue,
             offset,
@@ -823,14 +781,12 @@ suite('transforms:cell:sheetCell', () => {
           column: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'A1',
           targetColumn: 'Col1'
         }),
 
-        transforms.column.sheetCell({
-          type: 'CONSTANT',
+        transforms.sheet.constant({
           range: 'B2',
           targetColumn: 'B'
         })
@@ -863,4 +819,7 @@ suite('transforms:cell:sheetCell', () => {
       ['14', '21', '10']
     ])
   })
+
+  // TODO Нужно больше тестов
+  // TODO Разбить тесты на группы
 })

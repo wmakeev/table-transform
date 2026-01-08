@@ -130,8 +130,7 @@ test('transforms:forkAndMerge #2', async () => {
                   },
                   transforms: [
                     tf.column.add({ column: 'code' }),
-                    tf.column.sheetCell({
-                      type: 'HEADER',
+                    tf.sheet.column({
                       testOperation: 'INCLUDES',
                       testValue: 'Код',
                       range: 'A2:E7',
@@ -139,8 +138,7 @@ test('transforms:forkAndMerge #2', async () => {
                     }),
 
                     tf.column.add({ column: 'value' }),
-                    tf.column.sheetCell({
-                      type: 'HEADER',
+                    tf.sheet.column({
                       testOperation: 'STARTS_WITH',
                       testValue: 'Значение',
                       range: 'A2:E7',
@@ -183,8 +181,7 @@ test('transforms:forkAndMerge #2', async () => {
                   },
                   transforms: [
                     tf.column.add({ column: 'code' }),
-                    tf.column.sheetCell({
-                      type: 'HEADER',
+                    tf.sheet.column({
                       testOperation: 'EQUAL',
                       testValue: 'Code',
                       range: 'A1:F3',
@@ -192,8 +189,7 @@ test('transforms:forkAndMerge #2', async () => {
                     }),
 
                     tf.column.add({ column: 'value' }),
-                    tf.column.sheetCell({
-                      type: 'HEADER',
+                    tf.sheet.column({
                       testValue: 'Value',
                       range: 'A1:F3',
                       targetColumn: 'value'

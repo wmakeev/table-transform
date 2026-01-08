@@ -7,7 +7,26 @@ import {
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import { getExcelOffset, getExcelRangeBound } from '../../tools/header/index.js'
 
-const TRANSFORM_NAME = 'Column:SheetCell'
+const TRANSFORM_NAME = 'Sheet:Cell'
+
+export type SheetCellOperations =
+  | 'STARTS_WITH'
+  | 'EQUAL'
+  | 'INCLUDES'
+  | 'TEMPLATE'
+  | 'EMPTY'
+  | 'NOT_EMPTY'
+  | 'ANY'
+
+export type EmptyTestValueOperations = Extract<
+  SheetCellOperations,
+  'NOT_EMPTY' | 'EMPTY' | 'ANY'
+>
+
+export type NonEmptyTestValueOperations = Exclude<
+  SheetCellOperations,
+  EmptyTestValueOperations
+>
 
 export type SheetCellParams =
   | {
@@ -27,10 +46,10 @@ export type SheetCellParams =
        */
       range: string
 
-      testOperation?: Exclude<SheetCellOperations, 'ANY' | 'EMPTY'> | undefined
-
       /** Cell value to compare */
-      testValue?: unknown
+      testValue?: string | number
+
+      testOperation?: NonEmptyTestValueOperations | undefined
 
       /**
        * Column to place constant or column value
@@ -40,7 +59,7 @@ export type SheetCellParams =
       /**
        * Array index, if `targetColumn` is array column
        */
-      targetColumnIndex?: number
+      targetArrColumnIndex?: number
 
       /**
        * The offset to be shifted to target cell after the cell with `cellName`
@@ -58,24 +77,24 @@ export type SheetCellParams =
   | {
       type: 'CONSTANT' | 'HEADER'
       range: string
-      testOperation: Extract<SheetCellOperations, 'ANY' | 'EMPTY'>
       testValue: undefined
+      testOperation: EmptyTestValueOperations
       targetColumn: string
-      targetColumnIndex?: number
+      targetArrColumnIndex?: number
       offset?: string
       isOptional?: boolean
     }
   | {
       type: 'ASSERT'
       range: string
-      testOperation: Extract<SheetCellOperations, 'EMPTY'>
-      testValue?: undefined
+      testValue: undefined
+      testOperation: EmptyTestValueOperations
     }
   | {
       type: 'ASSERT'
       range: string
-      testOperation?: Exclude<SheetCellOperations, 'ANY' | 'EMPTY'> | undefined
-      testValue: unknown
+      testValue: string | number
+      testOperation?: NonEmptyTestValueOperations | undefined
     }
 
 interface FoundCell {
@@ -84,48 +103,38 @@ interface FoundCell {
   value: any
 }
 
-export type SheetCellOperations =
-  | 'STARTS_WITH'
-  | 'EQUAL'
-  | 'INCLUDES'
-  | 'TEMPLATE'
-  | 'EMPTY'
-  | 'ANY'
-
 const operations: Record<
   SheetCellOperations,
-  (str1: unknown, str2: unknown) => boolean
+  (expected: unknown, actual: unknown) => boolean
 > = {
-  STARTS_WITH: (str1, str2) => {
-    return str1 != null && str2 != null
-      ? String(str1).trim().startsWith(String(str2).trim())
+  STARTS_WITH: (expected, actual) => {
+    return expected != null && actual != null
+      ? String(actual).trim().startsWith(String(expected).trim())
       : false
   },
 
-  EQUAL: (str1, str2) => {
-    return str1 == null && str2 == null
+  EQUAL: (expected, actual) => {
+    return expected == null && actual == null
       ? true
-      : String(str2).trim() === String(str1).trim()
+      : String(actual).trim() === String(expected).trim()
   },
 
-  INCLUDES: (str1, str2) => {
-    return str1 == null || str2 == null
+  INCLUDES: (expected, actual) => {
+    return expected == null || actual == null
       ? false
-      : String(str1).includes(String(str2))
+      : String(actual).includes(String(expected))
   },
 
   TEMPLATE: () => {
     throw new TransformStepError('Not implemented', TRANSFORM_NAME)
   },
 
-  EMPTY: (str1, str2) => {
-    if (str2 != null || (typeof str2 === 'string' && str2 !== '')) {
-      throw new TransformStepError(
-        'EMPTY function should receive empty second argument',
-        TRANSFORM_NAME
-      )
-    }
-    return str1 == null || str1 === ''
+  EMPTY: (_, actual) => {
+    return actual == null || String(actual).trim() === ''
+  },
+
+  NOT_EMPTY: (_, actual) => {
+    return actual != null && String(actual).trim() !== ''
   },
 
   ANY: () => true
@@ -166,7 +175,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
         type !== 'ASSERT'
           ? (srcHeader.filter(
               h => !h.isDeleted && h.name === params.targetColumn
-            )?.[params.targetColumnIndex ?? 0] ?? null)
+            )?.[params.targetArrColumnIndex ?? 0] ?? null)
           : null
 
       if (type !== 'ASSERT' && targetColHeader === null) {
@@ -217,7 +226,7 @@ export const sheetCell = (params: SheetCellParams): TableChunksTransformer => {
           colIndex++
         ) {
           try {
-            if (compareFn(bufferRow[colIndex], testValue)) {
+            if (compareFn(testValue, bufferRow[colIndex])) {
               cellColIndex = colIndex
               break
             }
