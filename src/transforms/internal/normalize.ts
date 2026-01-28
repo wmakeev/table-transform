@@ -2,8 +2,8 @@ import {
   getChunkNormalizer,
   isHeaderNormalized,
   TableChunksTransformer
-} from '../index.js'
-import { TransformBaseParams } from './index.js'
+} from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 export interface NormalizeParams extends TransformBaseParams {
   immutable: boolean

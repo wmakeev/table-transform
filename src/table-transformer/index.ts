@@ -49,7 +49,7 @@ export function createTableTransformer(
         )
       }
 
-      transforms_.push(tf.normalize({ immutable: false }))
+      transforms_.push(tf.internal.normalize({ immutable: false }))
 
       let maxHeadersCount = 0
 

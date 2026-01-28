@@ -10,7 +10,7 @@ import {
   TableRow,
   transforms as tf
 } from '../index.js'
-import { channelScopeSymbol, normalize, TransformBaseParams } from './index.js'
+import { channelScopeSymbol, TransformBaseParams, internal } from './index.js'
 
 const TRANSFORM_NAME = 'MergeFromChannel'
 
@@ -57,7 +57,7 @@ export const mergeFromChannel = (
   const { channelName } = params
 
   return source => {
-    const normalizedSource = normalize()(source)
+    const normalizedSource = internal.normalize()(source)
 
     const outputColumns = normalizedSource
       .getTableHeader()

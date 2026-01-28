@@ -111,7 +111,7 @@ export const splitIn = (params: SplitInParams): TableChunksTransformer => {
       )
     }
 
-    transforms_.push(tf.normalize({ immutable: false }))
+    transforms_.push(tf.internal.normalize({ immutable: false }))
 
     let tableSource = source
 
