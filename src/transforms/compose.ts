@@ -1,6 +1,13 @@
 import { TableChunksTransformer } from '../index.js'
 
 export interface ComposeParams {
+  /** Short name of compose */
+  name?: string
+
+  /** Compose description */
+  description?: string
+
+  /** Composed transforms */
   transforms: TableChunksTransformer[]
 }
 

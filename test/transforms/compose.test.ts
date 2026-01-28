@@ -17,6 +17,8 @@ import { createTestContext } from '../_common/TestContext.js'
 test('transforms:compose', async () => {
   const getComposed = (value: string) => {
     return tf.compose({
+      name: 'test',
+      description: 'long description',
       transforms: [
         tf.forkAndMerge({
           outputColumns: ['row_num', 'value'],
