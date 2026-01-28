@@ -4,10 +4,11 @@ import {
   TableChunksTransformer,
   TableHeader
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Rollup'
 
-export interface RollupColumnParams {
+export interface RollupColumnParams extends TransformBaseParams {
   columns: string[]
 }
 

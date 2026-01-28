@@ -11,13 +11,14 @@ import {
   transforms as tf
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
+import { TransformBaseParams } from './index.js'
 import { normalize } from './normalize.js'
 
 // TODO Можно ли оптимизировать копирование chunk в первый fork без клонирования?
 
 const TRANSFORM_NAME = 'ForkAndMerge'
 
-export interface ForkAndMergeParams {
+export interface ForkAndMergeParams extends TransformBaseParams {
   outputColumns: string[]
   transformConfigs: TableTransformConfig[]
 }

@@ -3,10 +3,11 @@ import {
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Remove'
 
-export interface RemoveColumnParams {
+export interface RemoveColumnParams extends TransformBaseParams {
   column: string
   colIndex?: number
   isInternalIndex?: boolean

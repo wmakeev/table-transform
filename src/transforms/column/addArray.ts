@@ -1,10 +1,11 @@
 import { TransformStepError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { add, remove } from './index.js'
 
 const TRANSFORM_NAME = 'Column:AddArray'
 
-export interface AddArrayColumnParams {
+export interface AddArrayColumnParams extends TransformBaseParams {
   column: string
   length: number
   forceLength?: boolean

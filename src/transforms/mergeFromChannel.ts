@@ -10,11 +10,11 @@ import {
   TableRow,
   transforms as tf
 } from '../index.js'
-import { channelScopeSymbol, normalize } from './index.js'
+import { channelScopeSymbol, normalize, TransformBaseParams } from './index.js'
 
 const TRANSFORM_NAME = 'MergeFromChannel'
 
-export interface MergeFromChannelParams {
+export interface MergeFromChannelParams extends TransformBaseParams {
   channelName: string
 }
 

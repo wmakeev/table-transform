@@ -5,9 +5,9 @@ import {
   HeaderChunkTuple,
   TableChunksTransformer
 } from '../index.js'
-import { channelScopeSymbol } from './index.js'
+import { channelScopeSymbol, TransformBaseParams } from './index.js'
 
-export interface ForkToChannelParams {
+export interface ForkToChannelParams extends TransformBaseParams {
   channelName: string
 }
 

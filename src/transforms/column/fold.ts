@@ -1,10 +1,11 @@
 import { TransformStepError } from '../../errors/index.js'
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { add as addColumn, remove as removeColumn } from './index.js'
 
 const TRANSFORM_NAME = 'Column:Fold'
 
-export interface FoldParams {
+export interface FoldParams extends TransformBaseParams {
   /**
    * Наименование сворачиваемых колонок
    */

@@ -8,8 +8,9 @@ import {
   TableRow,
   TableTransformConfig
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface ForkParams {
+export interface ForkParams extends TransformBaseParams {
   transformConfig: TableTransformConfig
 }
 

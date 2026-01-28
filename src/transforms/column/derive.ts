@@ -2,10 +2,11 @@ import {
   TableChunksTransformer,
   TransformStepColumnsError
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { add } from './add.js'
 import { transform } from './transform.js'
 
-export interface DeriveColumnParams {
+export interface DeriveColumnParams extends TransformBaseParams {
   /** Column name */
   column: string
 

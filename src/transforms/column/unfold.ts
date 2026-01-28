@@ -4,11 +4,12 @@ import {
   TransformStepError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { add as addColumn, remove as removeColumn } from './index.js'
 
 const TRANSFORM_NAME = 'Column:Unfold'
 
-export interface UnfoldParams {
+export interface UnfoldParams extends TransformBaseParams {
   /**
    * Колонка которая содержит данные для разворачивания в отдельные колонки
    */

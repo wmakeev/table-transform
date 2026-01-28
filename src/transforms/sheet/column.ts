@@ -1,10 +1,11 @@
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { NonEmptyTestValueOperations, sheetCell } from './cell.js'
 
 // TODO Нужно как-то переопределять наименование трансформации
 // const TRANSFORM_NAME = 'Sheet:Column'
 
-export interface BaseSheetColumnParams {
+export interface BaseSheetColumnParams extends TransformBaseParams {
   /**
    * The range to search for a column header cell.
    *

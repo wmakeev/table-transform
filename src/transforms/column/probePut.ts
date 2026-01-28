@@ -4,9 +4,10 @@ import {
   TransformStepColumnsNotFoundError,
   TransformStepError
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { probeScopeSymbol } from './index.js'
 
-export interface ProbePutColumnParams {
+export interface ProbePutColumnParams extends TransformBaseParams {
   column: string
   key?: string
   arrIndex?: number

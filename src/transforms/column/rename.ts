@@ -1,9 +1,10 @@
 import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Rename'
 
-export interface RenameColumnParams {
+export interface RenameColumnParams extends TransformBaseParams {
   column: string
   newName: string
 }

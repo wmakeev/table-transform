@@ -9,8 +9,9 @@ import {
   createTableTransformer,
   transforms as tf
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface FlatMapWithParams {
+export interface FlatMapWithParams extends TransformBaseParams {
   mapper: TableRowFlatMapper
 
   // TODO Этот параметр можно убрать т.к. есть column.probeTake/Put

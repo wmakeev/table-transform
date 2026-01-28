@@ -1,6 +1,6 @@
 import {
-  TransformStepRowExpressionError,
-  TransformStepError
+  TransformStepError,
+  TransformStepRowExpressionError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {

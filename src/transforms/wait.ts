@@ -4,8 +4,9 @@ import {
   TransformStepColumnsNotFoundError,
   TransformStepRowError
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface WaitColumnParams {
+export interface WaitColumnParams extends TransformBaseParams {
   timeoutColumn: string
 }
 

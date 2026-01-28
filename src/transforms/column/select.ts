@@ -6,10 +6,11 @@ import {
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
 import { add, remove } from './index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Select'
 
-export interface SelectColumnsParams {
+export interface SelectColumnsParams extends TransformBaseParams {
   /** Columns that should be selected */
   columns: string[]
   addMissingColumns?: boolean

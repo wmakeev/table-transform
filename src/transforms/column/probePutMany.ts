@@ -1,7 +1,8 @@
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { probePut } from './probePut.js'
 
-export interface ProbePutManyColumnParams {
+export interface ProbePutManyColumnParams extends TransformBaseParams {
   columns: string[]
 }
 

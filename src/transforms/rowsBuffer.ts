@@ -6,8 +6,9 @@ import {
   TableRow,
   TransformStepParameterError
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface BufferParams {
+export interface BufferParams extends TransformBaseParams {
   maxBufferSize: number
 }
 

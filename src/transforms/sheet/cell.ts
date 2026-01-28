@@ -6,6 +6,7 @@ import {
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import { getExcelOffset, getExcelRangeBound } from '../../tools/header/index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Sheet:Cell'
 
@@ -28,74 +29,76 @@ export type NonEmptyTestValueOperations = Exclude<
   EmptyTestValueOperations
 >
 
-export type SheetCellParams =
-  | {
-      /**
-       * Transform mode
-       *
-       * - `ASSERT` - throws error if cell not found
-       * - `CONSTANT` - use cell value as column value (useful with offset)
-       * - `HEADER` - interpret found cell as column header
-       */
-      type: 'CONSTANT' | 'HEADER'
+export type SheetCellParams = TransformBaseParams &
+  (
+    | {
+        /**
+         * Transform mode
+         *
+         * - `ASSERT` - throws error if cell not found
+         * - `CONSTANT` - use cell value as column value (useful with offset)
+         * - `HEADER` - interpret found cell as column header
+         */
+        type: 'CONSTANT' | 'HEADER'
 
-      /**
-       * The range in which to search for a cell.
-       *
-       * Excel style range like: `A1`, `A2:B10`
-       */
-      range: string
+        /**
+         * The range in which to search for a cell.
+         *
+         * Excel style range like: `A1`, `A2:B10`
+         */
+        range: string
 
-      /** Cell value to compare */
-      testValue?: string | number
+        /** Cell value to compare */
+        testValue?: string | number
 
-      testOperation?: NonEmptyTestValueOperations | undefined
+        testOperation?: NonEmptyTestValueOperations | undefined
 
-      /**
-       * Column to place constant or column value
-       */
-      targetColumn: string
+        /**
+         * Column to place constant or column value
+         */
+        targetColumn: string
 
-      /**
-       * Array index, if `targetColumn` is array column
-       */
-      targetArrColumnIndex?: number
+        /**
+         * Array index, if `targetColumn` is array column
+         */
+        targetArrColumnIndex?: number
 
-      /**
-       * The offset to be shifted to target cell after the cell with `cellName`
-       * is found in `range`.
-       *
-       * Excel RC style offset like: `R[1]`, `C[2]`, `R[1]C[1]`
-       */
-      offset?: string | undefined
+        /**
+         * The offset to be shifted to target cell after the cell with `cellName`
+         * is found in `range`.
+         *
+         * Excel RC style offset like: `R[1]`, `C[2]`, `R[1]C[1]`
+         */
+        offset?: string | undefined
 
-      /**
-       * If `true` not error was thrown if column not found
-       */
-      isOptional?: boolean
-    }
-  | {
-      type: 'CONSTANT' | 'HEADER'
-      range: string
-      testValue: undefined
-      testOperation: EmptyTestValueOperations
-      targetColumn: string
-      targetArrColumnIndex?: number
-      offset?: string
-      isOptional?: boolean
-    }
-  | {
-      type: 'ASSERT'
-      range: string
-      testValue: undefined
-      testOperation: EmptyTestValueOperations
-    }
-  | {
-      type: 'ASSERT'
-      range: string
-      testValue: string | number
-      testOperation?: NonEmptyTestValueOperations | undefined
-    }
+        /**
+         * If `true` not error was thrown if column not found
+         */
+        isOptional?: boolean
+      }
+    | {
+        type: 'CONSTANT' | 'HEADER'
+        range: string
+        testValue: undefined
+        testOperation: EmptyTestValueOperations
+        targetColumn: string
+        targetArrColumnIndex?: number
+        offset?: string
+        isOptional?: boolean
+      }
+    | {
+        type: 'ASSERT'
+        range: string
+        testValue: undefined
+        testOperation: EmptyTestValueOperations
+      }
+    | {
+        type: 'ASSERT'
+        range: string
+        testValue: string | number
+        testOperation?: NonEmptyTestValueOperations | undefined
+      }
+  )
 
 interface FoundCell {
   bufferRowIndex: number

@@ -23,7 +23,15 @@ export * from './wait.js'
 
 export const channelScopeSymbol = Symbol('ChannelScope')
 
-export interface TransformExpressionParams {
+export interface TransformBaseParams {
+  /** Custom transform name */
+  name?: string
+
+  /** Transform description */
+  description?: string
+}
+
+export interface TransformExpressionParams extends TransformBaseParams {
   /**
    * Optional column name.
    *
@@ -38,7 +46,7 @@ export interface TransformExpressionParams {
   columnIndex?: number
 }
 
-export interface ColumnTransformExpressionParams {
+export interface ColumnTransformExpressionParams extends TransformBaseParams {
   /** Column name */
   column: string
 

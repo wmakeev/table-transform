@@ -3,9 +3,10 @@ import {
   TableHeader,
   TransformStepColumnsNotFoundError
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { probeScopeSymbol } from './index.js'
 
-interface ProbeTakeColumnParams {
+interface ProbeTakeColumnParams extends TransformBaseParams {
   column: string
   key?: string
   arrIndex?: number

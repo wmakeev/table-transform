@@ -3,8 +3,9 @@ import {
   TableRow,
   TransformStepColumnsNotFoundError
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
-export interface TapColumnValueParams {
+export interface TapColumnValueParams extends TransformBaseParams {
   column: string
   // TODO colIndex
   tapFunction: (value: unknown, row: TableRow, index: number) => void

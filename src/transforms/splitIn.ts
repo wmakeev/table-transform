@@ -11,8 +11,9 @@ import {
 } from '../index.js'
 import { AsyncChannel } from '../tools/AsyncChannel/index.js'
 import { getNormalizedHeaderRow } from '../tools/header/index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface SplitInParams {
+export interface SplitInParams extends TransformBaseParams {
   /**
    * The columns by which the incoming stream is splitted
    */

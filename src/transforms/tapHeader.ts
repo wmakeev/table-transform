@@ -1,6 +1,7 @@
 import { TableChunksTransformer, TableHeader } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface TapHeaderParams {
+export interface TapHeaderParams extends TransformBaseParams {
   tapFunction: (header: TableHeader) => void
 }
 

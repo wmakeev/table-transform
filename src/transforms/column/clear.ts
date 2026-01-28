@@ -1,9 +1,10 @@
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import { fill } from './fill.js'
 
 // const TRANSFORM_NAME = 'Column:Clear'
 
-export interface ClearColumnParams {
+export interface ClearColumnParams extends TransformBaseParams {
   column: string
   arrIndex?: number
 }

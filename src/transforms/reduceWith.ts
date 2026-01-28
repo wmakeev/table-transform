@@ -3,8 +3,9 @@ import {
   TableChunksReducer,
   TableChunksTransformer
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface ReduceWithParams {
+export interface ReduceWithParams extends TransformBaseParams {
   reducer: TableChunksReducer
 }
 

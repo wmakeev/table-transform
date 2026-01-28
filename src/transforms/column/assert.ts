@@ -1,7 +1,7 @@
 import {
+  TransformStepError,
   TransformStepRowAssertError,
-  TransformStepRowExpressionError,
-  TransformStepError
+  TransformStepRowExpressionError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
 import {
@@ -13,7 +13,7 @@ const TRANSFORM_NAME = 'Column:Assert'
 
 export const assert = (
   params: TransformExpressionParams & {
-    // TODO Rename to "description"
+    // TODO Rename to "description" or add expression
     message?: string
   }
 ): TableChunksTransformer => {

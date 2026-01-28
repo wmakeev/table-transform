@@ -2,8 +2,9 @@ import {
   TableChunksTransformer,
   TransformStepColumnsNotFoundError
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
-export interface AssertHeaderParams {
+export interface AssertHeaderParams extends TransformBaseParams {
   headers: string[]
 }
 

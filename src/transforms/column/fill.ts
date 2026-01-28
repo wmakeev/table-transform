@@ -1,9 +1,10 @@
 import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Fill'
 
-export interface FillColumnParams {
+export interface FillColumnParams extends TransformBaseParams {
   column: string
   value: unknown
   arrIndex?: number

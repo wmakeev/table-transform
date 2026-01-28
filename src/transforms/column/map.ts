@@ -1,6 +1,7 @@
 import { TableChunksTransformer, TableHeader } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
-interface MapColumnParams {
+interface MapColumnParams extends TransformBaseParams {
   column: string
   mapper: (value: unknown) => unknown
   arrIndex?: number

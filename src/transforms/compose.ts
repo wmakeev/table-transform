@@ -1,12 +1,7 @@
 import { TableChunksTransformer } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface ComposeParams {
-  /** Short name of compose */
-  name?: string
-
-  /** Compose description */
-  description?: string
-
+export interface ComposeParams extends TransformBaseParams {
   /** Composed transforms */
   transforms: TableChunksTransformer[]
 }

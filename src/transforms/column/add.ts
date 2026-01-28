@@ -4,8 +4,9 @@ import {
   TableChunksTransformer,
   TableHeader
 } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
-export interface AddColumnParams {
+export interface AddColumnParams extends TransformBaseParams {
   column: string
 
   defaultValue?: unknown

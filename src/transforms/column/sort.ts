@@ -1,9 +1,10 @@
 import { TransformStepColumnsNotFoundError } from '../../errors/index.js'
 import { TableChunksTransformer, TableRow } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Sort'
 
-export interface SortColumnParams {
+export interface SortColumnParams extends TransformBaseParams {
   column: string
   order?: 'asc' | 'desc'
   // TODO Нужно ли результат выплевывать одним chunk или бить на части?

@@ -5,10 +5,11 @@ import {
   TransformStepRowError
 } from '../../errors/index.js'
 import { TableChunksTransformer, TableHeader, TableRow } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 
 const TRANSFORM_NAME = 'Column:Unroll'
 
-export interface UnrollColumnParams {
+export interface UnrollColumnParams extends TransformBaseParams {
   column: string
   strictArrayColumn?: boolean
   arrIndex?: number

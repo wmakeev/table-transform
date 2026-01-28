@@ -2,8 +2,9 @@ import {
   TableChunksTransformer,
   TransformStepParameterError
 } from '../index.js'
+import { TransformBaseParams } from './index.js'
 
-export interface SkipRowsParams {
+export interface SkipRowsParams extends TransformBaseParams {
   count: number
 }
 

@@ -1,4 +1,5 @@
 import { TableChunksTransformer } from '../../index.js'
+import { TransformBaseParams } from '../index.js'
 import {
   EmptyTestValueOperations,
   NonEmptyTestValueOperations,
@@ -8,7 +9,7 @@ import {
 // TODO Нужно как-то переопределять наименование трансформации
 // const TRANSFORM_NAME = 'Sheet:Assert'
 
-export interface BaseSheetAssertParams {
+export interface BaseSheetAssertParams extends TransformBaseParams {
   /**
    * The range to search for a cell to make assertion.
    *
