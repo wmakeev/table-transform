@@ -1,5 +1,6 @@
 export * from './add.js'
 export * from './addArray.js'
+export * from './addMany.js'
 export * from './assert.js'
 export * from './clear.js'
 export * from './derive.js'
