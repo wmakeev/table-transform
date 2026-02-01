@@ -31,7 +31,7 @@ test('transforms:column:addMany', async () => {
 
   const transformedRows = await transformedRowsStream.toArray()
 
-  assert.deepEqual(transformedRows[0], [
+  assert.deepEqual(transformedRows, [
     [['a', 'b', 'c', 'd']],
     [
       [1, 'new', 'new', 'new'],
