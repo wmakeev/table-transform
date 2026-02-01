@@ -15,7 +15,7 @@ import {
 import { SimplexExpressionCompileProvider } from '../../_common/SimplexExpressionCompileProvider.js'
 
 suite('transforms:column:scan', () => {
-  test('scan without seed', async () => {
+  test('scan without seed #1', async () => {
     const tableTransformer = createTableTransformer({
       context: new Context()
         .setExpressionCompileProvider(new SimplexExpressionCompileProvider())
@@ -78,6 +78,70 @@ suite('transforms:column:scan', () => {
       ['Three', 'item 4', 4    ],
       ['Three', 'item 5', 5    ],
       ['Three', 'item 6', 6    ]
+    ])
+  })
+
+  test('scan without seed #2', async () => {
+    const tableTransformer = createTableTransformer({
+      context: new Context()
+        .setExpressionCompileProvider(new SimplexExpressionCompileProvider())
+        .setExpressionContext({
+          empty: (val: unknown) => val == null || val === ''
+        }),
+
+      transforms: [
+        tf.splitIn({
+          keyColumns: ['id'],
+          transformConfig: {
+            transforms: [
+              tf.column.sort({
+                column: 'val'
+              }),
+              tf.column.scan({
+                column: 'val',
+                expression: `if empty(prev()) then value() else prev()`
+              })
+            ]
+          }
+        })
+      ]
+    })
+
+    /* prettier-ignore */
+    const csv = [
+      ['id', 'val'],
+      ['a' , 3    ],
+      ['a' , 2    ],
+      ['b' , 5    ],
+      ['c' , 2    ],
+      ['c' , 3    ],
+      ['c' , 1    ],
+      ['c' , 4    ],
+      ['e' , 4    ],
+      ['e' , 2    ],
+    ]
+
+    const transformedRowsStream: Readable = compose(
+      csv.values(),
+      new ChunkTransform({ batchSize: 2 }),
+      tableTransformer,
+      new FlattenTransform()
+    )
+
+    const transformedRows = await transformedRowsStream.toArray()
+
+    /* _prettier-ignore */
+    assert.deepEqual(transformedRows, [
+      ['id', 'val'],
+      ['a', 2],
+      ['a', 2],
+      ['b', 5],
+      ['c', 1],
+      ['c', 1],
+      ['c', 1],
+      ['c', 1],
+      ['e', 2],
+      ['e', 2]
     ])
   })
 
