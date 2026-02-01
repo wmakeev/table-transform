@@ -93,6 +93,9 @@ export const compileTransformExpression = (
 
   const expressionContext = context.getExpressionContext() ?? {}
 
+  // TODO Компиляция функции происходит слишком поздно уже на этапе обработки ..
+  // .. данных, хотя ошибку компиляции можно было бы выдать значительно раньше.
+  // #dl9adgn1
   const transformExpression = expressionCompileProvider.compileExpression(
     params.expression,
     {
