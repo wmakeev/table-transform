@@ -22,13 +22,13 @@ suite('transforms:column:unfold', () => {
         }),
         tf.column.unfold({
           column: 'obj',
-          fields: ['foo', 'baz', 'toString']
+          fields: ['foo', 'baz', 'toString', 'b']
         }),
         tf.header.assert({
           headers: ['obj']
         }),
         tf.column.select({
-          columns: ['foo', 'baz', 'toString']
+          columns: ['foo', 'baz', 'b', 'toString']
         })
       ]
     })
@@ -37,7 +37,7 @@ suite('transforms:column:unfold', () => {
     const table = [
     [
       ['a' , 'b' , 'obj'                   , 'c' ],
-      ['a1', 'b1', {foo: 1, bar: 2, baz: 3}, 'c1'],
+      ['a1', 'b1', {foo: 1, bar: 2, baz: 3, b: 67 }, 'c1'],
       ['a2', 'b2', [3, 4]                  , 'c2'],
       ['a3', 'b3', null                    , 'c3'],
     ],
@@ -54,13 +54,13 @@ suite('transforms:column:unfold', () => {
     ).toArray()
 
     assert.deepEqual(transformedRows, [
-      ['foo', 'baz', 'toString'],
-      [1, 3, undefined],
-      [3, 4, undefined],
-      [undefined, undefined, undefined],
-      [undefined, undefined, undefined],
-      [undefined, undefined, undefined],
-      [undefined, undefined, undefined]
+      ['foo', 'baz', 'b', 'toString'],
+      [1, 3, 67, undefined],
+      [3, 4, undefined, undefined],
+      [undefined, undefined, undefined, undefined],
+      [undefined, undefined, undefined, undefined],
+      [undefined, undefined, undefined, undefined],
+      [undefined, undefined, undefined, undefined]
     ])
   })
 
@@ -97,6 +97,128 @@ suite('transforms:column:unfold', () => {
       ['b3', '', 4],
       ['b4', null, undefined]
     ])
+  })
+
+  test('array and object', async () => {
+    const tableTransformer = createTableTransformer({
+      transforms: [
+        tf.column.select({
+          columns: ['c', 'b', 'a', 'obj']
+        }),
+        tf.column.remove({
+          column: 'b'
+        }),
+        tf.column.unfold({
+          column: 'obj',
+          fields: ['foo', 'baz', 'toString', 'b'],
+          fieldsMap: {
+            foo: 'Foo',
+            toString: 'toString',
+            b: 'B'
+          },
+          removeColumn: true
+        }),
+        tf.column.removeMany({
+          columns: ['a', 'c']
+        })
+      ]
+    })
+
+    /* prettier-ignore */
+    const table = [
+    [
+      ['a' , 'b' , 'obj'                   , 'c' ],
+      ['a1', 'b1', {foo: 1, bar: 2, baz: 3, b: 67 }, 'c1'],
+      ['a2', 'b2', [3, 4]                  , 'c2'],
+      ['a3', 'b3', null                    , 'c3'],
+    ],
+    [
+      ['a4', 'b4', {}                      , 'c4'],
+      ['a5', 'b5', 42                      , 'c5'],
+      ['a6', 'b6', undefined               , 'c6'],
+    ]
+  ]
+
+    const transformedRows: string[][] = await compose(
+      () => tableTransformer(table),
+      new FlattenTransform()
+    ).toArray()
+
+    assert.deepEqual(
+      transformedRows,
+      /* prettier-ignore */
+      [
+        ['Foo'    , 'baz'    , 'toString', 'B'      ],
+        [1        , 3        , undefined , 67       ],
+        [3        , 4        , undefined , undefined],
+        [undefined, undefined, undefined , undefined],
+        [undefined, undefined, undefined , undefined],
+        [undefined, undefined, undefined , undefined],
+        [undefined, undefined, undefined , undefined]
+      ]
+    )
+  })
+
+  test('array and object', async () => {
+    const tableTransformer = createTableTransformer({
+      transforms: [
+        tf.column.remove({
+          column: 'b'
+        }),
+
+        tf.column.unfold({
+          column: 'obj',
+          fields: ['foo', null, 'baz', 'b'],
+          fieldsMap: {
+            foo: 'Foo',
+            toString: 'toString',
+            b: 'B'
+          },
+          removeColumn: true
+        }),
+
+        tf.column.removeMany({
+          columns: ['c']
+        }),
+        tf.internal.normalize()
+      ]
+    })
+
+    /* prettier-ignore */
+    const table = [
+    [
+      ['a'  , 'b'  , 'obj'                           , 'c' ],
+      ['a1' , 'b1' , {foo: 1, bar: 2, baz: 3, b: 67 }, 'c1'],
+      ['a21', 'b21', [3, 4]                          , 'c21'],
+      ['a22', 'b22', [5, 6, 7, 8]                    , 'c22'],
+      ['a3' , 'b3' , null                            , 'c3'],
+    ],
+    [
+      ['a4' , 'b4' , {}                              , 'c4'],
+      ['a5' , 'b5' , 42                              , 'c5'],
+      ['a6' , 'b6' , undefined                       , 'c6'],
+    ]
+  ]
+
+    const transformedRows: string[][] = await compose(
+      () => tableTransformer(table),
+      new FlattenTransform()
+    ).toArray()
+
+    assert.deepEqual(
+      transformedRows,
+      /* _prettier-ignore */
+      [
+        ['a', 'Foo', 'baz', 'B', 'toString'],
+        ['a1', 1, 3, 67, undefined],
+        ['a21', 3, undefined, undefined, null],
+        ['a22', 5, 7, 8, null],
+        ['a3', undefined, undefined, undefined, undefined],
+        ['a4', undefined, undefined, undefined, undefined],
+        ['a5', undefined, undefined, undefined, undefined],
+        ['a6', undefined, undefined, undefined, undefined]
+      ]
+    )
   })
 
   // TODO Добавить больше тестов для проверки крайних случаев
