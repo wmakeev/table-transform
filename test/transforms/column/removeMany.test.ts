@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict'
+import {
+  Readable,
+  // @ts-expect-error no typings for compose
+  compose
+} from 'node:stream'
+import test from 'node:test'
+import {
+  TableRow,
+  TableTransformConfig,
+  createTableTransformer,
+  transforms as tf
+} from '../../../src/index.js'
+
+test('transforms:column:removeMany', async () => {
+  const tableTransformConfig: TableTransformConfig = {
+    transforms: [
+      tf.column.removeMany({
+        columns: ['a', 'c']
+      })
+    ]
+  }
+
+  const sourceDataChunks: TableRow[][] = [
+    [
+      ['a', 'b', 'c', 'e'],
+      [1, 6],
+      [2, 3],
+      [3, 5]
+    ]
+  ]
+
+  const transformedRowsStream: Readable = compose(
+    sourceDataChunks,
+    createTableTransformer(tableTransformConfig)
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.deepEqual(transformedRows, [
+    [['b', 'e']],
+    [
+      [6, null],
+      [3, null],
+      [5, null]
+    ]
+  ])
+})
