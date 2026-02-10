@@ -97,9 +97,12 @@ suite('transforms:column:scan', () => {
               tf.column.sort({
                 column: 'val'
               }),
+              tf.column.add({
+                column: 'scan'
+              }),
               tf.column.scan({
-                column: 'val',
-                expression: `if empty(prev()) then value() else prev()`
+                column: 'scan',
+                expression: `if empty(prev()) then value("val") else prev()`
               })
             ]
           }
@@ -132,16 +135,16 @@ suite('transforms:column:scan', () => {
 
     /* _prettier-ignore */
     assert.deepEqual(transformedRows, [
-      ['id', 'val'],
-      ['a', 2],
-      ['a', 2],
-      ['b', 5],
-      ['c', 1],
-      ['c', 1],
-      ['c', 1],
-      ['c', 1],
-      ['e', 2],
-      ['e', 2]
+      ['id', 'val', 'scan'],
+      ['a', 2, null],
+      ['a', 3, 3],
+      ['b', 5, null],
+      ['c', 1, null],
+      ['c', 2, 2],
+      ['c', 3, 2],
+      ['c', 4, 2],
+      ['e', 2, null],
+      ['e', 4, 4]
     ])
   })
 
