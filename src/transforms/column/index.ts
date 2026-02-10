@@ -24,6 +24,7 @@ export * from './select.js'
 export * from './sort.js'
 export * from './tapValue.js'
 export * from './transform.js'
+export * from './transformAndRename.js'
 export * from './unfold.js'
 export * from './unroll.js'
 

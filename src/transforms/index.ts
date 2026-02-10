@@ -24,10 +24,10 @@ export const channelScopeSymbol = Symbol('ChannelScope')
 
 export interface TransformBaseParams {
   /** Custom transform name */
-  name?: string
+  name?: string | undefined
 
   /** Transform description */
-  description?: string
+  description?: string | undefined
 }
 
 export interface TransformExpressionParams extends TransformBaseParams {
@@ -42,7 +42,7 @@ export interface TransformExpressionParams extends TransformBaseParams {
   expression: string
 
   /** Index of array column */
-  columnIndex?: number
+  columnIndex?: number | undefined
 }
 
 export interface ColumnTransformExpressionParams extends TransformBaseParams {
@@ -53,5 +53,5 @@ export interface ColumnTransformExpressionParams extends TransformBaseParams {
   expression: string
 
   /** Index of array column */
-  columnIndex?: number
+  columnIndex?: number | undefined
 }
