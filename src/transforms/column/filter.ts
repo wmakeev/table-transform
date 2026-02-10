@@ -11,6 +11,7 @@ import {
 const TRANSFORM_NAME = 'Column:Filter'
 
 export const filter = (
+  // TODO Для filter параметр `expression` не обязательный
   params: TransformExpressionParams
 ): TableChunksTransformer => {
   return source => {
