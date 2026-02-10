@@ -6,6 +6,23 @@ import { generateExcelStyleHeader } from './excel.js'
 export * from './excel.js'
 
 /**
+ * Find column header by name
+ */
+export function findActiveHeader(headerName: string, tableHeader: TableHeader) {
+  return (
+    tableHeader.find(h => h.isDeleted === false && h.name === headerName) ??
+    null
+  )
+}
+
+/**
+ * Returns not deleted headers by it names
+ */
+export function findActiveHeaders(headerNames: string[], header: TableHeader) {
+  return headerNames.map(name => findActiveHeader(name, header))
+}
+
+/**
  * @returns `true` if no columns is deleted or reordered
  */
 export function isHeaderNormalized(header: TableHeader): boolean {
