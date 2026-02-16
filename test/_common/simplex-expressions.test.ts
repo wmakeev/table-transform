@@ -77,7 +77,7 @@ test('Simplex expressions (fields access)', async () => {
       ['out1'   , 'out2'   , 'out3'   , 'out4'   ],
       [undefined, true     , undefined, true     ],
       [undefined, undefined, 12       , undefined],
-      [undefined, undefined, undefined, null     ],
+      [undefined, undefined, undefined, undefined],
       [undefined, undefined, undefined, undefined]
     ]
   )
