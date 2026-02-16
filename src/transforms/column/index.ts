@@ -27,5 +27,6 @@ export * from './transform.js'
 export * from './transformAndRename.js'
 export * from './unfold.js'
 export * from './unroll.js'
+export * from './unrollAndRename.js'
 
 export const probeScopeSymbol = Symbol('ProbeScope')

@@ -11,8 +11,8 @@ const TRANSFORM_NAME = 'Column:Unroll'
 
 export interface UnrollColumnParams extends TransformBaseParams {
   column: string
-  strictArrayColumn?: boolean
-  arrIndex?: number
+  strictArrayColumn?: boolean | undefined
+  arrIndex?: number | undefined
 }
 
 /**
