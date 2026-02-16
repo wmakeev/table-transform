@@ -1,6 +1,6 @@
 {
   "name": "@wmakeev/table-transform",
-  "version": "9.0.0-14",
+  "version": "9.0.0-15",
   "type": "module",
   "description": "Streaming table data transformation",
   "keywords": [
