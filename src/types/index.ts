@@ -58,7 +58,7 @@ export interface TableTransformConfig {
          */
         mode: 'FIRST_ROW'
 
-        trimHeaderNames?: boolean | undefined
+        trimHeadersNames?: boolean | undefined
       }
     | {
         mode: 'COLUMN_NUM' | 'EXCEL_STYLE'

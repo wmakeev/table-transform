@@ -19,7 +19,7 @@ test('Trim headers #5', async () => {
   const tableTransformer = createTableTransformer({
     inputHeader: {
       mode: 'FIRST_ROW',
-      trimHeaderNames: true
+      trimHeadersNames: true
     },
     transforms: [
       tf.header.assert({

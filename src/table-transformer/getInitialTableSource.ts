@@ -134,7 +134,7 @@ export async function getInitialTableSource(params: {
   else {
     const shouldTrim =
       (inputHeaderOptions?.mode === 'FIRST_ROW' &&
-        inputHeaderOptions.trimHeaderNames) ??
+        inputHeaderOptions.trimHeadersNames) ??
       false
 
     headerRow = shouldTrim ? firstRow.map(it => String(it).trim()) : firstRow
