@@ -132,7 +132,12 @@ export async function getInitialTableSource(params: {
 
   // Header should exist. Extract header from first row.
   else {
-    headerRow = firstRow
+    const shouldTrim =
+      (inputHeaderOptions?.mode === 'FIRST_ROW' &&
+        inputHeaderOptions.trimHeaderNames) ??
+      false
+
+    headerRow = shouldTrim ? firstRow.map(it => String(it).trim()) : firstRow
     curChunk = curChunk.slice(1)
   }
 
