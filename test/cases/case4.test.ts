@@ -65,3 +65,32 @@ test('Empty headers #4 (correct)', async () => {
     ['', '', '', '', '', 'baz']
   ])
 })
+
+test('Custom headers #4', async () => {
+  const tableTransformer = createTableTransformer({
+    inputHeader: {
+      mode: 'CUSTOM',
+      headers: ['One', 'Tow', 'Three', 'Four']
+    },
+    transforms: []
+  })
+
+  const transformedRowsStream: Readable = compose(
+    createReadStream(path.join(process.cwd(), 'test/cases/case4.csv'), 'utf8'),
+    parse({ bom: true }),
+    new ChunkTransform({ batchSize: 2 }),
+    tableTransformer,
+    new FlattenTransform()
+  )
+
+  const transformedRows = await transformedRowsStream.toArray()
+
+  assert.equal(transformedRows.length, 4)
+
+  assert.deepEqual(transformedRows, [
+    ['One', 'Tow', 'Three', 'Four'],
+    ['', '', '', ''],
+    ['', 'foo', '', 'bar'],
+    ['', '', '', '']
+  ])
+})

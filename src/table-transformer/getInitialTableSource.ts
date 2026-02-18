@@ -5,7 +5,6 @@ import {
   generateHeaderColumnNames
 } from '../tools/index.js'
 import {
-  HeaderMode,
   TableChunksSource,
   TableHeader,
   TableRow,
@@ -14,18 +13,48 @@ import {
 import { Context } from './Context.js'
 
 const generateForcedHeader = (
-  headerMode: HeaderMode,
+  headerMode: 'COLUMN_NUM' | 'EXCEL_STYLE',
   count: number
 ): TableHeader => {
   const columnsNames = generateHeaderColumnNames(headerMode, count)
-
   const tableHeader = createTableHeader(columnsNames)
-
   return tableHeader
 }
 
+type ChunkedRowsIterable = Iterable<TableRow[]> | AsyncIterable<TableRow[]>
+
+const createPredefinedHeaderTableChunksSource = (
+  context: Context,
+  tableHeader: TableHeader,
+  chunkedRowsIterable: ChunkedRowsIterable
+) => ({
+  getContext: () => context,
+  getTableHeader: () => tableHeader,
+  async *[Symbol.asyncIterator]() {
+    const forcedLen = tableHeader.length
+
+    for await (const chunk of chunkedRowsIterable) {
+      // TODO Аналогичные проверки на массив ниже. Можно/нужно объединить?
+      if (!Array.isArray(chunk)) {
+        throw new TransformError('Rows chunk expected to be Array')
+      }
+
+      if (chunk.length > 0) {
+        for (const row of chunk) {
+          if (!Array.isArray(row)) {
+            throw new TransformError('Row expected to be Array')
+          }
+          forceArrayLength(row, forcedLen)
+        }
+
+        yield chunk
+      }
+    }
+  }
+})
+
 export async function getInitialTableSource(params: {
-  chunkedRowsIterable: Iterable<TableRow[]> | AsyncIterable<TableRow[]>
+  chunkedRowsIterable: ChunkedRowsIterable
   inputHeaderOptions?: TableTransformConfig['inputHeader']
   /** Transform context */
   context?: Context | undefined
@@ -34,10 +63,28 @@ export async function getInitialTableSource(params: {
 
   const context = params.context ?? new Context()
 
-  //#region Predefined forced header
+  // 1. Custom header
+  if (inputHeaderOptions?.mode === 'CUSTOM') {
+    const columnsNames = inputHeaderOptions.headers
+
+    if (columnsNames == null || columnsNames.length === 0) {
+      throw new TransformError(
+        'inputHeader.columns expected to be not empty array'
+      )
+    }
+
+    return createPredefinedHeaderTableChunksSource(
+      context,
+      createTableHeader(columnsNames),
+      chunkedRowsIterable
+    )
+  }
+
+  // 2. Generated header with specified columns count
   if (
-    inputHeaderOptions?.mode !== 'FIRST_ROW' &&
-    inputHeaderOptions?.forceColumnsCount != null
+    (inputHeaderOptions?.mode === 'COLUMN_NUM' ||
+      inputHeaderOptions?.mode === 'EXCEL_STYLE') &&
+    inputHeaderOptions.forceColumnsCount != null
   ) {
     if (inputHeaderOptions.forceColumnsCount <= 0) {
       throw new TransformError(
@@ -45,38 +92,17 @@ export async function getInitialTableSource(params: {
       )
     }
 
-    const tableHeader = generateForcedHeader(
-      inputHeaderOptions.mode,
-      inputHeaderOptions.forceColumnsCount
+    return createPredefinedHeaderTableChunksSource(
+      context,
+      generateForcedHeader(
+        inputHeaderOptions.mode,
+        inputHeaderOptions.forceColumnsCount
+      ),
+      chunkedRowsIterable
     )
-
-    return {
-      getContext: () => context,
-      getTableHeader: () => tableHeader,
-      async *[Symbol.asyncIterator]() {
-        const forcedLen = inputHeaderOptions.forceColumnsCount!
-
-        for await (const chunk of chunkedRowsIterable) {
-          // TODO Аналогичные проверки на массив ниже. Можно/нужно объединить?
-          if (!Array.isArray(chunk)) {
-            throw new TransformError('Rows chunk expected to be Array')
-          }
-
-          if (chunk.length > 0) {
-            for (const row of chunk) {
-              if (!Array.isArray(row)) {
-                throw new TransformError('Row expected to be Array')
-              }
-              forceArrayLength(row, forcedLen)
-            }
-
-            yield chunk
-          }
-        }
-      }
-    }
   }
-  //#endregion
+
+  // 3. Non custom header with unknown columns count
 
   /** Generated header will be prepended */
   const shouldHeaderPrepended =

@@ -70,6 +70,10 @@ export interface TableTransformConfig {
          */
         forceColumnsCount?: number
       }
+    | {
+        mode: 'CUSTOM'
+        headers: string[]
+      }
 
   outputHeader?: {
     // TODO Причина добавления forceColumns?

@@ -1,6 +1,6 @@
 import assert from 'node:assert'
 import { TransformBugError } from '../../errors/index.js'
-import { ColumnHeader, HeaderMode, TableHeader, TableRow } from '../../index.js'
+import { ColumnHeader, TableHeader, TableRow } from '../../index.js'
 import { generateExcelStyleHeader } from './excel.js'
 
 export * from './excel.js'
@@ -108,7 +108,7 @@ export function generateColumnNumHeader(colsCount: number) {
 }
 
 export const generateHeaderColumnNames = (
-  headerMode: HeaderMode,
+  headerMode: 'COLUMN_NUM' | 'EXCEL_STYLE',
   count: number
 ): string[] => {
   let columnsNames: string[]
