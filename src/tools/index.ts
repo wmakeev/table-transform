@@ -61,8 +61,10 @@ export function forceArrayLength(arr: unknown[], length: number): void {
   if (arr.length === length) {
     return
   } else if (arr.length > length) {
+    // TODO use `arr.length = length` (???)
     arr.splice(length)
   } else {
+    // TODO Optimize
     arr.push(...Array(length - arr.length).fill(null))
   }
 }
