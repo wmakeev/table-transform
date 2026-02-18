@@ -32,6 +32,7 @@ export const fold = (params: FoldParams): TableChunksTransformer => {
   const {
     columns,
     targetColumn,
+    // TODO добавить remap опцию для переименования полей в объекте
     foldToArray = false,
     removeColumns = false
   } = params
