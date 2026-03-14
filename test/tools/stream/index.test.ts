@@ -12,7 +12,7 @@ test('ChunkTransform', async () => {
 
   const result = await stream.toArray()
 
-  assert.ok(result)
+  assert.ok(result != null)
   assert.equal(result.length, 9)
   assert.equal(result[0].length, 120)
   assert.equal(result[8].length, 40)
@@ -27,7 +27,7 @@ test('FlattenTransform', async () => {
 
   const result = await stream.toArray()
 
-  assert.ok(result)
+  assert.ok(result != null)
   assert.equal(result.length, 1000)
   assert.equal(result[0], 0)
   assert.equal(result[999], 999)

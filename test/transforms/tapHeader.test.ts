@@ -45,6 +45,6 @@ test('transforms:tapHeader', async () => {
 
   await transformedRowsStream.toArray()
 
-  assert.ok(tapedHeader)
+  assert.ok(tapedHeader != null)
   assert.deepEqual(tapedHeader, ['col1', 'col2'])
 })

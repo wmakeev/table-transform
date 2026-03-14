@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { TestContext } from 'node:test'
 import { setTimeout as setTimeoutAsync } from 'node:timers/promises'
 import { AsyncChannel } from '../../src/index.js'
 
@@ -504,15 +504,20 @@ test('AsyncChannel (buffer) #1', async () => {
   )
 })
 
-test('AsyncChannel (first take)', async () => {
+test('AsyncChannel (first take)', async (t: TestContext) => {
+  t.plan(1)
+
   const chan = new AsyncChannel<number>()
 
   const consumer = (async () => {
+    const values = []
+
     for await (const it of chan) {
-      setTimeoutAsync(it + 10)
+      await setTimeoutAsync(it + 10)
+      values.push(it)
     }
 
-    assert.ok('DONE')
+    t.assert.deepEqual(values, [1, 2, 3])
   })()
 
   setTimeout(async () => {
@@ -525,7 +530,7 @@ test('AsyncChannel (first take)', async () => {
     })
   }, 100)
 
-  assert.ok(consumer)
+  await consumer
 })
 
 test('AsyncChannel (errors)', async () => {

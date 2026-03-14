@@ -41,33 +41,30 @@
   "np": {
     "yarn": false
   },
-  "author": "Vitaliy V. Makeev",
+  "author": "Vitaly V. Makeev",
   "repository": {
     "type": "git",
     "url": "https://github.com/wmakeev/table-transform"
   },
   "license": "ISC",
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.4",
-    "@tsconfig/strictest": "^2.0.5",
-    "@types/node": "^22",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "@typescript-eslint/typescript-estree": "^6.10.0",
+    "@tsconfig/node24": "^24.0.4",
+    "@tsconfig/strictest": "^2.0.8",
+    "@types/node": "^24",
+    "@eslint/js": "^9.24.0",
     "@wmakeev/filtrex": "^6.4.0",
     "auto-changelog": "^2.4.0",
-    "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.5.1",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
     "decode-html": "^2.0.0",
-    "envalid": "^8.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-node": "^11.1.0",
+    "envalid": "^8.1.1",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "lodash": "^4.17.21",
-    "prettier": "^3.3.3",
+    "prettier": "^3.8.1",
     "simplex-lang": "^0.3.0",
-    "typescript": "^5.5.4",
-    "typescript-eslint-language-service": "^5.0.5"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.30.0"
   }
 }

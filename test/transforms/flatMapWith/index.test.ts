@@ -246,13 +246,13 @@ test('transforms:flatMapWith (error handle)', async () => {
           transforms: [
             tf.tapHeader({
               tapFunction(header) {
-                assert.ok(header)
+                assert.ok(header != null)
               }
             }),
             tf.tapRows({
               tapFunction(chunk, header) {
-                assert.ok(chunk)
-                assert.ok(header)
+                assert.ok(chunk != null)
+                assert.ok(header != null)
               }
             }),
 

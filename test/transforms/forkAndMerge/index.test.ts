@@ -254,7 +254,7 @@ test('transforms:forkAndMerge #2', async () => {
 
   assert.equal(
     transformedRows.filter((row: any) => {
-      return row[2]?.includes('Error')
+      return row[2]?.includes('Error') === true
     }).length,
     2
   )

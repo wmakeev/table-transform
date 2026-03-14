@@ -25,8 +25,7 @@ class ScanContext extends Context {
   }
 }
 
-export interface ColumnScanExpressionParams
-  extends ColumnTransformExpressionParams {
+export interface ColumnScanExpressionParams extends ColumnTransformExpressionParams {
   seed?: unknown
 }
 

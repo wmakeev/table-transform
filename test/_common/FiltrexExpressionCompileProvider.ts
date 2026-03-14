@@ -49,9 +49,7 @@ function optionalPropertyAccessor(
   }
 }
 
-export class FiltrexExpressionCompileProvider
-  implements ExpressionCompileProvider
-{
+export class FiltrexExpressionCompileProvider implements ExpressionCompileProvider {
   compileExpression(
     expression: string,
     context?: ExpressionContext

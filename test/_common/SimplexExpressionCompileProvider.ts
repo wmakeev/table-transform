@@ -4,9 +4,7 @@ import {
   ExpressionContext
 } from '../../src/index.js'
 
-export class SimplexExpressionCompileProvider
-  implements ExpressionCompileProvider
-{
+export class SimplexExpressionCompileProvider implements ExpressionCompileProvider {
   compileExpression(
     expression: string,
     context?: ExpressionContext

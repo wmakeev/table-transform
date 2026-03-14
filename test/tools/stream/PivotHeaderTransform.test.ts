@@ -36,7 +36,7 @@ test('PivotHeaderTransform', async () => {
 
   const result = await stream.toArray()
 
-  assert.ok(result)
+  assert.ok(result != null)
 
   assert.deepEqual(result, [
     [

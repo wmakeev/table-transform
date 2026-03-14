@@ -260,7 +260,7 @@ test('tools:header:getChunkNormalizer', async t => {
 test('tools:header:generateColumnNumHeader', () => {
   const tableHeader = generateColumnNumHeader(1000)
 
-  assert.ok(tableHeader)
+  assert.ok(tableHeader != null)
   assert.ok(tableHeader.length === 1000)
 
   assert.equal(tableHeader[0], 'Col1')
@@ -271,7 +271,7 @@ test('tools:header:generateColumnNumHeader', () => {
 test('tools:header:generateExcelStyleHeader', () => {
   const tableHeader = generateExcelStyleHeader(1000)
 
-  assert.ok(tableHeader)
+  assert.ok(tableHeader != null)
   assert.ok(tableHeader.length === 1000)
 
   assert.equal(tableHeader[0], 'A')
