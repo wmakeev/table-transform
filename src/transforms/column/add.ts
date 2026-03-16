@@ -16,6 +16,10 @@ export interface AddColumnParams extends TransformBaseParams {
    * name.
    */
   forceArrayColumn?: boolean
+
+  // TODO add работает не явно - если колонка есть он ее оставляет.
+  // Вероятно нужно явно указывать на такое поведение
+  // skipIfExists: true
 }
 
 /**
