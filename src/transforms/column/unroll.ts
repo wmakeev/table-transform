@@ -11,7 +11,11 @@ const TRANSFORM_NAME = 'Column:Unroll'
 
 export interface UnrollColumnParams extends TransformBaseParams {
   column: string
+
+  // TODO Если true, то для строку с пустым массивом логичнее удалить (аналог FlatMap).
+  // И/или добавить композитные варианты: .unrollAndMap, .unrollAndFlatMap #djdk52pqq
   strictArrayColumn?: boolean | undefined
+
   arrIndex?: number | undefined
 }
 
