@@ -20,7 +20,7 @@ export interface AppendParams extends TransformBaseParams {
   /**
    * The config of transformation through which table rows is passed.
    */
-  transformConfig: TableTransformConfig
+  transformConfig?: TableTransformConfig
 }
 
 // const TRANSFORM_NAME = 'Append'
@@ -41,11 +41,11 @@ export const append = (params: AppendParams): TableChunksTransformer => {
       context: new Context(sourceIn.getContext()),
       ...transformConfig,
       outputHeader: {
-        ...transformConfig.outputHeader,
+        ...(transformConfig?.outputHeader ?? {}),
         skip: true
       },
       transforms: [
-        ...(transformConfig.transforms ?? []),
+        ...(transformConfig?.transforms ?? []),
         select({
           columns,
           addMissingColumns: true
@@ -61,7 +61,7 @@ export const append = (params: AppendParams): TableChunksTransformer => {
     const sourceOut = normalize()(sourceIn)
 
     return {
-      ...sourceIn,
+      ...sourceOut,
       [Symbol.asyncIterator]: async function* () {
         for await (const batch of sourceOut) {
           yield batch

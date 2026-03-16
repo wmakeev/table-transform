@@ -19,7 +19,7 @@ export interface PrependParams extends TransformBaseParams {
   /**
    * The config of transformation through which table rows is passed.
    */
-  transformConfig: TableTransformConfig
+  transformConfig?: TableTransformConfig
 }
 
 // const TRANSFORM_NAME = 'Prepend'
@@ -39,11 +39,11 @@ export const prepend = (params: PrependParams): TableChunksTransformer => {
       context: new Context(sourceIn.getContext()),
       ...transformConfig,
       outputHeader: {
-        ...transformConfig.outputHeader,
+        ...(transformConfig?.outputHeader ?? {}),
         skip: true
       },
       transforms: [
-        ...(transformConfig.transforms ?? []),
+        ...(transformConfig?.transforms ?? []),
         select({
           columns,
           addMissingColumns: true
@@ -55,7 +55,7 @@ export const prepend = (params: PrependParams): TableChunksTransformer => {
     const sourceOut = normalize()(sourceIn)
 
     return {
-      ...sourceIn,
+      ...sourceOut,
       [Symbol.asyncIterator]: async function* () {
         for await (const batch of prependTransformer([table])) {
           yield batch
